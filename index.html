@@ -5,7 +5,7 @@ import zipfile
 import pandas as pd
 from google.colab import files
 
-# Busca arquivos .csv enviados ao Colab (se houver)
+# Busca todos os arquivos .csv enviados para a pasta
 csv_files = sorted(glob.glob("*.csv"))
 classes_data = {}
 
@@ -45,21 +45,12 @@ for csv_f in csv_files:
                     })
             if alunos_lista:
                 classes_data[turma_nome] = alunos_lista
+                print(f"✅ {turma_nome}: {len(alunos_lista)} alunos carregados.")
     except Exception as e:
         print(f"⚠️ Erro ao processar {csv_f}: {e}")
 
-# Se nenhum CSV foi carregado no Colab, cria turmas de exemplo
 if not classes_data:
-    classes_data = {
-        "6º Ano A": [
-            {"id": "001_1", "numero": "1", "nome": "Ana Silva", "ra": "000123456-1", "situacao": "Ativo"},
-            {"id": "002_2", "numero": "2", "nome": "Bruno Oliveira", "ra": "000123456-2", "situacao": "Ativo"}
-        ],
-        "7º Ano B": [
-            {"id": "003_1", "numero": "1", "nome": "Carlos Souza", "ra": "000987654-1", "situacao": "Ativo"},
-            {"id": "004_2", "numero": "2", "nome": "Daniela Lima", "ra": "000987654-2", "situacao": "Ativo"}
-        ]
-    }
+    print("⚠️ NENHUM CSV ENCONTRADO! Envie os arquivos .csv para o Colab antes de continuar.")
 
 students_json_str = json.dumps(classes_data, ensure_ascii=False)
 
@@ -82,8 +73,12 @@ html_app_code = f"""<!DOCTYPE html>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        body {{ font-family: 'Inter', system-ui, -apple-system, sans-serif; }}
-        .touch-btn {{ min-height: 40px; }}
+        body {{
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }}
+        .touch-btn {{
+            min-height: 40px;
+        }}
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen pb-10">
@@ -101,16 +96,11 @@ html_app_code = f"""<!DOCTYPE html>
                 <p class="text-xs sm:text-sm text-indigo-200">Diário Digital de Vistos • Barretos/SP</p>
             </div>
         </div>
-        
-        <div class="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-2 md:pt-0 border-indigo-800 flex-wrap">
-            <label class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-emerald-500 cursor-pointer shadow-sm" title="Importar lista de alunos em CSV">
-                <i class="fa-solid fa-file-csv"></i> Importar CSV
-                <input type="file" @change="importarCSV" accept=".csv" class="hidden">
-            </label>
-            <button @click="exportarBackup" class="bg-indigo-800 hover:bg-indigo-700 text-indigo-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-700 shadow-sm">
+        <div class="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-2 md:pt-0 border-indigo-800">
+            <button @click="exportarBackup" class="bg-indigo-800 hover:bg-indigo-700 text-indigo-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-700 shadow-sm" title="Baixar cópia dos dados">
                 <i class="fa-solid fa-download"></i> Backup JSON
             </button>
-            <label class="bg-indigo-800 hover:bg-indigo-700 text-indigo-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-700 cursor-pointer shadow-sm">
+            <label class="bg-indigo-800 hover:bg-indigo-700 text-indigo-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-700 cursor-pointer shadow-sm" title="Carregar backup">
                 <i class="fa-solid fa-upload"></i> Restaurar
                 <input type="file" @change="importarBackup" accept=".json" class="hidden">
             </label>
@@ -119,13 +109,13 @@ html_app_code = f"""<!DOCTYPE html>
 
     <!-- BARRA DE SELEÇÃO E CONTROLES -->
     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-2.5 mb-4">
-        
-        <!-- SELEÇÃO DE TURMA -->
+        <!-- SELEÇÃO DE TURMA ORDENADA ALFABETICAMENTE -->
         <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Turma</label>
             <select v-model="selectedClass" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm cursor-pointer">
-                <option v-for="t in turmasOrdenadas" :key="t" :value="t">
-                    {{{{ t }}}} ({{{{ (turmas[t] || []).length }}}} alu.)
+                <option v-if="turmasOrdenadas.length === 0" value="">Nenhuma turma carregada</option>
+                <option v-for="turma in turmasOrdenadas" :key="turma" :value="turma">
+                    {{{{ turma }}}} ({{{{ (turmas[turma] || []).length }}}} alu.)
                 </option>
             </select>
         </div>
@@ -156,7 +146,7 @@ html_app_code = f"""<!DOCTYPE html>
         <div class="col-span-2 sm:col-span-2 md:col-span-1 bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ações Rápidas</label>
             <div class="flex gap-1.5">
-                <button @click="marcarTodosVistos" class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold py-2 px-2 rounded-lg transition flex items-center justify-center gap-1 shadow-sm touch-btn">
+                <button @click="marcarTodosVistos" class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold py-2 px-2 rounded-lg transition flex items-center justify-center gap-1 shadow-sm touch-btn" title="Caderno e Livro para Todos">
                     <i class="fa-solid fa-check-double"></i> Todos
                 </button>
                 <button @click="exportarExcel" class="bg-green-700 hover:bg-green-800 text-white text-xs font-bold py-2 px-3 rounded-lg transition shadow-sm touch-btn" title="Exportar Excel">
@@ -174,7 +164,7 @@ html_app_code = f"""<!DOCTYPE html>
         <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1.5 flex items-center gap-2">
             <i class="fa-solid fa-pen-to-square text-amber-500"></i> Conteúdo / Matéria Vistada no Dia:
         </label>
-        <input type="text" v-model="conteudoDia" placeholder="Ex: Exercícios de Álgebra pg 45 a 48..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium text-slate-800 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 transition">
+        <input type="text" v-model="conteudoDia" placeholder="Ex: Exercícios de Álgebra pg 45 a 48, Resumo do Capítulo 3..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium text-slate-800 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
     </div>
 
     <!-- ABA NAVEGAÇÃO -->
@@ -187,12 +177,12 @@ html_app_code = f"""<!DOCTYPE html>
         </button>
     </div>
 
-    <!-- TELA 1: CHAMADA -->
+    <!-- TELA 1: CHAMADA / LANÇAMENTO DIÁRIO -->
     <div v-if="currentTab === 'chamada'" class="space-y-3">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="p-3.5 bg-slate-50 border-b border-slate-200 flex justify-between items-center flex-wrap gap-2">
                 <h2 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
-                    <i class="fa-solid fa-users text-indigo-600"></i> Turma: <span class="text-indigo-900 font-extrabold">{{{{ selectedClass }}}}</span>
+                    <i class="fa-solid fa-users text-indigo-600"></i> Turma: <span class="text-indigo-900 font-extrabold">{{{{ selectedClass || 'Nenhuma' }}}}</span>
                 </h2>
                 <div class="flex items-center gap-2 text-xs">
                     <span class="font-bold text-slate-600 bg-slate-200 px-2.5 py-1 rounded-full">
@@ -222,6 +212,7 @@ html_app_code = f"""<!DOCTYPE html>
                         </div>
                     </div>
 
+                    <!-- BOTÕES DE VISTO -->
                     <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 w-full md:w-auto justify-between">
                         <button @click="toggleItem(aluno.id, 'caderno')" :class="['flex-1 md:flex-initial px-3 py-2 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 touch-btn', getRegistro(aluno.id).caderno ? 'bg-amber-500 text-white ring-2 ring-amber-300 shadow' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100']">
                             <i class="fa-solid fa-book-bookmark"></i> Caderno (+1,0)
@@ -232,16 +223,17 @@ html_app_code = f"""<!DOCTYPE html>
                         </button>
                     </div>
 
+                    <!-- BOTÕES DE OCORRÊNCIAS -->
                     <div class="flex items-center gap-1.5 w-full md:w-auto justify-end flex-wrap">
-                        <button @click="toggleItem(aluno.id, 'copiou')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).copiou ? 'bg-rose-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']">
+                        <button @click="toggleItem(aluno.id, 'copiou')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).copiou ? 'bg-rose-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']" title="Copiou (-0,2 pt)">
                             <i class="fa-solid fa-user-ninja"></i> Copiou (-0,2)
                         </button>
 
-                        <button @click="toggleItem(aluno.id, 'incompleto')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).incompleto ? 'bg-amber-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']">
+                        <button @click="toggleItem(aluno.id, 'incompleto')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).incompleto ? 'bg-amber-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']" title="Incompleto (-0,3 pt)">
                             <i class="fa-solid fa-hourglass-half"></i> Incompleto (-0,3)
                         </button>
 
-                        <button @click="toggleItem(aluno.id, 'dormiu')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).dormiu ? 'bg-purple-700 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']">
+                        <button @click="toggleItem(aluno.id, 'dormiu')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).dormiu ? 'bg-purple-700 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']" title="Dormiu na carteira (-0,5 pt)">
                             <i class="fa-solid fa-face-tired"></i> Dormiu (-0,5)
                         </button>
                     </div>
@@ -311,13 +303,8 @@ const {{ createApp, ref, computed, watch, onMounted }} = Vue;
 
 createApp({{
     setup() {{
-        const turmasInicial = JSON.parse(localStorage.getItem('diario_turmas_db') || null) || {students_json_str};
-        const turmas = ref(turmasInicial);
-
-        watch(turmas, (newVal) => {{
-            localStorage.setItem('diario_turmas_db', JSON.stringify(newVal));
-        }}, {{ deep: true }});
-
+        const turmas = ref({students_json_str});
+        
         const turmasOrdenadas = computed(() => {{
             return Object.keys(turmas.value || {{}}).sort((a, b) => a.localeCompare(b, 'pt-BR'));
         }});
@@ -331,14 +318,6 @@ createApp({{
         onMounted(() => {{
             if (turmasOrdenadas.value.length > 0) {{
                 selectedClass.value = turmasOrdenadas.value[0];
-            }}
-        }});
-
-        watch(turmasOrdenadas, (novasTurmas) => {{
-            if (!selectedClass.value || !novasTurmas.includes(selectedClass.value)) {{
-                if (novasTurmas.length > 0) {{
-                    selectedClass.value = novasTurmas[0];
-                }}
             }}
         }});
 
@@ -427,7 +406,10 @@ createApp({{
             const pontosLiquidos = Math.max(0, pontosBrutos - descontos);
 
             return {{
-                caderno, livro, copiou, incompleto, dormiu, descontos, pontosLiquidos
+                caderno, livro, copiou, incompleto, dormiu,
+                descontos,
+                pontosLiquidos,
+                totalVistos: caderno + livro
             }};
         }}
 
@@ -443,6 +425,7 @@ createApp({{
         function calcularNota(studentId) {{
             const maxTurma = maxPontuacaoTurma.value;
             if (maxTurma === 0) return 0;
+
             const t = getTotaisAluno(studentId);
             const notaCalculada = (t.pontosLiquidos / maxTurma) * 10;
             return Math.min(10, Math.max(0, notaCalculada));
@@ -460,69 +443,15 @@ createApp({{
             return `${{d}}/${{m}}/${{y}}`;
         }}
 
-        function importarCSV(event) {{
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const nomeTurma = file.name.replace('.csv', '').trim();
-            const reader = new FileReader();
-
-            reader.onload = (e) => {{
-                try {{
-                    const lines = e.target.result.split('\\n');
-                    const alunos = [];
-                    let headerFound = false;
-
-                    lines.forEach((line, index) => {{
-                        if (line.includes('Nome do Aluno') || line.includes('Nº de chamada')) {{
-                            headerFound = true;
-                            return;
-                        }}
-                        if (headerFound && line.trim()) {{
-                            const cols = line.split(';');
-                            if (cols.length >= 2) {{
-                                const num = (cols[0] || '').replace(/["']/g, '').trim();
-                                const nome = (cols[1] || '').replace(/["']/g, '').trim();
-                                const ra = (cols[2] || '').replace(/["']/g, '').trim();
-                                const sit = (cols[4] || 'Ativo').replace(/["']/g, '').trim();
-
-                                if (nome && nome.toUpperCase() !== 'NOME DO ALUNO') {{
-                                    alunos.push({{
-                                        id: `${{ra || 'ID'}}_${{num || index}}`,
-                                        numero: num || `${{index}}`,
-                                        nome: nome,
-                                        ra: ra || 'N/A',
-                                        situacao: sit || 'Ativo'
-                                    }});
-                                }}
-                            }}
-                        }}
-                    }});
-
-                    if (alunos.length > 0) {{
-                        turmas.value = {{ ...turmas.value, [nomeTurma]: alunos }};
-                        selectedClass.value = nomeTurma;
-                        alert(`✅ Turma "${{nomeTurma}}" carregada com ${{alunos.length}} alunos!`);
-                    }} else {{
-                        alert("⚠️ Nenhum aluno encontrado no arquivo CSV.");
-                    }}
-                }} catch (err) {{
-                    alert("⚠️ Erro ao ler o arquivo CSV.");
-                }}
-            }};
-            reader.readAsText(file, 'utf-8');
-        }}
-
         function exportarBackup() {{
             const payload = {{
-                turmas: turmas.value,
                 registros: registros.value,
                 conteudos: conteudos.value
             }};
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `diario_vistos_backup_${{new Date().toISOString().split('T')[0]}}.json`);
+            downloadAnchor.setAttribute("download", `backup_diario_vistos_${{new Date().toISOString().split('T')[0]}}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
@@ -536,12 +465,11 @@ createApp({{
             reader.onload = (e) => {{
                 try {{
                     const parsed = JSON.parse(e.target.result);
-                    if (parsed.turmas) turmas.value = parsed.turmas;
                     if (parsed.registros) registros.value = parsed.registros;
                     if (parsed.conteudos) conteudos.value = parsed.conteudos;
                     alert("✅ Backup restaurado com sucesso!");
                 }} catch (err) {{
-                    alert("⚠️ Arquivo JSON inválido.");
+                    alert("⚠️ Arquivo JSON inválido ou corrompido.");
                 }}
             }};
             reader.readAsText(file);
@@ -600,7 +528,7 @@ createApp({{
             turmas, turmasOrdenadas, selectedClass, selectedDate, selectedBimestre, currentTab, apenasAtivos,
             conteudoDia, currentStudentList, maxPontuacaoTurma, getRegistro, toggleItem,
             marcarTodosVistos, getTotaisAluno, calcularNota, getNotaClass, formatData,
-            importarCSV, exportarBackup, importarBackup, exportarExcel, exportarPDF
+            exportarBackup, importarBackup, exportarExcel, exportarPDF
         }};
     }}
 }}).mount('#app');
@@ -616,6 +544,5 @@ zip_filename = "diario_vistos_app.zip"
 with zipfile.ZipFile(zip_filename, 'w') as zipf:
     zipf.write("index.html")
 
-print("\n🚀 Aplicação atualizada com sucesso!")
-print("✨ Abra o arquivo `index.html` gerado: as turmas estarão visíveis no menu e você pode importar novos arquivos CSV pelo botão 'Importar CSV'.")
+print("\n🚀 Código re-gerado com validação para a lista suspensa!")
 files.download(zip_filename)
