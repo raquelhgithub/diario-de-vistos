@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diário de Vistos e Controle - Prof. Raquel</title>
+  <title>Diário de Vistos Completo - Prof. Raquel</title>
   <style>
     :root {
-      --primary-color: #1e293b;
-      --secondary-color: #0284c7;
-      --bg-color: #f8fafc;
-      --card-bg: #ffffff;
-      --border-color: #cbd5e1;
-      --text-color: #0f172a;
+      --primary: #1e293b;
+      --accent: #0284c7;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --border: #cbd5e1;
+      --danger: #ef4444;
+      --success: #10b981;
     }
 
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background-color: var(--bg);
+      color: #334155;
       margin: 0;
       padding: 20px;
     }
@@ -25,248 +26,356 @@
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      background: var(--card-bg);
+      background: var(--card);
       padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     }
 
     header {
-      border-bottom: 2px solid var(--border-color);
+      border-bottom: 2px solid var(--border);
       padding-bottom: 15px;
       margin-bottom: 20px;
     }
 
-    h1 {
-      margin: 0 0 5px 0;
-      color: var(--primary-color);
+    h1 { margin: 0; color: var(--primary); font-size: 1.8rem; }
+    p { margin: 5px 0 0; color: #64748b; }
+
+    .panel {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
     }
 
-    .subtitle {
-      color: #64748b;
-      margin: 0;
-    }
-
-    .controls {
+    .grid-3 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 15px;
-      margin-bottom: 25px;
     }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
+    label { font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 5px; }
+    select, input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
 
-    label {
-      font-weight: 600;
-      margin-bottom: 5px;
-      font-size: 0.9rem;
-    }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+    th, td { padding: 10px; border: 1px solid var(--border); text-align: left; vertical-align: middle; }
+    th { background: #e2e8f0; color: var(--primary); }
 
-    select, input {
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      font-size: 1rem;
-    }
-
-    .table-container {
-      overflow-x: auto;
-      margin-top: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th, td {
-      padding: 12px;
-      border: 1px solid var(--border-color);
-    }
-
-    th {
-      background-color: #f1f5f9;
-      color: var(--primary-color);
-      font-weight: 600;
-    }
-
-    .badge-evento {
-      background-color: #fef3c7;
-      color: #92400e;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      display: block;
-      margin-top: 4px;
-    }
-
-    .visto-checkbox {
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-    }
-
-    .actions {
-      margin-top: 20px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
+    .check-group { display: flex; gap: 10px; align-items: center; }
+    .check-group label { margin: 0; font-weight: normal; cursor: pointer; }
 
     .btn {
-      padding: 10px 20px;
+      padding: 8px 16px;
       border: none;
       border-radius: 6px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: 0.2s;
+    }
+    .btn-main { background: var(--accent); color: white; }
+    .btn-main:hover { background: #0369a1; }
+    .btn-danger { background: var(--danger); color: white; padding: 4px 8px; font-size: 0.8rem; }
+    .btn-success { background: var(--success); color: white; }
+
+    .management-box {
+      border: 1px dashed var(--accent);
+      background: #f0f9ff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
     }
 
-    .btn-primary {
-      background-color: var(--secondary-color);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background-color: #0369a1;
+    .student-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 6px 12px;
+      margin-top: 5px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <header>
-      <h1 id="prof-nome">Diário de Vistos</h1>
-      <p class="subtitle">Controle de entregas e visto de atividades por aula</p>
-    </header>
+<div class="container">
+  <header>
+    <h1>Diário de Vistos & Controle de Atividades</h1>
+    <p>Professora Raquel — Gestão de Atividades, Descontos e Alunos</p>
+  </header>
 
-    <div class="controls">
-      <div class="form-group">
+  <!-- PAINEL DE SELEÇÃO E GERENCIAMENTO -->
+  <div class="panel">
+    <div class="grid-3">
+      <div>
         <label for="select-turma">Turma:</label>
-        <select id="select-turma" onchange="renderizarAulas()">
+        <select id="select-turma" onchange="carregarAlunosEData()">
           <option value="">Selecione uma turma...</option>
+          <option value="1A - QUI">1A - QUI</option>
+          <option value="1B - QUI">1B - QUI</option>
+          <option value="2ADM - QUI">2ADM - QUI</option>
+          <option value="2C - QUI">2C - QUI</option>
+          <option value="3A - APQUI">3A - APQUI</option>
         </select>
       </div>
 
-      <div class="form-group">
-        <label for="aluno-nome">Nome do Aluno(a):</label>
-        <input type="text" id="aluno-nome" placeholder="Digite o nome do aluno...">
+      <div>
+        <label for="select-aluno">Aluno(a):</label>
+        <select id="select-aluno">
+          <option value="">Selecione a turma primeiro...</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="data-aula">Data da Aula:</label>
+        <input type="date" id="data-aula">
       </div>
     </div>
 
-    <div class="table-container">
-      <table id="tabela-vistos">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Dia / Bimestre</th>
-            <th>Qtd. Aulas</th>
-            <th>Evento / Observação</th>
-            <th style="text-align: center;">Visto Concedido</th>
-            <th>Anotações da Aula</th>
-          </tr>
-        </thead>
-        <tbody id="lista-aulas-corpo">
-          <tr>
-            <td colspan="6" style="text-align: center; color: #64748b;">Selecione uma turma para carregar as datas das aulas.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- GERENCIADOR DE ALUNOS DA TURMA -->
+    <details style="margin-top: 15px;">
+      <summary style="cursor:pointer; font-weight:600; color:var(--accent);">⚙️ Gerenciar Alunos da Turma Selecionada</summary>
+      <div class="management-box">
+        <div style="display:flex; gap: 10px;">
+          <input type="text" id="novo-aluno-nome" placeholder="Nome do novo aluno...">
+          <button class="btn btn-success" onclick="adicionarAluno()">Adicionar</button>
+        </div>
+        <div id="lista-alunos-gerenciar" style="margin-top:10px;"></div>
+      </div>
+    </details>
+  </div>
 
-    <div class="actions">
-      <button class="btn btn-primary" onclick="salvarVistos()">Salvar Registro de Vistos</button>
+  <!-- TABELA DE REGISTRO DE VISTOS -->
+  <div class="panel">
+    <h3>Registro da Atividade</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Local do Visto</th>
+          <th>Situação / Descontos</th>
+          <th>Nota / Pontuação</th>
+          <th>Observações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="check-group">
+              <input type="checkbox" id="visto-caderno"> <label for="visto-caderno">Caderno</label>
+            </div>
+            <div class="check-group" style="margin-top:5px;">
+              <input type="checkbox" id="visto-livro"> <label for="visto-livro">Livro / Apostila</label>
+            </div>
+          </td>
+          <td>
+            <div class="check-group">
+              <input type="checkbox" id="desc-incompleto"> <label for="desc-incompleto">Incompleto (-50%)</label>
+            </div>
+            <div class="check-group" style="margin-top:5px;">
+              <input type="checkbox" id="desc-atraso"> <label for="desc-atraso">Entregou com Atraso (-20%)</label>
+            </div>
+            <div class="check-group" style="margin-top:5px;">
+              <input type="checkbox" id="desc-copia"> <label for="desc-copia">Cópia / Plágio (Nota Zero)</label>
+            </div>
+          </td>
+          <td>
+            <label for="nota-manual">Nota / Ponto Atribuído:</label>
+            <input type="number" id="nota-manual" min="0" max="10" step="0.5" value="10">
+          </td>
+          <td>
+            <textarea id="obs-atividade" rows="3" style="width:100%; border:1px solid var(--border); border-radius:6px; padding:5px;" placeholder="Ex: Faltou fazer os exercícios 3 e 4 do capítulo 2."></textarea>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 15px; display:flex; justify-content: flex-end; gap: 10px;">
+      <button class="btn btn-main" onclick="salvarVisto()">💾 Salvar Visto</button>
+      <button class="btn btn-success" onclick="exportarRelatorio()">📥 Exportar Relatório (JSON/CSV)</button>
     </div>
   </div>
 
-  <script>
-    // JSON de dados atualizado
-    const PROFESSOR_DATA = {"nome": "Raquel", "turmas": {"2ADM - QUI": [{"data": "27/07/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Reunião de Planejamento Escolar"}, {"data": "03/08/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "10/08/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "17/08/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "24/08/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "31/08/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/09/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/09/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "28/09/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "05/10/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "19/10/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "26/10/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/11/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/11/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "23/11/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/11/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "07/12/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/12/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}], "1A - QUI": [{"data": "28/07/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "01/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "08/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "15/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "13/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "20/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "27/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "03/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "10/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "17/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "24/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Período de Avaliações Externas - SARESP (Estimado)"}, {"data": "01/12/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}], "1B - QUI": [{"data": "28/07/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "01/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "08/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "15/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "13/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "20/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "27/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "03/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "10/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "17/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "24/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Período de Avaliações Externas - SARESP (Estimado)"}, {"data": "01/12/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}], "2C - QUI": [{"data": "12/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "19/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "26/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "02/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "23/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "07/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Período de Avaliações Externas - SARESP (Estimado)"}, {"data": "02/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Conselho de Classe Final / Fechamento de Notas"}], "3A - APQUI": [{"data": "12/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "19/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "26/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "02/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "23/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "07/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Período de Avaliações Externas - SARESP (Estimado)"}, {"data": "02/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Conselho de Classe Final / Fechamento de Notas"}], "2AGRO - QUI": [{"data": "12/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "19/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "26/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "02/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "23/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "07/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Período de Avaliações Externas - SARESP (Estimado)"}, {"data": "02/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Conselho de Classe Final / Fechamento de Notas"}], "3A - PRAT": [{"data": "30/07/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "06/08/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "13/08/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "20/08/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "03/09/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "10/09/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "17/09/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "01/10/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "08/10/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "29/10/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "05/11/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "12/11/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "19/11/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "03/12/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "10/12/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}], "1C - QUI": [{"data": "24/07/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Retorno das Aulas / Acolhimento"}, {"data": "07/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "02/10/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/10/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/10/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "06/11/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "13/11/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}], "1D - QUI": [{"data": "24/07/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Retorno das Aulas / Acolhimento"}, {"data": "07/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "02/10/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/10/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/10/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "06/11/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "13/11/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}]}};
+  <!-- REGISTROS SALVOS -->
+  <div class="panel">
+    <h3>Histórico de Vistos Registrados</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Turma</th>
+          <th>Aluno</th>
+          <th>Local</th>
+          <th>Status / Obs</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="historico-corpo">
+        <tr><td colspan="6" style="text-align:center; color:#64748b;">Nenhum visto registrado ainda nesta sessão.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("prof-nome").innerText = `Diário de Vistos - Prof. ${PROFESSOR_DATA.nome}`;
-      const select = document.getElementById("select-turma");
+<script>
+  // Banco de Dados Local dos Alunos por Turma
+  let bancoTurmas = {
+    "1A - QUI": ["Ana Silva", "Bruno Santos", "Carla Dias"],
+    "1B - QUI": ["Daniel Oliveira", "Eduarda Lima"],
+    "2ADM - QUI": ["Felipe Costa", "Gabriela Pereira"],
+    "2C - QUI": ["Heitor Alves", "Isabela Rocha"],
+    "3A - APQUI": ["João Mendes", "Luana Martins"]
+  };
 
-      Object.keys(PROFESSOR_DATA.turmas).forEach(turma => {
-        const option = document.createElement("option");
-        option.value = turma;
-        option.textContent = turma;
-        select.appendChild(option);
-      });
+  let historicoVistos = [];
+
+  // Carrega alunos no Select e na Lista de Gerenciamento
+  function carregarAlunosEData() {
+    const turma = document.getElementById("select-turma").value;
+    const selectAluno = document.getElementById("select-aluno");
+    const containerGerenciador = document.getElementById("lista-alunos-gerenciar");
+
+    selectAluno.innerHTML = "";
+    containerGerenciador.innerHTML = "";
+
+    if (!turma || !bancoTurmas[turma]) {
+      selectAluno.innerHTML = '<option value="">Selecione uma turma...</option>';
+      return;
+    }
+
+    // Preenche o Select
+    bancoTurmas[turma].forEach(aluno => {
+      const opt = document.createElement("option");
+      opt.value = aluno;
+      opt.textContent = aluno;
+      selectAluno.appendChild(opt);
     });
 
-    function renderizarAulas() {
-      const turma = document.getElementById("select-turma").value;
-      const tbody = document.getElementById("lista-aulas-corpo");
-      tbody.innerHTML = "";
+    // Preenche a lista do Gerenciador (com botão de Remover)
+    bancoTurmas[turma].forEach((aluno, index) => {
+      const div = document.createElement("div");
+      div.className = "student-list-item";
+      div.innerHTML = `
+        <span>${aluno}</span>
+        <button class="btn btn-danger" onclick="removerAluno(${index})">Excluir</button>
+      `;
+      containerGerenciador.appendChild(div);
+    });
+  }
 
-      if (!turma) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b;">Selecione uma turma para carregar as datas das aulas.</td></tr>';
-        return;
-      }
+  // Adicionar Aluno na Turma Atual
+  function adicionarAluno() {
+    const turma = document.getElementById("select-turma").value;
+    const inputNome = document.getElementById("novo-aluno-nome");
+    const nome = inputNome.value.trim();
 
-      const aulas = PROFESSOR_DATA.turmas[turma];
-
-      aulas.forEach((aula, idx) => {
-        const tr = document.createElement("tr");
-
-        const eventoTag = aula.eventoGeral 
-          ? `<span class="badge-evento">${aula.eventoGeral}</span>` 
-          : "";
-
-        tr.innerHTML = `
-          <td><strong>${aula.data}</strong></td>
-          <td>${aula.diaSemana}<br><small style="color:#64748b">${aula.bimestre}</small></td>
-          <td>${aula.qtdAulas}</td>
-          <td>${eventoTag || "-"}</td>
-          <td style="text-align: center;">
-            <input type="checkbox" class="visto-checkbox" id="visto-${idx}">
-          </td>
-          <td>
-            <input type="text" id="obs-${idx}" placeholder="Ex: Tarefa pg. 42 / Entrega do relatório" style="width: 90%;">
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+    if (!turma) {
+      alert("Selecione uma turma primeiro!");
+      return;
     }
 
-    function salvarVistos() {
-      const turma = document.getElementById("select-turma").value;
-      const aluno = document.getElementById("aluno-nome").value;
-
-      if (!turma) {
-        alert("Por favor, selecione uma turma.");
-        return;
-      }
-
-      if (!aluno) {
-        alert("Por favor, digite o nome do aluno.");
-        return;
-      }
-
-      const aulas = PROFESSOR_DATA.turmas[turma];
-      const registros = aulas.map((aula, idx) => {
-        return {
-          data: aula.data,
-          visto: document.getElementById(`visto-${idx}`).checked,
-          observacao: document.getElementById(`obs-${idx}`).value
-        };
-      });
-
-      const dadosSalvos = {
-        professor: PROFESSOR_DATA.nome,
-        turma: turma,
-        aluno: aluno,
-        registros: registros
-      };
-
-      console.log("Registro de Vistos:", dadosSalvos);
-      alert(`Vistos salvos com sucesso para o aluno(a) ${aluno} (${turma})! Check os dados no console.`);
+    if (!nome) {
+      alert("Digite o nome do aluno.");
+      return;
     }
-  </script>
+
+    bancoTurmas[turma].push(nome);
+    inputNome.value = "";
+    carregarAlunosEData();
+  }
+
+  // Remover Aluno da Turma
+  function removerAluno(index) {
+    const turma = document.getElementById("select-turma").value;
+    if (confirm(`Deseja remover este aluno da turma ${turma}?`)) {
+      bancoTurmas[turma].splice(index, 1);
+      carregarAlunosEData();
+    }
+  }
+
+  // Salvar Visto
+  function salvarVisto() {
+    const turma = document.getElementById("select-turma").value;
+    const aluno = document.getElementById("select-aluno").value;
+    const data = document.getElementById("data-aula").value;
+
+    if (!turma || !aluno || !data) {
+      alert("Preencha Turma, Aluno e Data antes de salvar!");
+      return;
+    }
+
+    const local = [];
+    if (document.getElementById("visto-caderno").checked) local.push("Caderno");
+    if (document.getElementById("visto-livro").checked) local.push("Livro");
+
+    const detalhes = [];
+    if (document.getElementById("desc-incompleto").checked) detalhes.push("Incompleto");
+    if (document.getElementById("desc-atraso").checked) detalhes.push("Com Atraso");
+    if (document.getElementById("desc-copia").checked) detalhes.push("Cópia/Plágio");
+
+    const registro = {
+      turma,
+      aluno,
+      data,
+      local: local.join(" + ") || "Não especificado",
+      status: detalhes.join(", ") || "Completo / OK",
+      nota: document.getElementById("nota-manual").value,
+      obs: document.getElementById("obs-atividade").value
+    };
+
+    historicoVistos.push(registro);
+    renderizarHistorico();
+    alert("Visto registrado!");
+  }
+
+  function renderizarHistorico() {
+    const tbody = document.getElementById("historico-corpo");
+    tbody.innerHTML = "";
+
+    if (historicoVistos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#64748b;">Nenhum visto registrado ainda.</td></tr>';
+      return;
+    }
+
+    historicoVistos.forEach((reg, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${reg.data}</td>
+        <td>${reg.turma}</td>
+        <td><strong>${reg.aluno}</strong></td>
+        <td>${reg.local}</td>
+        <td><small>${reg.status}</small> | <em>${reg.obs}</em></td>
+        <td><button class="btn btn-danger" onclick="excluirRegistro(${idx})">x</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function excluirRegistro(idx) {
+    historicoVistos.splice(idx, 1);
+    renderizarHistorico();
+  }
+
+  // Exportar Relatório em formato baixável (JSON/Text)
+  function exportarRelatorio() {
+    if (historicoVistos.length === 0) {
+      alert("Nenhum dado para exportar!");
+      return;
+    }
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(historicoVistos, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `relatorio_vistos_${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  }
+
+  // Inicializar data padrão de hoje
+  document.getElementById('data-aula').valueAsDate = new Date();
+</script>
+
 </body>
 </html>
