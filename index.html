@@ -12,9 +12,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     
     <style>
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
@@ -38,8 +35,11 @@
         </div>
         
         <div class="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-2 md:pt-0 border-indigo-800 flex-wrap">
+            <button @click="restaurarTurmasPadrao" class="bg-amber-500 hover:bg-amber-600 text-indigo-950 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm" title="Restaurar a lista original de turmas">
+                <i class="fa-solid fa-rotate-left"></i> Resetar Turmas
+            </button>
             <button @click="exportarBackup" class="bg-indigo-800 hover:bg-indigo-700 text-indigo-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-700 shadow-sm">
-                <i class="fa-solid fa-download"></i> Backup JSON
+                <i class="fa-solid fa-download"></i> Backup
             </button>
             <label class="bg-indigo-800 hover:bg-indigo-700 text-indigo-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-700 cursor-pointer shadow-sm">
                 <i class="fa-solid fa-upload"></i> Restaurar
@@ -49,7 +49,7 @@
     </header>
 
     <!-- BARRA DE SELEÇÃO E CONTROLES -->
-    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-2.5 mb-4">
+    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2.5 mb-4">
         
         <!-- SELEÇÃO DE TURMA -->
         <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
@@ -76,35 +76,25 @@
             </select>
         </div>
 
-        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-center">
-            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Filtro Alunos</label>
-            <button @click="apenasAtivos = !apenasAtivos" :class="['w-full py-2 px-2 rounded-lg font-semibold text-xs flex items-center justify-center gap-1.5 border transition touch-btn', apenasAtivos ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-slate-50 border-slate-300 text-slate-600']">
-                <i :class="['fa-solid', apenasAtivos ? 'fa-user-check text-emerald-600' : 'fa-users text-slate-400']"></i>
-                <span>{{ apenasAtivos ? 'Apenas Ativos' : 'Todos Alunos' }}</span>
-            </button>
-        </div>
-
-        <div class="col-span-2 sm:col-span-2 md:col-span-1 bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ações Rápidas</label>
-            <div class="flex gap-1.5">
-                <button @click="marcarTodosVistos" class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold py-2 px-2 rounded-lg transition flex items-center justify-center gap-1 shadow-sm touch-btn">
-                    <i class="fa-solid fa-check-double"></i> Todos
-                </button>
-            </div>
+            <button @click="marcarTodosVistos" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-2 rounded-lg transition flex items-center justify-center gap-1 shadow-sm touch-btn">
+                <i class="fa-solid fa-check-double"></i> Vistar Todos Hoje
+            </button>
         </div>
     </div>
 
     <!-- PAINEL ADICIONAR NOVO ALUNO -->
     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
         <h3 class="text-xs font-bold text-indigo-900 uppercase tracking-wider mb-2 flex items-center gap-2">
-            <i class="fa-solid fa-user-plus text-indigo-600"></i> Adicionar Aluno na Turma {{ selectedClass }}
+            <i class="fa-solid fa-user-plus text-indigo-600"></i> Adicionar Aluno na Turma: <span class="text-amber-600 font-extrabold">{{ selectedClass }}</span>
         </h3>
         <form @submit.prevent="adicionarAluno" class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-            <input type="text" v-model="novoAluno.numero" placeholder="Nº" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium" required>
-            <input type="text" v-model="novoAluno.nome" placeholder="Nome Completo" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium sm:col-span-2" required>
+            <input type="text" v-model="novoAluno.numero" placeholder="Nº Ex: 12" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium" required>
+            <input type="text" v-model="novoAluno.nome" placeholder="Nome Completo do Aluno" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium sm:col-span-2" required>
             <input type="text" v-model="novoAluno.ra" placeholder="RA (opcional)" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium">
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg p-2 text-xs font-bold sm:col-span-4 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-plus"></i> Salvar Aluno
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg p-2 text-xs font-bold sm:col-span-4 transition flex items-center justify-center gap-2 shadow-sm">
+                <i class="fa-solid fa-plus"></i> Cadastrar Aluno
             </button>
         </form>
     </div>
@@ -123,7 +113,7 @@
             <i class="fa-solid fa-list-check"></i> Registro Diário
         </button>
         <button @click="currentTab = 'fechamento'" :class="['py-3 px-4 font-bold text-xs sm:text-sm border-b-2 transition flex items-center gap-2', currentTab === 'fechamento' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600']">
-            <i class="fa-solid fa-calculator"></i> Fechamento e Notas Proporcionais
+            <i class="fa-solid fa-calculator"></i> Fechamento e Notas
         </button>
     </div>
 
@@ -132,8 +122,11 @@
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="p-3.5 bg-slate-50 border-b border-slate-200 flex justify-between items-center flex-wrap gap-2">
                 <h2 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
-                    <i class="fa-solid fa-users text-indigo-600"></i> Turma: <span class="text-indigo-900 font-extrabold">{{ selectedClass }}</span>
+                    <i class="fa-solid fa-users text-indigo-600"></i> Lista de Alunos: <span class="text-indigo-900 font-extrabold">{{ selectedClass }}</span>
                 </h2>
+                <span class="text-xs font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-full">
+                    {{ currentStudentList.length }} Alunos Cadastrados
+                </span>
             </div>
 
             <div class="divide-y divide-slate-100">
@@ -151,6 +144,7 @@
                         </div>
                     </div>
 
+                    <!-- BOTOES DE VISTO -->
                     <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 w-full md:w-auto justify-between">
                         <button @click="toggleItem(aluno.id, 'caderno')" :class="['flex-1 md:flex-initial px-3 py-2 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 touch-btn', getRegistro(aluno.id).caderno ? 'bg-amber-500 text-white ring-2 ring-amber-300 shadow' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100']">
                             <i class="fa-solid fa-book-bookmark"></i> Caderno (+1,0)
@@ -161,21 +155,21 @@
                         </button>
                     </div>
 
+                    <!-- DESCONTOS E BOTÃO EXCLUIR ALUNO -->
                     <div class="flex items-center gap-1.5 w-full md:w-auto justify-end flex-wrap">
                         <button @click="toggleItem(aluno.id, 'copiou')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).copiou ? 'bg-rose-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']">
-                            <i class="fa-solid fa-user-ninja"></i> Copiou (-0,2)
+                            Copiou (-0,2)
                         </button>
 
                         <button @click="toggleItem(aluno.id, 'incompleto')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).incompleto ? 'bg-amber-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']">
-                            <i class="fa-solid fa-hourglass-half"></i> Incompleto (-0,3)
+                            Incompleto (-0,3)
                         </button>
 
                         <button @click="toggleItem(aluno.id, 'dormiu')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).dormiu ? 'bg-purple-700 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']">
-                            <i class="fa-solid fa-face-tired"></i> Dormiu (-0,5)
+                            Dormiu (-0,5)
                         </button>
 
-                        <!-- BOTÃO EXCLUIR ALUNO -->
-                        <button @click="excluirAluno(aluno.id)" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-rose-600 hover:bg-rose-100 hover:text-rose-800 transition" title="Excluir Aluno">
+                        <button @click="excluirAluno(aluno.id)" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-100 text-rose-700 hover:bg-rose-600 hover:text-white transition shadow-sm ml-1" title="Excluir Aluno Permanente">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
@@ -219,18 +213,24 @@ const { createApp, ref, computed, watch } = Vue;
 
 createApp({
     setup() {
-        const turmasInicial = JSON.parse(localStorage.getItem('diario_turmas_db') || null) || {
+        // Base de dados padrão completa de turmas
+        const baseTurmasPadrao = {
             "Alunos 1A": [
                 {"id": "ID_1_1", "numero": "1", "nome": "ALESSANDRA NASCIMENTO DA CRUZ", "ra": "ID_1", "situacao": "Ativo"},
                 {"id": "ID_5_6", "numero": "6", "nome": "CARLA VITORIA SANTOS OLIVEIRA", "ra": "ID_5", "situacao": "Ativo"}
+            ],
+            "Alunos 1C": [
+                {"id": "114678530-6_1", "numero": "1", "nome": "ANA LAURA DA CRUZ MARQUES", "ra": "114678530-6", "situacao": "Ativo"}
+            ],
+            "Alunos 2E": [
+                {"id": "111904106-5_1", "numero": "1", "nome": "AMANDA APARECIDA PIRES BARBI", "ra": "111904106-5", "situacao": "Ativo"}
             ]
         };
 
-        const turmas = ref(turmasInicial);
-        const selectedClass = ref(Object.keys(turmasInicial)[0] || '');
+        const turmas = ref(JSON.parse(localStorage.getItem('diario_turmas_v2')) || baseTurmasPadrao);
+        const selectedClass = ref(Object.keys(turmas.value)[0] || 'Alunos 1A');
         const selectedDate = ref(new Date().toISOString().split('T')[0]);
         const selectedBimestre = ref('1');
-        const apenasAtivos = ref(true);
         const currentTab = ref('chamada');
         const conteudoDia = ref('');
 
@@ -241,7 +241,8 @@ createApp({
         const turmasOrdenadas = computed(() => Object.keys(turmas.value).sort());
 
         const currentStudentList = computed(() => {
-            return (turmas.value[selectedClass.value] || []).slice().sort((a,b) => Number(a.numero) - Number(b.numero));
+            const lista = turmas.value[selectedClass.value] || [];
+            return lista.slice().sort((a,b) => Number(a.numero) - Number(b.numero));
         });
 
         const getKey = (alunoId) => `${selectedBimestre.value}_${selectedDate.value}_${alunoId}`;
@@ -262,7 +263,7 @@ createApp({
 
         const adicionarAluno = () => {
             if (!novoAluno.value.nome || !novoAluno.value.numero) return;
-            
+
             const novoObj = {
                 id: 'aluno_' + Date.now(),
                 numero: novoAluno.value.numero,
@@ -281,8 +282,15 @@ createApp({
         };
 
         const excluirAluno = (alunoId) => {
-            if (confirm('Tem certeza que deseja excluir este aluno?')) {
+            if (confirm('Tem certeza que deseja excluir permanentemente este aluno da turma?')) {
                 turmas.value[selectedClass.value] = turmas.value[selectedClass.value].filter(a => a.id !== alunoId);
+                saveStorage();
+            }
+        };
+
+        const restaurarTurmasPadrao = () => {
+            if (confirm("Quer restaurar a lista original de turmas (1A, 1C, 2E)? Seus vistos do dia serão mantidos.")) {
+                turmas.value = JSON.parse(JSON.stringify(baseTurmasPadrao));
                 saveStorage();
             }
         };
@@ -340,7 +348,7 @@ createApp({
         const saveStorage = () => {
             localStorage.setItem('diario_registros_db', JSON.stringify(registros.value));
             localStorage.setItem('diario_conteudos_db', JSON.stringify(conteudos.value));
-            localStorage.setItem('diario_turmas_db', JSON.stringify(turmas.value));
+            localStorage.setItem('diario_turmas_v2', JSON.stringify(turmas.value));
         };
 
         const exportarBackup = () => {
@@ -377,11 +385,11 @@ createApp({
         };
 
         return {
-            turmas, selectedClass, selectedDate, selectedBimestre, apenasAtivos,
+            turmas, selectedClass, selectedDate, selectedBimestre,
             currentTab, conteudoDia, turmasOrdenadas, currentStudentList, novoAluno,
             getRegistro, toggleItem, marcarTodosVistos, getTotaisAluno,
             maxPontuacaoTurma, calcularNota, getNotaClass, adicionarAluno, excluirAluno,
-            exportarBackup, importarBackup
+            restaurarTurmasPadrao, exportarBackup, importarBackup
         };
     }
 }).mount('#app');
