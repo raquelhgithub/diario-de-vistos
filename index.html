@@ -1,398 +1,231 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diário Digital - E.E. José Marcelino de Almeida</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    
-    <style>
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-        .touch-btn { min-height: 40px; }
-    </style>
-</head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen pb-10">
-
-<div id="app" class="max-w-7xl mx-auto px-2 sm:px-6 pt-3 sm:pt-6">
-    
-    <!-- HEADER -->
-    <header class="bg-indigo-900 text-white rounded-2xl p-4 sm:p-6 mb-4 shadow-xl flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-amber-400">
-        <div class="flex items-center gap-3 w-full md:w-auto">
-            <div class="bg-amber-400 text-indigo-950 p-3 rounded-2xl font-bold text-2xl shadow shrink-0">
-                <i class="fa-solid fa-graduation-cap"></i>
-            </div>
-            <div>
-                <h1 class="text-xl sm:text-2xl font-bold tracking-tight">E.E. José Marcelino de Almeida</h1>
-                <p class="text-xs sm:text-sm text-indigo-200">Diário Digital de Vistos • Barretos/SP</p>
-            </div>
-        </div>
-        
-        <div class="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-2 md:pt-0 border-indigo-800 flex-wrap">
-            <button @click="restaurarTurmasPadrao" class="bg-amber-500 hover:bg-amber-600 text-indigo-950 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm" title="Restaurar a lista original de turmas">
-                <i class="fa-solid fa-rotate-left"></i> Resetar Turmas
-            </button>
-            <button @click="exportarBackup" class="bg-indigo-800 hover:bg-indigo-700 text-indigo-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-700 shadow-sm">
-                <i class="fa-solid fa-download"></i> Backup
-            </button>
-            <label class="bg-indigo-800 hover:bg-indigo-700 text-indigo-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-700 cursor-pointer shadow-sm">
-                <i class="fa-solid fa-upload"></i> Restaurar
-                <input type="file" @change="importarBackup" accept=".json" class="hidden">
-            </label>
-        </div>
-    </header>
-
-    <!-- BARRA DE SELEÇÃO E CONTROLES -->
-    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2.5 mb-4">
-        
-        <!-- SELEÇÃO DE TURMA -->
-        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
-            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Turma</label>
-            <select v-model="selectedClass" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm cursor-pointer">
-                <option v-for="t in turmasOrdenadas" :key="t" :value="t">
-                    {{ t }} ({{ (turmas[t] || []).length }} alu.)
-                </option>
-            </select>
-        </div>
-
-        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
-            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Data da Aula</label>
-            <input type="date" v-model="selectedDate" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm">
-        </div>
-
-        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
-            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Bimestre Letivo</label>
-            <select v-model="selectedBimestre" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm">
-                <option value="1">1º Bimestre</option>
-                <option value="2">2º Bimestre</option>
-                <option value="3">3º Bimestre</option>
-                <option value="4">4º Bimestre</option>
-            </select>
-        </div>
-
-        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
-            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ações Rápidas</label>
-            <button @click="marcarTodosVistos" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-2 rounded-lg transition flex items-center justify-center gap-1 shadow-sm touch-btn">
-                <i class="fa-solid fa-check-double"></i> Vistar Todos Hoje
-            </button>
-        </div>
-    </div>
-
-    <!-- PAINEL ADICIONAR NOVO ALUNO -->
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
-        <h3 class="text-xs font-bold text-indigo-900 uppercase tracking-wider mb-2 flex items-center gap-2">
-            <i class="fa-solid fa-user-plus text-indigo-600"></i> Adicionar Aluno na Turma: <span class="text-amber-600 font-extrabold">{{ selectedClass }}</span>
-        </h3>
-        <form @submit.prevent="adicionarAluno" class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-            <input type="text" v-model="novoAluno.numero" placeholder="Nº Ex: 12" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium" required>
-            <input type="text" v-model="novoAluno.nome" placeholder="Nome Completo do Aluno" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium sm:col-span-2" required>
-            <input type="text" v-model="novoAluno.ra" placeholder="RA (opcional)" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium">
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg p-2 text-xs font-bold sm:col-span-4 transition flex items-center justify-center gap-2 shadow-sm">
-                <i class="fa-solid fa-plus"></i> Cadastrar Aluno
-            </button>
-        </form>
-    </div>
-
-    <!-- CAMPO CONTEÚDO VISTADO DO DIA -->
-    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 mb-4">
-        <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1.5 flex items-center gap-2">
-            <i class="fa-solid fa-pen-to-square text-amber-500"></i> Conteúdo / Matéria Vistada no Dia:
-        </label>
-        <input type="text" v-model="conteudoDia" placeholder="Ex: Exercícios de Álgebra pg 45 a 48..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium text-slate-800 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 transition">
-    </div>
-
-    <!-- ABA NAVEGAÇÃO -->
-    <div class="flex border-b border-slate-200 mb-4 bg-white rounded-t-xl px-2 pt-1">
-        <button @click="currentTab = 'chamada'" :class="['py-3 px-4 font-bold text-xs sm:text-sm border-b-2 transition flex items-center gap-2', currentTab === 'chamada' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600']">
-            <i class="fa-solid fa-list-check"></i> Registro Diário
-        </button>
-        <button @click="currentTab = 'fechamento'" :class="['py-3 px-4 font-bold text-xs sm:text-sm border-b-2 transition flex items-center gap-2', currentTab === 'fechamento' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600']">
-            <i class="fa-solid fa-calculator"></i> Fechamento e Notas
-        </button>
-    </div>
-
-    <!-- TELA 1: CHAMADA -->
-    <div v-if="currentTab === 'chamada'" class="space-y-3">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-3.5 bg-slate-50 border-b border-slate-200 flex justify-between items-center flex-wrap gap-2">
-                <h2 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
-                    <i class="fa-solid fa-users text-indigo-600"></i> Lista de Alunos: <span class="text-indigo-900 font-extrabold">{{ selectedClass }}</span>
-                </h2>
-                <span class="text-xs font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-full">
-                    {{ currentStudentList.length }} Alunos Cadastrados
-                </span>
-            </div>
-
-            <div class="divide-y divide-slate-100">
-                <div v-for="aluno in currentStudentList" :key="aluno.id" class="p-3 sm:p-4 hover:bg-indigo-50/30 transition flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                    
-                    <div class="flex items-center gap-3 min-w-[240px] w-full md:w-auto">
-                        <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-100 text-indigo-900 font-black text-xs sm:text-sm flex items-center justify-center shrink-0 border border-indigo-200">
-                            {{ aluno.numero }}
-                        </span>
-                        <div class="truncate flex-1">
-                            <h3 class="font-bold text-slate-800 text-xs sm:text-sm leading-tight truncate">{{ aluno.nome }}</h3>
-                            <div class="flex items-center gap-2 mt-0.5">
-                                <span class="text-[10px] font-mono text-slate-400">RA: {{ aluno.ra || 'N/A' }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- BOTOES DE VISTO -->
-                    <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 w-full md:w-auto justify-between">
-                        <button @click="toggleItem(aluno.id, 'caderno')" :class="['flex-1 md:flex-initial px-3 py-2 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 touch-btn', getRegistro(aluno.id).caderno ? 'bg-amber-500 text-white ring-2 ring-amber-300 shadow' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100']">
-                            <i class="fa-solid fa-book-bookmark"></i> Caderno (+1,0)
-                        </button>
-
-                        <button @click="toggleItem(aluno.id, 'livro')" :class="['flex-1 md:flex-initial px-3 py-2 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 touch-btn', getRegistro(aluno.id).livro ? 'bg-sky-600 text-white ring-2 ring-sky-300 shadow' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100']">
-                            <i class="fa-solid fa-layer-group"></i> Livro (+1,0)
-                        </button>
-                    </div>
-
-                    <!-- DESCONTOS E BOTÃO EXCLUIR ALUNO -->
-                    <div class="flex items-center gap-1.5 w-full md:w-auto justify-end flex-wrap">
-                        <button @click="toggleItem(aluno.id, 'copiou')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).copiou ? 'bg-rose-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']">
-                            Copiou (-0,2)
-                        </button>
-
-                        <button @click="toggleItem(aluno.id, 'incompleto')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).incompleto ? 'bg-amber-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']">
-                            Incompleto (-0,3)
-                        </button>
-
-                        <button @click="toggleItem(aluno.id, 'dormiu')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).dormiu ? 'bg-purple-700 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']">
-                            Dormiu (-0,5)
-                        </button>
-
-                        <button @click="excluirAluno(aluno.id)" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-100 text-rose-700 hover:bg-rose-600 hover:text-white transition shadow-sm ml-1" title="Excluir Aluno Permanente">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TELA 2: FECHAMENTO BIMESTRAL -->
-    <div v-if="currentTab === 'fechamento'" class="space-y-4">
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-100 text-slate-600 text-xs font-black uppercase border-b border-slate-200">
-                        <th class="p-3">Nº</th>
-                        <th class="p-3">Aluno</th>
-                        <th class="p-3 text-center">Pontos Líquidos</th>
-                        <th class="p-3 text-center">Nota Final (0 a 10)</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 text-sm">
-                    <tr v-for="aluno in currentStudentList" :key="aluno.id" class="hover:bg-slate-50">
-                        <td class="p-3 font-bold text-indigo-800">{{ aluno.numero }}</td>
-                        <td class="p-3 font-bold text-slate-800">{{ aluno.nome }}</td>
-                        <td class="p-3 text-center font-black text-slate-800">{{ getTotaisAluno(aluno.id).pontosLiquidos.toFixed(1) }}</td>
-                        <td class="p-3 text-center">
-                            <span :class="['px-3 py-1 rounded-full font-black text-sm shadow-sm', getNotaClass(calcularNota(aluno.id))]">
-                                {{ calcularNota(aluno.id).toFixed(1) }}
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script>
-const { createApp, ref, computed, watch } = Vue;
-
-createApp({
-    setup() {
-        // Base de dados padrão completa de turmas
-        const baseTurmasPadrao = {
-            "Alunos 1A": [
-                {"id": "ID_1_1", "numero": "1", "nome": "ALESSANDRA NASCIMENTO DA CRUZ", "ra": "ID_1", "situacao": "Ativo"},
-                {"id": "ID_5_6", "numero": "6", "nome": "CARLA VITORIA SANTOS OLIVEIRA", "ra": "ID_5", "situacao": "Ativo"}
-            ],
-            "Alunos 1C": [
-                {"id": "114678530-6_1", "numero": "1", "nome": "ANA LAURA DA CRUZ MARQUES", "ra": "114678530-6", "situacao": "Ativo"}
-            ],
-            "Alunos 2E": [
-                {"id": "111904106-5_1", "numero": "1", "nome": "AMANDA APARECIDA PIRES BARBI", "ra": "111904106-5", "situacao": "Ativo"}
-            ]
-        };
-
-        const turmas = ref(JSON.parse(localStorage.getItem('diario_turmas_v2')) || baseTurmasPadrao);
-        const selectedClass = ref(Object.keys(turmas.value)[0] || 'Alunos 1A');
-        const selectedDate = ref(new Date().toISOString().split('T')[0]);
-        const selectedBimestre = ref('1');
-        const currentTab = ref('chamada');
-        const conteudoDia = ref('');
-
-        const novoAluno = ref({ numero: '', nome: '', ra: '' });
-        const registros = ref(JSON.parse(localStorage.getItem('diario_registros_db') || '{}'));
-        const conteudos = ref(JSON.parse(localStorage.getItem('diario_conteudos_db') || '{}'));
-
-        const turmasOrdenadas = computed(() => Object.keys(turmas.value).sort());
-
-        const currentStudentList = computed(() => {
-            const lista = turmas.value[selectedClass.value] || [];
-            return lista.slice().sort((a,b) => Number(a.numero) - Number(b.numero));
-        });
-
-        const getKey = (alunoId) => `${selectedBimestre.value}_${selectedDate.value}_${alunoId}`;
-
-        const getRegistro = (alunoId) => {
-            const k = getKey(alunoId);
-            return registros.value[k] || { caderno: false, livro: false, copiou: false, incompleto: false, dormiu: false };
-        };
-
-        const toggleItem = (alunoId, field) => {
-            const k = getKey(alunoId);
-            if (!registros.value[k]) {
-                registros.value[k] = { caderno: false, livro: false, copiou: false, incompleto: false, dormiu: false };
-            }
-            registros.value[k][field] = !registros.value[k][field];
-            saveStorage();
-        };
-
-        const adicionarAluno = () => {
-            if (!novoAluno.value.nome || !novoAluno.value.numero) return;
-
-            const novoObj = {
-                id: 'aluno_' + Date.now(),
-                numero: novoAluno.value.numero,
-                nome: novoAluno.value.nome.toUpperCase(),
-                ra: novoAluno.value.ra || 'N/A',
-                situacao: 'Ativo'
-            };
-
-            if (!turmas.value[selectedClass.value]) {
-                turmas.value[selectedClass.value] = [];
-            }
-
-            turmas.value[selectedClass.value].push(novoObj);
-            novoAluno.value = { numero: '', nome: '', ra: '' };
-            saveStorage();
-        };
-
-        const excluirAluno = (alunoId) => {
-            if (confirm('Tem certeza que deseja excluir permanentemente este aluno da turma?')) {
-                turmas.value[selectedClass.value] = turmas.value[selectedClass.value].filter(a => a.id !== alunoId);
-                saveStorage();
-            }
-        };
-
-        const restaurarTurmasPadrao = () => {
-            if (confirm("Quer restaurar a lista original de turmas (1A, 1C, 2E)? Seus vistos do dia serão mantidos.")) {
-                turmas.value = JSON.parse(JSON.stringify(baseTurmasPadrao));
-                saveStorage();
-            }
-        };
-
-        const marcarTodosVistos = () => {
-            currentStudentList.value.forEach(aluno => {
-                const k = getKey(aluno.id);
-                if (!registros.value[k]) registros.value[k] = {};
-                registros.value[k].caderno = true;
-                registros.value[k].livro = true;
-            });
-            saveStorage();
-        };
-
-        const getTotaisAluno = (alunoId) => {
-            let caderno = 0, livro = 0, descontos = 0;
-            const prefix = `${selectedBimestre.value}_`;
-
-            Object.keys(registros.value).forEach(k => {
-                if (k.startsWith(prefix) && k.endsWith(`_${alunoId}`)) {
-                    const r = registros.value[k];
-                    if (r.caderno) caderno += 1.0;
-                    if (r.livro) livro += 1.0;
-                    if (r.copiou) descontos += 0.2;
-                    if (r.incompleto) descontos += 0.3;
-                    if (r.dormiu) descontos += 0.5;
-                }
-            });
-
-            const pontosLiquidos = Math.max(0, (caderno + livro) - descontos);
-            return { caderno, livro, descontos, pontosLiquidos };
-        };
-
-        const maxPontuacaoTurma = computed(() => {
-            let max = 0;
-            currentStudentList.value.forEach(aluno => {
-                const tot = getTotaisAluno(aluno.id).pontosLiquidos;
-                if (tot > max) max = tot;
-            });
-            return max || 1.0;
-        });
-
-        const calcularNota = (alunoId) => {
-            const pts = getTotaisAluno(alunoId).pontosLiquidos;
-            if (maxPontuacaoTurma.value === 0) return 0;
-            return Math.min(10, (pts / maxPontuacaoTurma.value) * 10);
-        };
-
-        const getNotaClass = (nota) => {
-            if (nota >= 7) return 'bg-emerald-100 text-emerald-800';
-            if (nota >= 5) return 'bg-amber-100 text-amber-800';
-            return 'bg-rose-100 text-rose-800';
-        };
-
-        const saveStorage = () => {
-            localStorage.setItem('diario_registros_db', JSON.stringify(registros.value));
-            localStorage.setItem('diario_conteudos_db', JSON.stringify(conteudos.value));
-            localStorage.setItem('diario_turmas_v2', JSON.stringify(turmas.value));
-        };
-
-        const exportarBackup = () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
-                turmas: turmas.value,
-                registros: registros.value,
-                conteudos: conteudos.value
-            }));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `diario_backup_${selectedDate.value}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        };
-
-        const importarBackup = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                try {
-                    const data = JSON.parse(evt.target.result);
-                    if (data.turmas) turmas.value = data.turmas;
-                    if (data.registros) registros.value = data.registros;
-                    if (data.conteudos) conteudos.value = data.conteudos;
-                    saveStorage();
-                    alert("Backup restaurado com sucesso!");
-                } catch (err) {
-                    alert("Erro ao importar o arquivo de backup.");
-                }
-            };
-            reader.readAsText(file);
-        };
-
-        return {
-            turmas, selectedClass, selectedDate, selectedBimestre,
-            currentTab, conteudoDia, turmasOrdenadas, currentStudentList, novoAluno,
-            getRegistro, toggleItem, marcarTodosVistos, getTotaisAluno,
-            maxPontuacaoTurma, calcularNota, getNotaClass, adicionarAluno, excluirAluno,
-            restaurarTurmasPadrao, exportarBackup, importarBackup
-        };
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plano de Aulas - Prof. Raquel</title>
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --background-color: #f4f6f9;
+      --card-background: #ffffff;
+      --text-color: #333333;
+      --border-color: #e0e0e0;
     }
-}).mount('#app');
-</script>
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card-background);
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: var(--primary-color);
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      font-size: 16px;
+      background-color: #fff;
+    }
+
+    .aulas-container {
+      margin-top: 25px;
+    }
+
+    .aula-card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #fafafa;
+      transition: border-color 0.2s;
+    }
+
+    .aula-card:focus-within {
+      border-color: var(--secondary-color);
+    }
+
+    .aula-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .badge {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .evento-alerta {
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-bottom: 10px;
+      border: 1px solid #ffeeba;
+    }
+
+    textarea {
+      width: 100%;
+      height: 60px;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      resize: vertical;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 15px;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #219150;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1 id="titulo-doc">Plano de Aulas</h1>
+
+    <div class="form-group">
+      <label for="select-turma">Selecione a Turma:</label>
+      <select id="select-turma" onchange="carregarAulas()">
+        <option value="">-- Selecione uma turma --</option>
+      </select>
+    </div>
+
+    <form id="form-plano" onsubmit="salvarPlano(event)">
+      <div id="lista-aulas" class="aulas-container"></div>
+      <button type="submit" id="btn-salvar" style="display: none;">Salvar Planejamento</button>
+    </form>
+  </div>
+
+  <script>
+    // Objeto JSON atualizado com as turmas
+    const PROFESSOR_DATA = {"nome": "Raquel", "turmas": {"2ADM - QUI": [{"data": "27/07/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Reunião de Planejamento Escolar"}, {"data": "03/08/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "10/08/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "17/08/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "24/08/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "31/08/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/09/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/09/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "28/09/2026", "diaSemana": "Segunda-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "05/10/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "19/10/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "26/10/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/11/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/11/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "23/11/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/11/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "07/12/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/12/2026", "diaSemana": "Segunda-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}], "1A - QUI": [{"data": "28/07/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "01/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "08/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "15/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "13/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "20/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "27/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "03/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "10/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "17/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "24/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Período de Avaliações Externas - SARESP (Estimado)"}, {"data": "01/12/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}], "1B - QUI": [{"data": "28/07/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/08/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "01/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "08/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "15/09/2026", "diaSemana": "Terça-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "13/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "20/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "27/10/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "03/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "10/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "17/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "24/11/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Período de Avaliações Externas - SARESP (Estimado)"}, {"data": "01/12/2026", "diaSemana": "Terça-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}], "2C - QUI": [{"data": "12/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "19/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "26/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "02/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "23/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "07/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Período de Avaliações Externas - SARESP (Estimado)"}, {"data": "02/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Conselho de Classe Final / Fechamento de Notas"}], "3A - APQUI": [{"data": "12/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "19/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "26/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "02/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "23/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "07/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Período de Avaliações Externas - SARESP (Estimado)"}, {"data": "02/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Conselho de Classe Final / Fechamento de Notas"}], "2AGRO - QUI": [{"data": "12/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "19/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "26/08/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "02/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "23/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/09/2026", "diaSemana": "Quarta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "07/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/10/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/11/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Período de Avaliações Externas - SARESP (Estimado)"}, {"data": "02/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "16/12/2026", "diaSemana": "Quarta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": "Conselho de Classe Final / Fechamento de Notas"}], "3A - PRAT": [{"data": "30/07/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "06/08/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "13/08/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "20/08/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "03/09/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "10/09/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "17/09/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Semana de Aplicação da Prova Paulista (Estimado)"}, {"data": "01/10/2026", "diaSemana": "Quinta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "08/10/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "29/10/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "05/11/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "12/11/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "19/11/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "03/12/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "10/12/2026", "diaSemana": "Quinta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}], "1C - QUI": [{"data": "24/07/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Retorno das Aulas / Acolhimento"}, {"data": "07/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "02/10/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/10/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/10/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "06/11/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "13/11/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}], "1D - QUI": [{"data": "24/07/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": "Retorno das Aulas / Acolhimento"}, {"data": "07/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "14/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "21/08/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "04/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "11/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "18/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "25/09/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "02/10/2026", "diaSemana": "Sexta-feira", "bimestre": "3º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "09/10/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "30/10/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "06/11/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}, {"data": "13/11/2026", "diaSemana": "Sexta-feira", "bimestre": "4º Bimestre", "qtdAulas": 2, "eventoGeral": ""}]}};
+
+    // Inicialização da interface
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("titulo-doc").innerText = `Plano de Aulas - Prof. ${PROFESSOR_DATA.nome}`;
+      const select = document.getElementById("select-turma");
+
+      // Preenche o select com as turmas disponíveis
+      Object.keys(PROFESSOR_DATA.turmas).forEach(turma => {
+        const option = document.createElement("option");
+        option.value = turma;
+        option.textContent = turma;
+        select.appendChild(option);
+      });
+    });
+
+    // Função para carregar as datas da turma selecionada
+    function carregarAulas() {
+      const turma = document.getElementById("select-turma").value;
+      const container = document.getElementById("lista-aulas");
+      const btnSalvar = document.getElementById("btn-salvar");
+      
+      container.innerHTML = "";
+
+      if (!turma) {
+        btnSalvar.style.display = "none";
+        return;
+      }
+
+      const aulas = PROFESSOR_DATA.turmas[turma];
+
+      aulas.forEach((aula, idx) => {
+        const card = document.createElement("div");
+        card.className = "aula-card";
+
+        const eventoHtml = aula.eventoGeral 
+          ? `<div class="evento-alerta"><strong>Evento:</strong> ${aula.eventoGeral}</div>` 
+          : "";
+
+        card.innerHTML = `
+          <div class="aula-header">
+            <span>${aula.data} (${aula.diaSemana})</span>
+            <span class="badge">${aula.bimestre} | ${aula.qtdAulas} aula(s)</span>
+          </div>
+          ${eventoHtml}
+          <div>
+            <label for="conteudo-${idx}">Conteúdo / Atividade:</label>
+            <textarea id="conteudo-${idx}" name="conteudo_${idx}" placeholder="Digite o conteúdo previsto para esta aula..."></textarea>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      btnSalvar.style.display = "block";
+    }
+
+    // Função de submissão do formulário
+    function salvarPlano(event) {
+      event.preventDefault();
+      const turma = document.getElementById("select-turma").value;
+      const aulas = PROFESSOR_DATA.turmas[turma];
+      
+      const resultado = aulas.map((aula, idx) => {
+        const conteudo = document.getElementById(`conteudo-${idx}`).value;
+        return {
+          ...aula,
+          conteudoPlanejado: conteudo
+        };
+      });
+
+      console.log("Planejamento Salvo:", resultado);
+      alert(`Planejamento da turma ${turma} salvo com sucesso! (Verifique o console para os dados exportados)`);
+    }
+  </script>
 </body>
 </html>
