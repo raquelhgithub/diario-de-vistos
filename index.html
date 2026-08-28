@@ -527,22 +527,37 @@ createApp({
         };
 
         const importarBackup = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                try {
-                    const parsed = JSON.parse(evt.target.result);
-                    if (parsed.turmas) turmas.value = parsed.turmas;
-                    if (parsed.registros) registros.value = parsed.registros;
-                    salvarNoLocalStorage();
-                    alert('Backup restaurado com sucesso!');
-                } catch (err) {
-                    alert('Erro ao importar backup: arquivo inválido.');
-                }
-            };
-            reader.readAsText(file);
-        };
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+        try {
+            const parsed = JSON.parse(evt.target.result);
+
+            // 1. Verifique se o JSON tem exatamente as chaves esperadas
+            if (parsed.turmas && Array.isArray(parsed.turmas)) {
+                turmas.value = parsed.turmas;
+            }
+            if (parsed.registros && Array.isArray(parsed.registros)) {
+                registros.value = parsed.registros;
+            }
+
+            // 2. Garanta a persistência local
+            salvarNoLocalStorage();
+
+            alert('Backup restaurado com sucesso!');
+        } catch (err) {
+            console.error('Erro de restauração:', err);
+            alert('Erro ao importar backup: arquivo JSON inválido ou corrompido.');
+        } finally {
+            // 3. OBRIGATÓRIO: Limpa o input para permitir selecionar o mesmo arquivo novamente
+            e.target.value = '';
+        }
+    };
+
+    reader.readAsText(file);
+};
 
         const importarCSV = (e) => {
             const file = e.target.files[0];
