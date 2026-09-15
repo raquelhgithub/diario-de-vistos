@@ -156,7 +156,7 @@
         </header>
 
         <!-- BARRA DE SELEÇÃO E CONTROLES -->
-        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2.5 mb-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 mb-3">
             
             <!-- SELEÇÃO DE TURMA -->
             <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
@@ -194,6 +194,15 @@
                 <button @click="apenasAtivos = !apenasAtivos" :class="['w-full py-2 px-2 rounded-lg font-semibold text-xs flex items-center justify-center gap-1.5 border transition touch-btn', apenasAtivos ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-slate-50 border-slate-300 text-slate-600']">
                     <i :class="['fa-solid', apenasAtivos ? 'fa-user-check text-emerald-600' : 'fa-users text-slate-400']"></i>
                     <span>{{ apenasAtivos ? 'Apenas Ativos' : 'Todos Alunos' }}</span>
+                </button>
+            </div>
+
+            <!-- ORDENAÇÃO DE ALUNOS -->
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-center">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ordenar Lista</label>
+                <button @click="alternarOrdenacao" class="w-full py-2 px-2 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 border transition touch-btn bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-700 shadow-sm" :title="'Clique para ordenar por ' + (ordenacaoAlunos === 'numero' ? 'Nome Alfabético (A-Z)' : 'Número de Chamada')">
+                    <i :class="['fa-solid', ordenacaoAlunos === 'numero' ? 'fa-arrow-down-1-9 text-indigo-600' : 'fa-arrow-down-a-z text-indigo-600']"></i>
+                    <span>{{ ordenacaoAlunos === 'numero' ? 'Por Número' : 'Por Nome (A-Z)' }}</span>
                 </button>
             </div>
         </div>
@@ -268,7 +277,11 @@
                     <h2 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
                         <i class="fa-solid fa-users text-indigo-600"></i> Turma: <span class="text-indigo-900 font-extrabold">{{ selectedClass }}</span>
                     </h2>
-                    <div class="flex items-center gap-2 text-xs">
+                    <div class="flex items-center gap-2 text-xs flex-wrap">
+                        <button @click="alternarOrdenacao" class="font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 px-2.5 py-1 rounded-full flex items-center gap-1.5 transition shadow-sm" :title="'Clique para alternar para ' + (ordenacaoAlunos === 'numero' ? 'Ordem Alfabética (A-Z)' : 'Ordem por Número')">
+                            <i :class="['fa-solid', ordenacaoAlunos === 'numero' ? 'fa-arrow-down-1-9' : 'fa-arrow-down-a-z']"></i>
+                            <span>{{ ordenacaoAlunos === 'numero' ? 'Ordem: Por Número' : 'Ordem: Por Nome (A-Z)' }}</span>
+                        </button>
                         <span class="font-bold text-slate-600 bg-slate-200 px-2.5 py-1 rounded-full">
                             {{ currentStudentList.length }} alunos exibidos
                         </span>
@@ -362,8 +375,12 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-100 text-slate-600 text-xs font-black uppercase border-b border-slate-200">
-                            <th class="p-3">Nº</th>
-                            <th class="p-3">Aluno</th>
+                            <th class="p-3 cursor-pointer select-none hover:bg-slate-200 transition" @click="setOrdenacao('numero')" title="Clique para ordenar por Número de Chamada">
+                                Nº <i v-if="ordenacaoAlunos === 'numero'" class="fa-solid fa-arrow-down-1-9 text-indigo-700 text-xs ml-1"></i>
+                            </th>
+                            <th class="p-3 cursor-pointer select-none hover:bg-slate-200 transition" @click="setOrdenacao('nome')" title="Clique para ordenar por Nome Alfabético (A-Z)">
+                                Aluno <i v-if="ordenacaoAlunos === 'nome'" class="fa-solid fa-arrow-down-a-z text-indigo-700 text-xs ml-1"></i>
+                            </th>
                             <th class="p-3 text-center"><i class="fa-solid fa-book-bookmark text-amber-600"></i> Caderno</th>
                             <th class="p-3 text-center"><i class="fa-solid fa-layer-group text-sky-600"></i> Livro</th>
                             <th class="p-3 text-center"><i class="fa-solid fa-clipboard-list text-emerald-600"></i> Atividade</th>
@@ -720,13 +737,36 @@ createApp({
             }
         });
 
+        const ordenacaoAlunos = ref(localStorage.getItem('diario_ordem_alunos') || 'numero');
+
+        function alternarOrdenacao() {
+            ordenacaoAlunos.value = ordenacaoAlunos.value === 'numero' ? 'nome' : 'numero';
+            localStorage.setItem('diario_ordem_alunos', ordenacaoAlunos.value);
+        }
+
+        function setOrdenacao(tipo) {
+            ordenacaoAlunos.value = tipo;
+            localStorage.setItem('diario_ordem_alunos', tipo);
+        }
+
         const currentStudentList = computed(() => {
             if (!selectedClass.value || !turmas.value[selectedClass.value]) return [];
-            const list = turmas.value[selectedClass.value];
+            let list = [...turmas.value[selectedClass.value]];
             if (apenasAtivos.value) {
-                return list.filter(aluno => (aluno.situacao || '').toLowerCase() === 'ativo');
+                list = list.filter(aluno => (aluno.situacao || '').toLowerCase() === 'ativo');
             }
-            return list;
+            if (ordenacaoAlunos.value === 'nome') {
+                return list.sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
+            } else {
+                return list.sort((a, b) => {
+                    const numA = parseInt(a.numero, 10);
+                    const numB = parseInt(b.numero, 10);
+                    if (isNaN(numA) && isNaN(numB)) return (a.nome || '').localeCompare(b.nome || '', 'pt-BR');
+                    if (isNaN(numA)) return 1;
+                    if (isNaN(numB)) return -1;
+                    return numA - numB;
+                });
+            }
         });
 
         function initDataStructure() {
@@ -1237,6 +1277,7 @@ createApp({
             
             // Turmas e Alunos
             turmas, turmasOrdenadas, selectedClass, selectedDate, selectedBimestre, currentTab, apenasAtivos,
+            ordenacaoAlunos, alternarOrdenacao, setOrdenacao,
             conteudoDia, currentStudentList, maxPontuacaoTurma, getRegistro, toggleItem,
             marcarTodosCaderno, marcarTodosLivro, marcarTodosAtividade, desmarcarTudo, marcarTodosVistos,
             getTotaisAluno, calcularNota, getNotaClass, formatData,
