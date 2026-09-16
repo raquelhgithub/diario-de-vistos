@@ -230,8 +230,11 @@
                 </div>
             </div>
 
-            <!-- EXPORTAÇÃO -->
-            <div class="flex items-center gap-1.5 justify-end border-t md:border-t-0 pt-2 md:pt-0 border-slate-100">
+            <!-- EXPORTAÇÃO E CONTAGEM BIMESTRAL -->
+            <div class="flex items-center gap-1.5 justify-end border-t md:border-t-0 pt-2 md:pt-0 border-slate-100 flex-wrap">
+                <button @click="abrirModalContagem" class="bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition shadow-sm flex items-center gap-1.5 touch-btn" title="Lançar contagem cumulativa de vistos do bimestre">
+                    <i class="fa-solid fa-calculator text-amber-300"></i> Contagem Bimestral
+                </button>
                 <button @click="exportarExcel" class="bg-green-700 hover:bg-green-800 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition shadow-sm flex items-center gap-1 touch-btn" title="Exportar Excel">
                     <i class="fa-solid fa-file-excel"></i> Excel
                 </button>
@@ -425,6 +428,9 @@
                         <span class="text-[10px] text-indigo-700 block font-bold">Máximo da Turma (Nota 10)</span>
                         <span class="text-base font-black text-indigo-900">{{ maxPontuacaoTurma.toFixed(1) }} pts</span>
                     </div>
+                    <button @click="abrirModalContagem" class="bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center gap-1.5 shadow transition touch-btn" title="Lançar Contagem de Vistos Bimestral">
+                        <i class="fa-solid fa-calculator text-amber-300"></i> Contagem Bimestral
+                    </button>
                     <button @click="exportarExcel" class="bg-green-700 hover:bg-green-800 text-white font-bold text-xs py-2 px-2.5 rounded-xl flex items-center gap-1 shadow transition touch-btn" title="Exportar Fechamento do Bimestre para Excel">
                         <i class="fa-solid fa-file-excel"></i> Excel
                     </button>
@@ -1155,6 +1161,143 @@
         </div>
     </div>
 
+    <!-- MODAL: CONTAGEM DE VISTOS BIMESTRAL -->
+    <div v-if="modalContagem.aberto" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div class="bg-white max-w-3xl w-full rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[95vh] flex flex-col">
+            <!-- Cabeçalho do Modal -->
+            <div class="bg-purple-900 text-white p-4 flex justify-between items-center border-b-2 border-amber-400 shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-purple-800 border border-purple-700 flex items-center justify-center text-amber-300 text-lg shadow-inner">
+                        <i class="fa-solid fa-calculator"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm sm:text-base leading-tight">Contagem de Vistos Bimestral</h3>
+                        <p class="text-[11px] text-purple-200">Lançamento acumulado de vistos de caderno, livro e atividade anteriores</p>
+                    </div>
+                </div>
+                <button @click="fecharModalContagem" class="text-purple-200 hover:text-white p-1 rounded-lg hover:bg-purple-800 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Corpo com formulário de cabeçalho e tabela rolável -->
+            <div class="p-4 space-y-4 overflow-y-auto grow">
+                <!-- Informações e Parâmetros da Contagem -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Turma Selecionada</label>
+                        <div class="font-extrabold text-indigo-900 bg-white border border-slate-200 rounded-lg py-2 px-3 text-xs sm:text-sm">
+                            {{ selectedClass }}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Data da Contagem</label>
+                        <input type="date" v-model="modalContagem.data" @change="carregarContagemData" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Bimestre Correspondente</label>
+                        <div class="font-bold text-purple-900 bg-purple-50 border border-purple-200 rounded-lg py-2 px-3 text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-calendar-check text-purple-600"></i>
+                            <span>{{ getBimestrePorData(modalContagem.data) }}º Bimestre</span>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Descrição do Registro</label>
+                        <input type="text" v-model="modalContagem.descricao" placeholder="Contagem de vistos anteriores do bimestre" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+
+                <!-- Barra de Preenchimento Rápido / Em Massa -->
+                <div class="bg-purple-50/60 border border-purple-200 rounded-xl p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                    <span class="text-[11px] font-bold text-purple-900 flex items-center gap-1.5">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> Preencher todos os alunos com:
+                    </span>
+                    <div class="flex items-center gap-2 flex-wrap text-xs">
+                        <div class="flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-purple-200">
+                            <span class="text-[10px] font-bold text-amber-600">Caderno:</span>
+                            <input type="number" min="0" v-model.number="modalContagem.massaCaderno" class="w-12 text-center font-bold text-xs bg-slate-50 border rounded p-0.5">
+                        </div>
+                        <div class="flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-purple-200">
+                            <span class="text-[10px] font-bold text-sky-600">Livro:</span>
+                            <input type="number" min="0" v-model.number="modalContagem.massaLivro" class="w-12 text-center font-bold text-xs bg-slate-50 border rounded p-0.5">
+                        </div>
+                        <div class="flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-purple-200">
+                            <span class="text-[10px] font-bold text-emerald-600">Atividade:</span>
+                            <input type="number" min="0" v-model.number="modalContagem.massaAtividade" class="w-12 text-center font-bold text-xs bg-slate-50 border rounded p-0.5">
+                        </div>
+                        <button @click="aplicarMassaContagem" class="bg-purple-700 hover:bg-purple-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow-xs flex items-center gap-1 touch-btn">
+                            <i class="fa-solid fa-check"></i> Aplicar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabela de Alunos -->
+                <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                    <div class="overflow-x-auto max-h-80">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="sticky top-0 bg-slate-100 z-10 border-b border-slate-200">
+                                <tr class="text-[11px] font-black text-slate-600 uppercase">
+                                    <th class="p-2.5 w-12 text-center">Nº</th>
+                                    <th class="p-2.5">Nome do Aluno</th>
+                                    <th class="p-2.5 text-center text-amber-700 bg-amber-50/50">Caderno</th>
+                                    <th class="p-2.5 text-center text-sky-700 bg-sky-50/50">Livro</th>
+                                    <th class="p-2.5 text-center text-emerald-700 bg-emerald-50/50">Atividade</th>
+                                    <th class="p-2.5 text-center text-purple-900 bg-purple-50/50">Total Vistos</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs">
+                                <tr v-for="aluno in modalContagem.alunos" :key="aluno.id" class="hover:bg-slate-50/80 transition">
+                                    <td class="p-2.5 text-center font-bold text-slate-500">{{ aluno.numero }}</td>
+                                    <td class="p-2.5">
+                                        <span class="font-bold text-slate-800 block">{{ aluno.nome }}</span>
+                                        <span class="text-[10px] text-slate-400">RA: {{ aluno.ra || '-' }}</span>
+                                    </td>
+                                    <!-- Input Caderno -->
+                                    <td class="p-2 text-center bg-amber-50/30">
+                                        <div class="inline-flex items-center gap-1">
+                                            <button @click="aluno.caderno = Math.max(0, (aluno.caderno || 0) - 1)" class="w-6 h-6 rounded bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold flex items-center justify-center text-xs touch-btn">-</button>
+                                            <input type="number" min="0" v-model.number="aluno.caderno" class="w-14 text-center font-bold text-xs bg-white border border-amber-300 rounded p-1 focus:ring-1 focus:ring-amber-500">
+                                            <button @click="aluno.caderno = (aluno.caderno || 0) + 1" class="w-6 h-6 rounded bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold flex items-center justify-center text-xs touch-btn">+</button>
+                                        </div>
+                                    </td>
+                                    <!-- Input Livro -->
+                                    <td class="p-2 text-center bg-sky-50/30">
+                                        <div class="inline-flex items-center gap-1">
+                                            <button @click="aluno.livro = Math.max(0, (aluno.livro || 0) - 1)" class="w-6 h-6 rounded bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold flex items-center justify-center text-xs touch-btn">-</button>
+                                            <input type="number" min="0" v-model.number="aluno.livro" class="w-14 text-center font-bold text-xs bg-white border border-sky-300 rounded p-1 focus:ring-1 focus:ring-sky-500">
+                                            <button @click="aluno.livro = (aluno.livro || 0) + 1" class="w-6 h-6 rounded bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold flex items-center justify-center text-xs touch-btn">+</button>
+                                        </div>
+                                    </td>
+                                    <!-- Input Atividade -->
+                                    <td class="p-2 text-center bg-emerald-50/30">
+                                        <div class="inline-flex items-center gap-1">
+                                            <button @click="aluno.atividade = Math.max(0, (aluno.atividade || 0) - 1)" class="w-6 h-6 rounded bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold flex items-center justify-center text-xs touch-btn">-</button>
+                                            <input type="number" min="0" v-model.number="aluno.atividade" class="w-14 text-center font-bold text-xs bg-white border border-emerald-300 rounded p-1 focus:ring-1 focus:ring-emerald-500">
+                                            <button @click="aluno.atividade = (aluno.atividade || 0) + 1" class="w-6 h-6 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold flex items-center justify-center text-xs touch-btn">+</button>
+                                        </div>
+                                    </td>
+                                    <!-- Total Vistos do Aluno -->
+                                    <td class="p-2.5 text-center font-black text-purple-900 bg-purple-50/30 text-xs sm:text-sm">
+                                        {{ (Number(aluno.caderno) || 0) + (Number(aluno.livro) || 0) + (Number(aluno.atividade) || 0) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rodapé com Botões de Ação -->
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center shrink-0">
+                <button @click="fecharModalContagem" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-100 transition">
+                    Cancelar
+                </button>
+                <button @click="salvarContagemBimestral" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-800 hover:bg-purple-900 shadow-md transition flex items-center gap-2 touch-btn">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvar Contagem Bimestral
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -1573,9 +1716,15 @@ createApp({
                 }
                 const item = tData[d][studentId];
                 if (item) {
-                    if (item.caderno) caderno++;
-                    if (item.livro) livro++;
-                    if (item.atividade) atividade++;
+                    if (item.caderno) {
+                        caderno += typeof item.caderno === 'number' ? item.caderno : (item.caderno ? 1 : 0);
+                    }
+                    if (item.livro) {
+                        livro += typeof item.livro === 'number' ? item.livro : (item.livro ? 1 : 0);
+                    }
+                    if (item.atividade) {
+                        atividade += typeof item.atividade === 'number' ? item.atividade : (item.atividade ? 1 : 0);
+                    }
                     if (item.copiou) copiou++;
                     if (item.incompleto) incompleto++;
                     if (item.dormiu) dormiu++;
@@ -2128,7 +2277,7 @@ createApp({
             const obj = registros.value[turma][data];
             let count = 0;
             Object.values(obj).forEach(r => {
-                if (r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu || (r.pontoPositivo > 0) || (r.pontoNegativo > 0))) {
+                if (r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu || (r.pontoPositivo > 0) || (r.pontoNegativo > 0) || r.isContagem)) {
                     count++;
                 }
             });
@@ -2138,6 +2287,120 @@ createApp({
         function getConteudoNaData(turma, data) {
             if (!turma || !data || !conteudos.value[turma]) return '';
             return conteudos.value[turma][data] || '';
+        }
+
+        // --- CONTAGEM DE VISTOS BIMESTRAL ---
+        const modalContagem = ref({
+            aberto: false,
+            data: '',
+            descricao: 'Contagem de vistos anteriores do bimestre',
+            massaCaderno: 0,
+            massaLivro: 0,
+            massaAtividade: 0,
+            alunos: []
+        });
+
+        function abrirModalContagem() {
+            modalContagem.value.data = selectedDate.value || new Date().toISOString().split('T')[0];
+            modalContagem.value.descricao = 'Contagem de vistos anteriores do bimestre';
+            modalContagem.value.massaCaderno = 0;
+            modalContagem.value.massaLivro = 0;
+            modalContagem.value.massaAtividade = 0;
+            carregarContagemData();
+            modalContagem.value.aberto = true;
+        }
+
+        function fecharModalContagem() {
+            modalContagem.value.aberto = false;
+        }
+
+        function carregarContagemData() {
+            const dataSel = modalContagem.value.data;
+            const turmaSel = selectedClass.value;
+            const regDia = (registros.value[turmaSel] && registros.value[turmaSel][dataSel]) || {};
+            const descDia = (conteudos.value[turmaSel] && conteudos.value[turmaSel][dataSel]) || '';
+            if (descDia) {
+                modalContagem.value.descricao = descDia;
+            } else if (!modalContagem.value.descricao) {
+                modalContagem.value.descricao = 'Contagem de vistos anteriores do bimestre';
+            }
+
+            const lista = currentStudentList.value || [];
+            modalContagem.value.alunos = lista.map(aluno => {
+                const reg = regDia[aluno.id] || {};
+                const cVal = typeof reg.caderno === 'number' ? reg.caderno : (reg.caderno ? 1 : 0);
+                const lVal = typeof reg.livro === 'number' ? reg.livro : (reg.livro ? 1 : 0);
+                const aVal = typeof reg.atividade === 'number' ? reg.atividade : (reg.atividade ? 1 : 0);
+                return {
+                    id: aluno.id,
+                    numero: aluno.numero,
+                    nome: aluno.nome,
+                    ra: aluno.ra,
+                    caderno: cVal,
+                    livro: lVal,
+                    atividade: aVal
+                };
+            });
+        }
+
+        function aplicarMassaContagem() {
+            const c = Math.max(0, Number(modalContagem.value.massaCaderno) || 0);
+            const l = Math.max(0, Number(modalContagem.value.massaLivro) || 0);
+            const a = Math.max(0, Number(modalContagem.value.massaAtividade) || 0);
+            modalContagem.value.alunos.forEach(item => {
+                item.caderno = c;
+                item.livro = l;
+                item.atividade = a;
+            });
+        }
+
+        function salvarContagemBimestral() {
+            const turmaSel = selectedClass.value;
+            const dataSel = modalContagem.value.data;
+            if (!turmaSel || !dataSel) {
+                alert('Informe a turma e a data da contagem.');
+                return;
+            }
+
+            if (!registros.value[turmaSel]) registros.value[turmaSel] = {};
+            if (!registros.value[turmaSel][dataSel]) registros.value[turmaSel][dataSel] = {};
+            if (!conteudos.value[turmaSel]) conteudos.value[turmaSel] = {};
+
+            const descFinal = (modalContagem.value.descricao || '').trim() || 'Contagem de vistos anteriores do bimestre';
+            conteudos.value[turmaSel][dataSel] = descFinal;
+
+            let totalVistosGerais = 0;
+            modalContagem.value.alunos.forEach(item => {
+                const c = Math.max(0, Number(item.caderno) || 0);
+                const l = Math.max(0, Number(item.livro) || 0);
+                const a = Math.max(0, Number(item.atividade) || 0);
+                totalVistosGerais += (c + l + a);
+
+                registros.value[turmaSel][dataSel][item.id] = {
+                    isContagem: true,
+                    caderno: c,
+                    livro: l,
+                    atividade: a,
+                    pontoPositivo: 0,
+                    pontoNegativo: 0,
+                    copiou: false,
+                    incompleto: false,
+                    dormiu: false
+                };
+            });
+
+            // Persistir Localmente e em Nuvem
+            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+            localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
+            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
+
+            // Atualizar data ativa se for a mesma
+            if (selectedDate.value === dataSel) {
+                conteudoDia.value = descFinal;
+            }
+
+            modalContagem.value.aberto = false;
+            alert(`✅ Contagem bimestral salva com sucesso para o dia ${formatData(dataSel)}! (${totalVistosGerais} vistos lançados)`);
         }
 
         function executarCopiaIndividual(isMover) {
@@ -2441,26 +2704,84 @@ createApp({
             doc.setTextColor(30, 41, 59);
             doc.text(`Detalhamento das Aulas e Registros do Período (${bimLabel}):`, 14, startY2 - 2);
 
-            const datasRegistradas = Object.keys(registros.value[selectedClass.value] || {}).sort();
+            const turmaReg = registros.value[selectedClass.value] || {};
+            const datasRegistradas = Object.keys(turmaReg).sort();
             let datasFiltradas = bimFiltro === 'todos'
                 ? datasRegistradas
                 : datasRegistradas.filter(d => getBimestrePorData(d) === String(bimFiltro));
 
+            // REGRA PEDAGÓGICA: Registra como dia com atividade apenas aquela data em que alguém da turma tem ponto ou desconto
+            datasFiltradas = datasFiltradas.filter(d => {
+                const diaObj = turmaReg[d] || {};
+                return Object.values(diaObj).some(r => {
+                    if (!r) return false;
+                    const c = typeof r.caderno === 'number' ? r.caderno : (r.caderno ? 1 : 0);
+                    const l = typeof r.livro === 'number' ? r.livro : (r.livro ? 1 : 0);
+                    const a = typeof r.atividade === 'number' ? r.atividade : (r.atividade ? 1 : 0);
+                    const pp = Number(r.pontoPositivo || 0);
+                    const pn = Number(r.pontoNegativo || 0);
+                    return c > 0 || l > 0 || a > 0 || pp > 0 || pn > 0 || r.copiou || r.incompleto || r.dormiu || r.isContagem;
+                });
+            });
+
             const linhasDias = datasFiltradas.map(d => {
-                const r = (registros.value[selectedClass.value] && registros.value[selectedClass.value][d] && registros.value[selectedClass.value][d][aluno.id]) || {};
-                const conteudo = (conteudos.value[selectedClass.value] && conteudos.value[selectedClass.value][d]) || 'Atividades de aula';
+                const diaObj = turmaReg[d] || {};
+                const r = diaObj[aluno.id] || {};
+                const isContagemDia = r.isContagem || Object.values(diaObj).some(x => x && x.isContagem);
+                const defaultDesc = isContagemDia ? 'Contagem de vistos anteriores do bimestre' : 'Atividades de aula';
+                const conteudo = (conteudos.value[selectedClass.value] && conteudos.value[selectedClass.value][d]) || defaultDesc;
+
+                // Identificar quais atividades foram cobradas na turma no dia
+                let turmaTeveCaderno = false;
+                let turmaTeveLivro = false;
+                let turmaTeveAtividade = false;
+
+                Object.values(diaObj).forEach(x => {
+                    if (!x) return;
+                    if (typeof x.caderno === 'number' ? x.caderno > 0 : x.caderno) turmaTeveCaderno = true;
+                    if (typeof x.livro === 'number' ? x.livro > 0 : x.livro) turmaTeveLivro = true;
+                    if (typeof x.atividade === 'number' ? x.atividade > 0 : x.atividade) turmaTeveAtividade = true;
+                });
+
+                const cVal = typeof r.caderno === 'number' ? r.caderno : (r.caderno ? 1 : 0);
+                const lVal = typeof r.livro === 'number' ? r.livro : (r.livro ? 1 : 0);
+                const aVal = typeof r.atividade === 'number' ? r.atividade : (r.atividade ? 1 : 0);
+
+                let cadTexto = '-';
+                if (isContagemDia) {
+                    cadTexto = cVal > 0 ? `${cVal} ${cVal === 1 ? 'visto' : 'vistos'}` : '0';
+                } else if (turmaTeveCaderno) {
+                    cadTexto = cVal > 0 ? 'SIM' : 'NÃO FEZ';
+                }
+
+                let livTexto = '-';
+                if (isContagemDia) {
+                    livTexto = lVal > 0 ? `${lVal} ${lVal === 1 ? 'visto' : 'vistos'}` : '0';
+                } else if (turmaTeveLivro) {
+                    livTexto = lVal > 0 ? 'SIM' : 'NÃO FEZ';
+                }
+
+                let ativTexto = '-';
+                if (isContagemDia) {
+                    ativTexto = aVal > 0 ? `${aVal} ${aVal === 1 ? 'visto' : 'vistos'}` : '0';
+                } else if (turmaTeveAtividade) {
+                    ativTexto = aVal > 0 ? 'SIM' : 'NÃO FEZ';
+                }
+
                 const obs = [];
+                if (isContagemDia) obs.push('Contagem Bimestral');
                 if (r.pontoPositivo > 0) obs.push(`+${r.pontoPositivo.toFixed(1)} pt`);
                 if (r.pontoNegativo > 0) obs.push(`-${r.pontoNegativo.toFixed(1)} pt`);
                 if (r.copiou) obs.push('Copiou (-0.2)');
                 if (r.incompleto) obs.push('Incompleto (-0.3)');
                 if (r.dormiu) obs.push('Dormiu (-0.5)');
+
                 return [
                     formatData(d),
                     conteudo,
-                    r.caderno ? 'SIM' : '-',
-                    r.livro ? 'SIM' : '-',
-                    r.atividade ? 'SIM' : '-',
+                    cadTexto,
+                    livTexto,
+                    ativTexto,
                     obs.length > 0 ? obs.join(', ') : 'Regular'
                 ];
             });
@@ -2475,10 +2796,24 @@ createApp({
                 columnStyles: {
                     0: { cellWidth: 22, halign: 'center' },
                     1: { cellWidth: 'auto' },
-                    2: { cellWidth: 16, halign: 'center' },
-                    3: { cellWidth: 16, halign: 'center' },
-                    4: { cellWidth: 16, halign: 'center' },
+                    2: { cellWidth: 18, halign: 'center' },
+                    3: { cellWidth: 18, halign: 'center' },
+                    4: { cellWidth: 18, halign: 'center' },
                     5: { cellWidth: 28, halign: 'center' }
+                },
+                didParseCell: function(data) {
+                    if (data.section === 'body' && (data.column.index === 2 || data.column.index === 3 || data.column.index === 4)) {
+                        if (data.cell.raw === 'NÃO FEZ') {
+                            data.cell.styles.textColor = [190, 18, 60]; // Rose 700
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (data.cell.raw === 'SIM') {
+                            data.cell.styles.textColor = [21, 128, 61]; // Green 700
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (typeof data.cell.raw === 'string' && data.cell.raw.includes('visto')) {
+                            data.cell.styles.textColor = [107, 33, 168]; // Purple 700
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                    }
                 },
                 margin: { left: 14, right: 14 }
             });
@@ -2726,8 +3061,9 @@ createApp({
             modalRenomearTurma, abrirModalRenomearTurma, confirmarRenomearTurma, confirmarExcluirTurma,
             modalProfessor, mostrarSenhasAdmin, toggleMostrarSenhaAdmin, abrirModalNovoProfessor, abrirModalEditarProfessor, salvarProfessorModal, confirmarExcluirProfessor, getSenhaUsuario,
             
-            // Ferramentas Mover/Copiar
+            // Ferramentas Mover/Copiar e Contagem Bimestral
             ferramentaIndividual, ferramentaLote, getQtdVistosNaData, getConteudoNaData, executarCopiaIndividual, limparPreviaLote, gerarPreviaLote, executarLote,
+            modalContagem, abrirModalContagem, fecharModalContagem, carregarContagemData, aplicarMassaContagem, salvarContagemBimestral, getBimestrePorData,
 
             // Backup e Exportações
             exportarBackup, importarBackup, exportarExcel, exportarPDF, gerarFichaAluno, gerarFichasTurmaLote,
