@@ -389,17 +389,62 @@
                 <div>
                     <h2 class="font-bold text-slate-800 text-lg">Cálculo Proporcional ao Máximo da Turma (Professor: {{ currentUser }})</h2>
                     <p class="text-xs text-slate-500">
-                        O aluno com maior pontuação líquida ganha Nota 10,0. Os demais recebem notas proporcionais a essa pontuação máxima.
+                        O aluno com maior pontuação líquida ganha Nota 10,0 no bimestre selecionado. Os demais recebem notas proporcionais.
                     </p>
                 </div>
-                <div class="flex items-center gap-3 flex-wrap">
-                    <button @click="gerarFichasTurmaLote" class="bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs py-2.5 px-3.5 rounded-xl flex items-center gap-2 shadow transition" title="Gerar Fichas de todos os alunos em PDF para Reunião de Pais">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button @click="exportarExcel" class="bg-green-700 hover:bg-green-800 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center gap-1.5 shadow transition touch-btn" title="Exportar Fechamento do Bimestre para Excel">
+                        <i class="fa-solid fa-file-excel"></i> Excel
+                    </button>
+                    <button @click="exportarPDF" class="bg-red-700 hover:bg-red-800 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center gap-1.5 shadow transition touch-btn" title="Exportar Fechamento do Bimestre para PDF">
+                        <i class="fa-solid fa-file-pdf"></i> PDF
+                    </button>
+                    <button @click="gerarFichasTurmaLote" class="bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs py-2 px-3.5 rounded-xl flex items-center gap-2 shadow transition touch-btn" title="Gerar Fichas de todos os alunos em PDF para Reunião de Pais">
                         <i class="fa-solid fa-print text-amber-400"></i> Fichas da Turma (Pais)
                     </button>
-                    <div class="bg-indigo-50 border border-indigo-200 p-3 rounded-xl text-right">
-                        <span class="text-xs text-indigo-700 block font-bold">Máximo da Turma (Nota 10)</span>
-                        <span class="text-xl font-black text-indigo-900">{{ maxPontuacaoTurma.toFixed(1) }} pts</span>
+                    <div class="bg-indigo-50 border border-indigo-200 p-2.5 px-3.5 rounded-xl text-right">
+                        <span class="text-[11px] text-indigo-700 block font-bold">Máximo da Turma (Nota 10)</span>
+                        <span class="text-lg font-black text-indigo-900">{{ maxPontuacaoTurma.toFixed(1) }} pts</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- SELETOR DE BIMESTRE DO FECHAMENTO -->
+            <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar-days text-indigo-600"></i> Fechamento do:
+                    </span>
+                    <span class="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-md">
+                        Bimestre Corrente: {{ bimestreCorrente }}º Bimestre
+                    </span>
+                </div>
+
+                <!-- BOTÕES DE SELEÇÃO DOS BIMESTRES -->
+                <div class="flex items-center gap-1.5 flex-wrap w-full md:w-auto">
+                    <button v-for="b in CALENDARIO_BIMESTRES_2026" :key="b.bimestre"
+                            @click="fechamentoBimestre = b.bimestre"
+                            :class="['px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 touch-btn border',
+                                fechamentoBimestre === b.bimestre 
+                                    ? 'bg-indigo-900 text-white border-indigo-900 shadow' 
+                                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100']">
+                        <span>{{ b.nome }}</span>
+                        <span v-if="b.bimestre === bimestreCorrente" 
+                              :class="['text-[9px] px-1.5 py-0.2 rounded-full font-black uppercase', 
+                                      fechamentoBimestre === b.bimestre ? 'bg-amber-400 text-slate-950' : 'bg-emerald-100 text-emerald-800 border border-emerald-300']">
+                            Atual
+                        </span>
+                        <span class="text-[10px] opacity-75 font-mono">({{ getQtdAulasBimestre(b.bimestre) }} d)</span>
+                    </button>
+
+                    <button @click="fechamentoBimestre = 'todos'"
+                            :class="['px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 touch-btn border',
+                                fechamentoBimestre === 'todos' 
+                                    ? 'bg-indigo-900 text-white border-indigo-900 shadow' 
+                                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100']">
+                        <span>Todos os Bimestres</span>
+                        <span class="text-[10px] opacity-75 font-mono">({{ getQtdAulasBimestre('todos') }} d)</span>
+                    </button>
                 </div>
             </div>
 
@@ -1293,6 +1338,18 @@ createApp({
             isBimestreAuto.value = true;
         }
 
+        // --- BIMESTRE DE FECHAMENTO DE NOTAS ---
+        // Padrão: Bimestre corrente de acordo com a data de hoje no calendário
+        const bimestreCorrente = computed(() => getBimestrePorData(new Date().toISOString().split('T')[0]));
+        const fechamentoBimestre = ref(getBimestrePorData(new Date().toISOString().split('T')[0]));
+
+        function getQtdAulasBimestre(bim) {
+            if (!selectedClass.value || !registros.value[selectedClass.value]) return 0;
+            const dates = Object.keys(registros.value[selectedClass.value]);
+            if (bim === 'todos') return dates.length;
+            return dates.filter(d => getBimestrePorData(d) === String(bim)).length;
+        }
+
         // PWA PROMPT E INSTALAÇÃO NO CELULAR / DESKTOP
         const pwaPrompt = ref(null);
         const mostrarBotaoInstalar = computed(() => !!pwaPrompt.value);
@@ -1515,12 +1572,16 @@ createApp({
             });
         }
 
-        function getTotaisAluno(studentId) {
+        function getTotaisAluno(studentId, bimestre = fechamentoBimestre.value) {
             let caderno = 0, livro = 0, atividade = 0, copiou = 0, incompleto = 0, dormiu = 0;
             let pontoPositivo = 0, pontoNegativo = 0;
             const tData = (selectedClass.value && registros.value[selectedClass.value]) ? registros.value[selectedClass.value] : {};
             
             Object.keys(tData).forEach(d => {
+                // Filtro por bimestre baseado na data em que foi dado o visto
+                if (bimestre && bimestre !== 'todos' && getBimestrePorData(d) !== String(bimestre)) {
+                    return;
+                }
                 const item = tData[d][studentId];
                 if (item) {
                     if (item.caderno) caderno++;
@@ -1549,16 +1610,16 @@ createApp({
         const maxPontuacaoTurma = computed(() => {
             let maxPts = 0;
             currentStudentList.value.forEach(aluno => {
-                const pts = getTotaisAluno(aluno.id).pontosLiquidos;
+                const pts = getTotaisAluno(aluno.id, fechamentoBimestre.value).pontosLiquidos;
                 if (pts > maxPts) maxPts = pts;
             });
             return maxPts;
         });
 
-        function calcularNota(studentId) {
+        function calcularNota(studentId, bimestre = fechamentoBimestre.value) {
             const maxTurma = maxPontuacaoTurma.value;
             if (maxTurma === 0) return 0;
-            const t = getTotaisAluno(studentId);
+            const t = getTotaisAluno(studentId, bimestre);
             const notaCalculada = (t.pontosLiquidos / maxTurma) * 10;
             return Math.min(10, Math.max(0, notaCalculada));
         }
@@ -2271,39 +2332,44 @@ createApp({
         }
 
         function exportarExcel() {
+            const bimFiltro = fechamentoBimestre.value;
+            const bimLabel = bimFiltro === 'todos' ? 'Todos os Bimestres (Anual)' : `${bimFiltro}º Bimestre`;
             const dataToExport = currentStudentList.value.map(aluno => {
-                const t = getTotaisAluno(aluno.id);
+                const t = getTotaisAluno(aluno.id, bimFiltro);
                 return {
                     "Nº": aluno.numero,
                     "Nome": aluno.nome,
                     "RA": aluno.ra,
                     "Situação": aluno.situacao,
+                    "Bimestre": bimLabel,
                     "Vistos Caderno": t.caderno,
                     "Vistos Livro": t.livro,
                     "Vistos Atividade": t.atividade,
                     "Pontos Extras (+)": t.pontoPositivo.toFixed(1),
                     "Descontos / Penalidades (-)": t.descontos.toFixed(1),
                     "Pontos Líquidos": t.pontosLiquidos.toFixed(1),
-                    "Nota Final Proporcional (0-10)": calcularNota(aluno.id).toFixed(2),
+                    "Nota Final Proporcional (0-10)": calcularNota(aluno.id, bimFiltro).toFixed(2),
                     "Professor": currentUser.value
                 };
             });
             const ws = XLSX.utils.json_to_sheet(dataToExport);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Fechamento Proporcional");
-            XLSX.writeFile(wb, `Fechamento_Vistos_${selectedClass.value}_Prof_${currentUser.value}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, `Fechamento ${bimFiltro === 'todos' ? 'Anual' : bimFiltro + 'Bim'}`);
+            XLSX.writeFile(wb, `Fechamento_Vistos_${selectedClass.value}_${bimFiltro}Bim_Prof_${currentUser.value}.xlsx`);
         }
 
         function exportarPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            const bimFiltro = fechamentoBimestre.value;
+            const bimLabel = bimFiltro === 'todos' ? 'Todos os Bimestres (Anual)' : `${bimFiltro}º Bimestre`;
             doc.setFontSize(14);
             doc.text("E.E. José Marcelino de Almeida - Barretos/SP", 14, 15);
             doc.setFontSize(10);
-            doc.text(`Relatório de Vistos - Turma: ${selectedClass.value} | Bimestre: ${selectedBimestre.value}º | Professor(a): ${currentUser.value}`, 14, 22);
+            doc.text(`Relatório de Vistos - Turma: ${selectedClass.value} | Fechamento: ${bimLabel} | Professor(a): ${currentUser.value}`, 14, 22);
 
             const tableData = currentStudentList.value.map(a => {
-                const t = getTotaisAluno(a.id);
+                const t = getTotaisAluno(a.id, bimFiltro);
                 return [
                     a.numero, a.nome, a.ra, 
                     t.caderno, 
@@ -2312,7 +2378,7 @@ createApp({
                     `+${t.pontoPositivo.toFixed(1)}`,
                     `-${t.descontos.toFixed(1)}`,
                     t.pontosLiquidos.toFixed(1),
-                    calcularNota(a.id).toFixed(1)
+                    calcularNota(a.id, bimFiltro).toFixed(1)
                 ];
             });
 
@@ -2324,12 +2390,14 @@ createApp({
                 headStyles: { fillColor: [30, 58, 138] }
             });
 
-            doc.save(`Diario_Vistos_${selectedClass.value}_Prof_${currentUser.value}.pdf`);
+            doc.save(`Diario_Vistos_${selectedClass.value}_${bimFiltro}Bim_Prof_${currentUser.value}.pdf`);
         }
 
         function gerarFichaAluno(aluno, existingDoc = null, isLast = true) {
             const { jsPDF } = window.jspdf;
             const doc = existingDoc || new jsPDF('p', 'mm', 'a4');
+            const bimFiltro = fechamentoBimestre.value;
+            const bimLabel = bimFiltro === 'todos' ? 'Todos os Bimestres (Anual)' : `${bimFiltro}º Bimestre`;
 
             // Cabeçalho Oficial
             doc.setFillColor(30, 27, 75); // Indigo 950
@@ -2353,11 +2421,11 @@ createApp({
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(8.5);
             doc.text(`Nº Chamada: ${aluno.numero || '-'}    |    RA: ${aluno.ra || '-'}    |    Situação: ${aluno.situacao || 'Ativo'}`, 18, 50);
-            doc.text(`Turma: ${selectedClass.value}    |    Bimestre: ${selectedBimestre.value}º Bimestre    |    Professor(a): ${currentUser.value}`, 18, 55);
+            doc.text(`Turma: ${selectedClass.value}    |    Bimestre de Avaliação: ${bimLabel}    |    Professor(a): ${currentUser.value}`, 18, 55);
 
             // Totais e Nota
-            const t = getTotaisAluno(aluno.id);
-            const nota = calcularNota(aluno.id);
+            const t = getTotaisAluno(aluno.id, bimFiltro);
+            const nota = calcularNota(aluno.id, bimFiltro);
 
             doc.autoTable({
                 startY: 63,
@@ -2382,11 +2450,12 @@ createApp({
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(9);
             doc.setTextColor(30, 41, 59);
-            doc.text("Detalhamento das Aulas e Registros do Período:", 14, startY2 - 2);
+            doc.text(`Detalhamento das Aulas e Registros do Período (${bimLabel}):`, 14, startY2 - 2);
 
             const datasRegistradas = Object.keys(registros.value[selectedClass.value] || {}).sort();
-            let datasFiltradas = datasRegistradas.filter(d => getBimestrePorData(d) === String(selectedBimestre.value));
-            if (datasFiltradas.length === 0) datasFiltradas = datasRegistradas;
+            let datasFiltradas = bimFiltro === 'todos'
+                ? datasRegistradas
+                : datasRegistradas.filter(d => getBimestrePorData(d) === String(bimFiltro));
 
             const linhasDias = datasFiltradas.map(d => {
                 const r = (registros.value[selectedClass.value] && registros.value[selectedClass.value][d] && registros.value[selectedClass.value][d][aluno.id]) || {};
@@ -2410,7 +2479,7 @@ createApp({
             doc.autoTable({
                 startY: startY2,
                 head: [['Data', 'Conteúdo Trabalhado em Sala', 'Caderno', 'Livro', 'Atividade', 'Ocorrências']],
-                body: linhasDias.length > 0 ? linhasDias : [['-', 'Nenhum visto registrado para este período até o momento.', '-', '-', '-', '-']],
+                body: linhasDias.length > 0 ? linhasDias : [['-', `Nenhum visto registrado para o ${bimLabel} até o momento.`, '-', '-', '-', '-']],
                 theme: 'striped',
                 headStyles: { fillColor: [71, 85, 105], fontSize: 8, halign: 'center' },
                 bodyStyles: { fontSize: 7.5 },
@@ -2449,7 +2518,7 @@ createApp({
             doc.text(`Emitido pelo Diário de Vistos em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 105, 290, { align: 'center' });
 
             if (!existingDoc) {
-                doc.save(`Ficha_Vistos_${aluno.nome.replace(/\s+/g, '_')}_${selectedClass.value}.pdf`);
+                doc.save(`Ficha_Vistos_${aluno.nome.replace(/\s+/g, '_')}_${selectedClass.value}_${bimFiltro}Bim.pdf`);
             }
             return doc;
         }
@@ -2460,7 +2529,9 @@ createApp({
                 alert('Nenhum aluno encontrado para exportar fichas.');
                 return;
             }
-            if (!confirm(`Deseja gerar o caderno de Fichas Individuais em PDF com todos os ${alunos.length} alunos da turma "${selectedClass.value}" para a Reunião de Pais?`)) {
+            const bimFiltro = fechamentoBimestre.value;
+            const bimLabel = bimFiltro === 'todos' ? 'Todos os Bimestres (Anual)' : `${bimFiltro}º Bimestre`;
+            if (!confirm(`Deseja gerar o caderno de Fichas Individuais em PDF com todos os ${alunos.length} alunos da turma "${selectedClass.value}" para o ${bimLabel}?`)) {
                 return;
             }
             const { jsPDF } = window.jspdf;
@@ -2471,8 +2542,8 @@ createApp({
                 gerarFichaAluno(aluno, doc, index === alunos.length - 1);
             });
 
-            doc.save(`Fichas_Turma_${selectedClass.value}_${selectedBimestre.value}Bim_Prof_${currentUser.value}.pdf`);
-            alert(`✅ Sucesso! Caderno com ${alunos.length} fichas gerado em PDF.`);
+            doc.save(`Fichas_Turma_${selectedClass.value}_${bimFiltro}Bim_Prof_${currentUser.value}.pdf`);
+            alert(`✅ Sucesso! Caderno com ${alunos.length} fichas do ${bimLabel} gerado em PDF.`);
         }
 
         // --- SINCRONIZAÇÃO NUVEM (FIREBASE FIRESTORE ONLINE GRATUITA) ---
@@ -2652,6 +2723,7 @@ createApp({
             
             // Turmas e Alunos
             turmas, turmasOrdenadas, selectedClass, selectedDate, selectedBimestre, isBimestreAuto, onBimestreManualChange, restaurarBimestreAuto,
+            CALENDARIO_BIMESTRES_2026, bimestreCorrente, fechamentoBimestre, getQtdAulasBimestre,
             currentTab, apenasAtivos, ordenacaoAlunos, alternarOrdenacao, setOrdenacao,
             conteudoDia, currentStudentList, maxPontuacaoTurma, getRegistro, toggleItem, alterarPontos,
             marcarTodosCaderno, marcarTodosLivro, marcarTodosAtividade, desmarcarTudo, marcarTodosVistos,
