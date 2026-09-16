@@ -330,8 +330,41 @@
                             </button>
                         </div>
 
-                        <!-- BOTÕES DE DESCONTO -->
+                        <!-- BOTÕES DE PONTUAÇÃO EXTRA & DESCONTOS -->
                         <div class="flex items-center gap-1.5 w-full md:w-auto justify-end flex-wrap">
+                            <!-- PONTO POSITIVO INCREMENTAL (+0,5 SEM LIMITE) -->
+                            <div class="inline-flex items-center rounded-lg border overflow-hidden shadow-xs transition" :class="(getRegistro(aluno.id).pontoPositivo || 0) > 0 ? 'border-emerald-600 bg-emerald-600' : 'border-emerald-300 bg-emerald-50'">
+                                <button v-if="(getRegistro(aluno.id).pontoPositivo || 0) > 0" 
+                                        @click.stop="alterarPontos(aluno.id, 'positivo', -0.5)" 
+                                        class="px-2 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-black transition touch-btn" 
+                                        title="Reduzir 0,5 ponto positivo">
+                                    -
+                                </button>
+                                <button @click="alterarPontos(aluno.id, 'positivo', 0.5)" 
+                                        :class="['px-2.5 py-1.5 text-xs font-bold transition flex items-center gap-1 touch-btn', (getRegistro(aluno.id).pontoPositivo || 0) > 0 ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'hover:bg-emerald-100 text-emerald-800']" 
+                                        :title="'Ponto Positivo: ' + ((getRegistro(aluno.id).pontoPositivo || 0) > 0 ? '+' + (getRegistro(aluno.id).pontoPositivo).toFixed(1) + ' pts. ' : '') + 'Clique para somar +0,5 (sem limite)'">
+                                    <i class="fa-solid fa-circle-plus"></i>
+                                    <span>{{ (getRegistro(aluno.id).pontoPositivo || 0) > 0 ? '+' + (getRegistro(aluno.id).pontoPositivo).toFixed(1) : '+0,5' }} pt</span>
+                                </button>
+                            </div>
+
+                            <!-- PONTO NEGATIVO INCREMENTAL (-0,5 SEM LIMITE) -->
+                            <div class="inline-flex items-center rounded-lg border overflow-hidden shadow-xs transition" :class="(getRegistro(aluno.id).pontoNegativo || 0) > 0 ? 'border-rose-600 bg-rose-600' : 'border-rose-300 bg-rose-50'">
+                                <button v-if="(getRegistro(aluno.id).pontoNegativo || 0) > 0" 
+                                        @click.stop="alterarPontos(aluno.id, 'negativo', -0.5)" 
+                                        class="px-2 py-1.5 bg-rose-700 hover:bg-rose-800 text-white text-xs font-black transition touch-btn" 
+                                        title="Reduzir penalidade em 0,5 ponto">
+                                    -
+                                </button>
+                                <button @click="alterarPontos(aluno.id, 'negativo', 0.5)" 
+                                        :class="['px-2.5 py-1.5 text-xs font-bold transition flex items-center gap-1 touch-btn', (getRegistro(aluno.id).pontoNegativo || 0) > 0 ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'hover:bg-rose-100 text-rose-800']" 
+                                        :title="'Ponto Negativo: ' + ((getRegistro(aluno.id).pontoNegativo || 0) > 0 ? '-' + (getRegistro(aluno.id).pontoNegativo).toFixed(1) + ' pts. ' : '') + 'Clique para somar -0,5 (sem limite)'">
+                                    <i class="fa-solid fa-circle-minus"></i>
+                                    <span>{{ (getRegistro(aluno.id).pontoNegativo || 0) > 0 ? '-' + (getRegistro(aluno.id).pontoNegativo).toFixed(1) : '-0,5' }} pt</span>
+                                </button>
+                            </div>
+
+                            <!-- DESCONTOS FIXOS -->
                             <button @click="toggleItem(aluno.id, 'copiou')" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 touch-btn', getRegistro(aluno.id).copiou ? 'bg-rose-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']">
                                 <i class="fa-solid fa-user-ninja"></i> Copiou (-0,2)
                             </button>
@@ -383,7 +416,8 @@
                             <th class="p-3 text-center"><i class="fa-solid fa-book-bookmark text-amber-600"></i> Caderno</th>
                             <th class="p-3 text-center"><i class="fa-solid fa-layer-group text-sky-600"></i> Livro</th>
                             <th class="p-3 text-center"><i class="fa-solid fa-clipboard-list text-emerald-600"></i> Atividade</th>
-                            <th class="p-3 text-center">Descontos</th>
+                            <th class="p-3 text-center text-emerald-700"><i class="fa-solid fa-circle-plus"></i> Extras (+)</th>
+                            <th class="p-3 text-center text-rose-600"><i class="fa-solid fa-circle-minus"></i> Descontos (-)</th>
                             <th class="p-3 text-center">Pontos Líquidos</th>
                             <th class="p-3 text-center">Nota Final (0 a 10)</th>
                             <th class="p-3 text-center">Ficha (Pais)</th>
@@ -399,6 +433,9 @@
                             <td class="p-3 text-center font-bold text-amber-700">{{ getTotaisAluno(aluno.id).caderno }}</td>
                             <td class="p-3 text-center font-bold text-sky-700">{{ getTotaisAluno(aluno.id).livro }}</td>
                             <td class="p-3 text-center font-bold text-emerald-700">{{ getTotaisAluno(aluno.id).atividade }}</td>
+                            <td class="p-3 text-center font-bold text-emerald-700">
+                                +{{ getTotaisAluno(aluno.id).pontoPositivo.toFixed(1) }}
+                            </td>
                             <td class="p-3 text-center font-bold text-rose-600">
                                 -{{ getTotaisAluno(aluno.id).descontos.toFixed(1) }} pt
                             </td>
@@ -1390,13 +1427,28 @@ createApp({
 
         function getRegistro(studentId) {
             initDataStructure();
-            if (!selectedClass.value) return { caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false };
+            if (!selectedClass.value) return { caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false, pontoPositivo: 0, pontoNegativo: 0 };
             if (!registros.value[selectedClass.value][selectedDate.value][studentId]) {
                 registros.value[selectedClass.value][selectedDate.value][studentId] = {
-                    caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false
+                    caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false,
+                    pontoPositivo: 0, pontoNegativo: 0
                 };
             }
-            return registros.value[selectedClass.value][selectedDate.value][studentId];
+            const reg = registros.value[selectedClass.value][selectedDate.value][studentId];
+            if (reg.pontoPositivo === undefined) reg.pontoPositivo = 0;
+            if (reg.pontoNegativo === undefined) reg.pontoNegativo = 0;
+            return reg;
+        }
+
+        function alterarPontos(studentId, tipo, delta) {
+            const reg = getRegistro(studentId);
+            if (tipo === 'positivo') {
+                const atual = typeof reg.pontoPositivo === 'number' ? reg.pontoPositivo : 0;
+                reg.pontoPositivo = Math.max(0, Math.round((atual + delta) * 10) / 10);
+            } else if (tipo === 'negativo') {
+                const atual = typeof reg.pontoNegativo === 'number' ? reg.pontoNegativo : 0;
+                reg.pontoNegativo = Math.max(0, Math.round((atual + delta) * 10) / 10);
+            }
         }
 
         function toggleItem(studentId, field) {
@@ -1446,6 +1498,8 @@ createApp({
                 reg.copiou = false;
                 reg.incompleto = false;
                 reg.dormiu = false;
+                reg.pontoPositivo = 0;
+                reg.pontoNegativo = 0;
             });
         }
 
@@ -1463,6 +1517,7 @@ createApp({
 
         function getTotaisAluno(studentId) {
             let caderno = 0, livro = 0, atividade = 0, copiou = 0, incompleto = 0, dormiu = 0;
+            let pontoPositivo = 0, pontoNegativo = 0;
             const tData = (selectedClass.value && registros.value[selectedClass.value]) ? registros.value[selectedClass.value] : {};
             
             Object.keys(tData).forEach(d => {
@@ -1474,15 +1529,20 @@ createApp({
                     if (item.copiou) copiou++;
                     if (item.incompleto) incompleto++;
                     if (item.dormiu) dormiu++;
+                    if (item.pontoPositivo) pontoPositivo += Number(item.pontoPositivo) || 0;
+                    if (item.pontoNegativo) pontoNegativo += Number(item.pontoNegativo) || 0;
                 }
             });
 
-            const descontos = (dormiu * 0.5) + (incompleto * 0.3) + (copiou * 0.2);
-            const pontosBrutos = (caderno * 1.0) + (livro * 1.0) + (atividade * 1.0);
-            const pontosLiquidos = Math.max(0, pontosBrutos - descontos);
+            pontoPositivo = Math.round(pontoPositivo * 10) / 10;
+            pontoNegativo = Math.round(pontoNegativo * 10) / 10;
+
+            const descontos = Math.round(((dormiu * 0.5) + (incompleto * 0.3) + (copiou * 0.2) + pontoNegativo) * 10) / 10;
+            const pontosBrutos = Math.round(((caderno * 1.0) + (livro * 1.0) + (atividade * 1.0) + pontoPositivo) * 10) / 10;
+            const pontosLiquidos = Math.max(0, Math.round((pontosBrutos - descontos) * 10) / 10);
 
             return {
-                caderno, livro, atividade, copiou, incompleto, dormiu, descontos, pontosLiquidos
+                caderno, livro, atividade, copiou, incompleto, dormiu, pontoPositivo, pontoNegativo, descontos, pontosBrutos, pontosLiquidos
             };
         }
 
@@ -2018,7 +2078,7 @@ createApp({
             const obj = registros.value[turma][data];
             let count = 0;
             Object.values(obj).forEach(r => {
-                if (r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu)) {
+                if (r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu || (r.pontoPositivo > 0) || (r.pontoNegativo > 0))) {
                     count++;
                 }
             });
@@ -2221,7 +2281,8 @@ createApp({
                     "Vistos Caderno": t.caderno,
                     "Vistos Livro": t.livro,
                     "Vistos Atividade": t.atividade,
-                    "Descontos": t.descontos.toFixed(1),
+                    "Pontos Extras (+)": t.pontoPositivo.toFixed(1),
+                    "Descontos / Penalidades (-)": t.descontos.toFixed(1),
                     "Pontos Líquidos": t.pontosLiquidos.toFixed(1),
                     "Nota Final Proporcional (0-10)": calcularNota(aluno.id).toFixed(2),
                     "Professor": currentUser.value
@@ -2241,19 +2302,23 @@ createApp({
             doc.setFontSize(10);
             doc.text(`Relatório de Vistos - Turma: ${selectedClass.value} | Bimestre: ${selectedBimestre.value}º | Professor(a): ${currentUser.value}`, 14, 22);
 
-            const tableData = currentStudentList.value.map(a => [
-                a.numero, a.nome, a.ra, 
-                getTotaisAluno(a.id).caderno, 
-                getTotaisAluno(a.id).livro, 
-                getTotaisAluno(a.id).atividade, 
-                `-${getTotaisAluno(a.id).descontos.toFixed(1)}`,
-                getTotaisAluno(a.id).pontosLiquidos.toFixed(1),
-                calcularNota(a.id).toFixed(1)
-            ]);
+            const tableData = currentStudentList.value.map(a => {
+                const t = getTotaisAluno(a.id);
+                return [
+                    a.numero, a.nome, a.ra, 
+                    t.caderno, 
+                    t.livro, 
+                    t.atividade, 
+                    `+${t.pontoPositivo.toFixed(1)}`,
+                    `-${t.descontos.toFixed(1)}`,
+                    t.pontosLiquidos.toFixed(1),
+                    calcularNota(a.id).toFixed(1)
+                ];
+            });
 
             doc.autoTable({
                 startY: 28,
-                head: [['Nº', 'Nome do Aluno', 'RA', 'Caderno', 'Livro', 'Atividade', 'Desc.', 'Pts', 'Nota']],
+                head: [['Nº', 'Nome do Aluno', 'RA', 'Caderno', 'Livro', 'Atividade', 'Extras (+)', 'Desc. (-)', 'Pts Líq.', 'Nota']],
                 body: tableData,
                 theme: 'striped',
                 headStyles: { fillColor: [30, 58, 138] }
@@ -2296,18 +2361,19 @@ createApp({
 
             doc.autoTable({
                 startY: 63,
-                head: [['Vistos Caderno', 'Vistos Livro', 'Vistos Atividade', 'Descontos/Faltas', 'Pontos Líquidos', 'Nota Proporcional']],
+                head: [['Caderno', 'Livro', 'Atividade', 'Extras (+)', 'Descontos (-)', 'Pontos Líquidos', 'Nota Proporcional']],
                 body: [[
                     `${t.caderno}`,
                     `${t.livro}`,
                     `${t.atividade}`,
+                    `+${t.pontoPositivo.toFixed(1)} pts`,
                     `-${t.descontos.toFixed(1)} pts`,
                     `${t.pontosLiquidos.toFixed(1)} pts`,
                     `${nota.toFixed(1)} / 10,0`
                 ]],
                 theme: 'grid',
                 headStyles: { fillColor: [49, 46, 129], textColor: [255, 255, 255], halign: 'center', fontSize: 8, fontStyle: 'bold' },
-                bodyStyles: { halign: 'center', fontSize: 9, fontStyle: 'bold', textColor: [30, 41, 59] },
+                bodyStyles: { halign: 'center', fontSize: 8.5, fontStyle: 'bold', textColor: [30, 41, 59] },
                 margin: { left: 14, right: 14 }
             });
 
@@ -2326,6 +2392,8 @@ createApp({
                 const r = (registros.value[selectedClass.value] && registros.value[selectedClass.value][d] && registros.value[selectedClass.value][d][aluno.id]) || {};
                 const conteudo = (conteudos.value[selectedClass.value] && conteudos.value[selectedClass.value][d]) || 'Atividades de aula';
                 const obs = [];
+                if (r.pontoPositivo > 0) obs.push(`+${r.pontoPositivo.toFixed(1)} pt`);
+                if (r.pontoNegativo > 0) obs.push(`-${r.pontoNegativo.toFixed(1)} pt`);
                 if (r.copiou) obs.push('Copiou (-0.2)');
                 if (r.incompleto) obs.push('Incompleto (-0.3)');
                 if (r.dormiu) obs.push('Dormiu (-0.5)');
@@ -2585,7 +2653,7 @@ createApp({
             // Turmas e Alunos
             turmas, turmasOrdenadas, selectedClass, selectedDate, selectedBimestre, isBimestreAuto, onBimestreManualChange, restaurarBimestreAuto,
             currentTab, apenasAtivos, ordenacaoAlunos, alternarOrdenacao, setOrdenacao,
-            conteudoDia, currentStudentList, maxPontuacaoTurma, getRegistro, toggleItem,
+            conteudoDia, currentStudentList, maxPontuacaoTurma, getRegistro, toggleItem, alterarPontos,
             marcarTodosCaderno, marcarTodosLivro, marcarTodosAtividade, desmarcarTudo, marcarTodosVistos,
             getTotaisAluno, calcularNota, getNotaClass, formatData,
             
