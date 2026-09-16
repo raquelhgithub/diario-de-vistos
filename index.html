@@ -34,6 +34,20 @@
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
         .touch-btn { min-height: 40px; }
         [v-cloak] { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #secaoPreviaFicha, #secaoPreviaFicha * { visibility: visible; }
+            #secaoPreviaFicha {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen pb-10">
@@ -1336,16 +1350,16 @@
             <div class="bg-indigo-950 text-white p-3.5 sm:p-4 flex justify-between items-center border-b-2 border-amber-400 shrink-0">
                 <div class="flex items-center gap-2.5 min-w-0">
                     <div class="w-9 h-9 rounded-xl bg-indigo-900 border border-indigo-700 flex items-center justify-center text-amber-300 text-lg shadow-inner shrink-0">
-                        <i class="fa-solid fa-file-pdf"></i>
+                        <i class="fa-solid fa-file-invoice"></i>
                     </div>
                     <div class="min-w-0">
                         <h3 class="font-bold text-sm sm:text-base leading-tight truncate">{{ modalPreviaPDF.titulo }}</h3>
-                        <p class="text-[11px] text-indigo-200 truncate">{{ modalPreviaPDF.subtitulo || 'Pré-visualize antes de imprimir ou salvar' }}</p>
+                        <p class="text-[11px] text-indigo-200 truncate">{{ modalPreviaPDF.subtitulo || 'Pré-visualização do documento oficial' }}</p>
                     </div>
                 </div>
                 <!-- Ações do Cabeçalho -->
                 <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                    <button @click="baixarPDFPrevia" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold py-2 px-3 rounded-xl transition shadow-xs flex items-center gap-1.5 touch-btn" title="Baixar arquivo PDF">
+                    <button @click="baixarPDFPrevia" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold py-2 px-3 rounded-xl transition shadow-xs flex items-center gap-1.5 touch-btn" title="Baixar arquivo PDF no dispositivo">
                         <i class="fa-solid fa-download"></i>
                         <span class="hidden sm:inline">Baixar PDF</span>
                     </button>
@@ -1359,22 +1373,204 @@
                 </div>
             </div>
 
-            <!-- Corpo com o Visualizador PDF -->
-            <div class="p-2 sm:p-4 bg-slate-100 flex-1 overflow-hidden flex flex-col min-h-[60vh] sm:min-h-[72vh]">
+            <!-- Corpo com o Documento Renderizado com Fidelidade -->
+            <div class="p-2 sm:p-4 bg-slate-100 flex-1 overflow-y-auto min-h-[60vh] sm:min-h-[72vh]">
                 <!-- Barra Informativa -->
-                <div class="mb-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-900 shrink-0 flex-wrap gap-2">
-                    <span class="flex items-center gap-1.5">
+                <div class="mb-3 px-3.5 py-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-900 shrink-0 flex-wrap gap-2">
+                    <span class="flex items-center gap-1.5 font-medium">
                         <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
                         <span>O download é <strong>opcional</strong>. Você pode apenas consultar em tela ou imprimir direto.</span>
                     </span>
-                    <a :href="modalPreviaPDF.url" target="_blank" class="font-bold text-indigo-700 hover:text-indigo-900 hover:underline flex items-center gap-1">
-                        <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i> Abrir em nova aba
-                    </a>
+                    <button @click="imprimirPDFPrevia" class="font-bold text-indigo-700 hover:text-indigo-900 flex items-center gap-1">
+                        <i class="fa-solid fa-print text-xs"></i> Imprimir Documento
+                    </button>
                 </div>
 
-                <!-- Iframe do PDF com fallback -->
-                <div class="w-full flex-1 rounded-xl overflow-hidden border border-slate-300 bg-white shadow-inner relative flex flex-col">
-                    <iframe :src="modalPreviaPDF.url" class="w-full h-full min-h-[55vh] sm:min-h-[68vh] grow" frameborder="0"></iframe>
+                <!-- SELETOR DE PÁGINAS/ALUNOS (QUANDO EM LOTE) -->
+                <div v-if="modalPreviaPDF.tipo === 'ficha' && modalPreviaPDF.fichas && modalPreviaPDF.fichas.length > 1" class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-indigo-900 text-white p-2.5 px-4 rounded-xl mb-3 gap-2 shadow-xs">
+                    <button @click="modalPreviaPDF.alunoIndex = Math.max(0, modalPreviaPDF.alunoIndex - 1)" :disabled="modalPreviaPDF.alunoIndex === 0" class="px-3 py-1.5 rounded-lg bg-indigo-800 hover:bg-indigo-700 disabled:opacity-40 text-xs font-bold transition flex items-center justify-center gap-1 touch-btn">
+                        <i class="fa-solid fa-chevron-left"></i> Anterior
+                    </button>
+                    <div class="flex items-center justify-center gap-2 flex-wrap">
+                        <span class="text-xs font-bold text-indigo-200">Aluno {{ modalPreviaPDF.alunoIndex + 1 }} de {{ modalPreviaPDF.fichas.length }}:</span>
+                        <select v-model="modalPreviaPDF.alunoIndex" class="bg-indigo-950 text-white text-xs font-bold rounded-lg border border-indigo-700 p-1.5 focus:ring-1 focus:ring-amber-400">
+                            <option v-for="(f, idx) in modalPreviaPDF.fichas" :key="idx" :value="idx">
+                                Nº {{ f.aluno.numero || '-' }} - {{ f.aluno.nome }}
+                            </option>
+                        </select>
+                    </div>
+                    <button @click="modalPreviaPDF.alunoIndex = Math.min(modalPreviaPDF.fichas.length - 1, modalPreviaPDF.alunoIndex + 1)" :disabled="modalPreviaPDF.alunoIndex === modalPreviaPDF.fichas.length - 1" class="px-3 py-1.5 rounded-lg bg-indigo-800 hover:bg-indigo-700 disabled:opacity-40 text-xs font-bold transition flex items-center justify-center gap-1 touch-btn">
+                        Próximo <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- FOLHA DA FICHA DOS PAIS (RENDERIZADA DIRETAMENTE) -->
+                <div v-if="modalPreviaPDF.tipo === 'ficha' && currentFichaPreview" id="secaoPreviaFicha" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-4 sm:p-8 max-w-4xl mx-auto text-slate-800 font-sans print:p-0 print:border-0 print:shadow-none">
+                    <!-- Cabeçalho Oficial -->
+                    <div class="bg-indigo-950 text-white p-3.5 sm:p-4 rounded-xl text-center shadow-xs">
+                        <h2 class="font-extrabold text-xs sm:text-sm tracking-wide uppercase">E.E. JOSÉ MARCELINO DE ALMEIDA - BARRETOS / SP</h2>
+                        <p class="text-[10px] sm:text-xs text-indigo-200 mt-0.5 uppercase tracking-wider font-semibold">FICHA INDIVIDUAL DE DESEMPENHO E VISTOS - REUNIÃO DE PAIS / CONSELHO</p>
+                    </div>
+
+                    <!-- Identificação do Aluno -->
+                    <div class="mt-3 p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-700">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-1">
+                            <h3 class="font-black text-sm text-slate-900">Aluno(a): {{ currentFichaPreview.aluno.nome }}</h3>
+                            <span class="font-bold text-[11px] text-indigo-900 bg-indigo-100 px-2 py-0.5 rounded-full self-start sm:self-auto">
+                                {{ currentFichaPreview.turma }} • {{ currentFichaPreview.bimLabel }}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2 pt-2 border-t border-slate-200 text-[11px]">
+                            <div><span class="text-slate-400 font-medium">Nº Chamada:</span> <strong class="text-slate-800">{{ currentFichaPreview.aluno.numero || '-' }}</strong></div>
+                            <div><span class="text-slate-400 font-medium">RA:</span> <strong class="text-slate-800 font-mono">{{ currentFichaPreview.aluno.ra || '-' }}</strong></div>
+                            <div><span class="text-slate-400 font-medium">Situação:</span> <strong class="text-slate-800">{{ currentFichaPreview.aluno.situacao || 'Ativo' }}</strong></div>
+                            <div><span class="text-slate-400 font-medium">Professor(a):</span> <strong class="text-slate-800">{{ currentFichaPreview.professor }}</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Totais e Nota Proporcional -->
+                    <div class="mt-3 overflow-x-auto rounded-xl border border-indigo-950 shadow-xs">
+                        <table class="w-full text-center border-collapse text-xs">
+                            <thead class="bg-indigo-950 text-white font-bold text-[10px] sm:text-xs uppercase">
+                                <tr>
+                                    <th class="p-2 border-r border-indigo-900">Caderno</th>
+                                    <th class="p-2 border-r border-indigo-900">Livro</th>
+                                    <th class="p-2 border-r border-indigo-900">Atividade</th>
+                                    <th class="p-2 border-r border-indigo-900">Extras (+)</th>
+                                    <th class="p-2 border-r border-indigo-900">Descontos (-)</th>
+                                    <th class="p-2 border-r border-indigo-900">Pontos Líquidos</th>
+                                    <th class="p-2 bg-indigo-900">Nota Proporcional</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white font-extrabold text-slate-800">
+                                <tr>
+                                    <td class="p-2.5 border-r border-slate-200">{{ currentFichaPreview.totais.caderno }}</td>
+                                    <td class="p-2.5 border-r border-slate-200">{{ currentFichaPreview.totais.livro }}</td>
+                                    <td class="p-2.5 border-r border-slate-200">{{ currentFichaPreview.totais.atividade }}</td>
+                                    <td class="p-2.5 border-r border-slate-200 text-emerald-700">+{{ currentFichaPreview.totais.pontoPositivo.toFixed(1) }} pts</td>
+                                    <td class="p-2.5 border-r border-slate-200 text-rose-700">-{{ currentFichaPreview.totais.descontos.toFixed(1) }} pts</td>
+                                    <td class="p-2.5 border-r border-slate-200 text-indigo-950">{{ currentFichaPreview.totais.pontosLiquidos.toFixed(1) }} pts</td>
+                                    <td class="p-2.5 bg-indigo-50/50 text-indigo-950 text-sm font-black">{{ currentFichaPreview.nota.toFixed(1) }} / 10,0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tabela do Histórico Diário Detalhado -->
+                    <div class="mt-4">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <h4 class="font-black text-xs text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                                <i class="fa-solid fa-calendar-days text-indigo-700"></i> Detalhamento das Aulas e Registros do Período ({{ currentFichaPreview.bimLabel }}):
+                            </h4>
+                            <span class="text-[10px] text-slate-400 font-semibold">{{ currentFichaPreview.linhasDias.length }} dias com atividade</span>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-xs max-h-96">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead class="sticky top-0 bg-slate-700 text-white font-bold text-[10px] uppercase z-10">
+                                    <tr>
+                                        <th class="p-2 text-center w-20">Data</th>
+                                        <th class="p-2">Conteúdo Trabalhado em Sala</th>
+                                        <th class="p-2 text-center w-20">Caderno</th>
+                                        <th class="p-2 text-center w-20">Livro</th>
+                                        <th class="p-2 text-center w-20">Atividade</th>
+                                        <th class="p-2 text-center w-36">Ocorrências</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 font-medium">
+                                    <tr v-if="currentFichaPreview.linhasDias.length === 0">
+                                        <td colspan="6" class="p-4 text-center text-slate-400 font-bold">
+                                            Nenhum visto registrado para o {{ currentFichaPreview.bimLabel }} até o momento.
+                                        </td>
+                                    </tr>
+                                    <tr v-for="(d, dIdx) in currentFichaPreview.linhasDias" :key="dIdx" class="hover:bg-slate-50 transition">
+                                        <td class="p-2 text-center font-bold text-slate-600 whitespace-nowrap">{{ d.data }}</td>
+                                        <td class="p-2 text-slate-800">{{ d.conteudo }}</td>
+                                        <!-- Caderno -->
+                                        <td class="p-2 text-center">
+                                            <span v-if="d.caderno === 'SIM'" class="px-2 py-0.5 rounded font-black text-emerald-700 bg-emerald-50 text-[11px]">SIM</span>
+                                            <span v-else-if="d.caderno === 'NÃO FEZ'" class="px-2 py-0.5 rounded font-black text-rose-700 bg-rose-50 text-[11px]">NÃO FEZ</span>
+                                            <span v-else-if="d.caderno.includes('visto')" class="px-2 py-0.5 rounded font-black text-purple-700 bg-purple-50 text-[11px]">{{ d.caderno }}</span>
+                                            <span v-else class="text-slate-400 font-bold">-</span>
+                                        </td>
+                                        <!-- Livro -->
+                                        <td class="p-2 text-center">
+                                            <span v-if="d.livro === 'SIM'" class="px-2 py-0.5 rounded font-black text-emerald-700 bg-emerald-50 text-[11px]">SIM</span>
+                                            <span v-else-if="d.livro === 'NÃO FEZ'" class="px-2 py-0.5 rounded font-black text-rose-700 bg-rose-50 text-[11px]">NÃO FEZ</span>
+                                            <span v-else-if="d.livro.includes('visto')" class="px-2 py-0.5 rounded font-black text-purple-700 bg-purple-50 text-[11px]">{{ d.livro }}</span>
+                                            <span v-else class="text-slate-400 font-bold">-</span>
+                                        </td>
+                                        <!-- Atividade -->
+                                        <td class="p-2 text-center">
+                                            <span v-if="d.atividade === 'SIM'" class="px-2 py-0.5 rounded font-black text-emerald-700 bg-emerald-50 text-[11px]">SIM</span>
+                                            <span v-else-if="d.atividade === 'NÃO FEZ'" class="px-2 py-0.5 rounded font-black text-rose-700 bg-rose-50 text-[11px]">NÃO FEZ</span>
+                                            <span v-else-if="d.atividade.includes('visto')" class="px-2 py-0.5 rounded font-black text-purple-700 bg-purple-50 text-[11px]">{{ d.atividade }}</span>
+                                            <span v-else class="text-slate-400 font-bold">-</span>
+                                        </td>
+                                        <!-- Ocorrências -->
+                                        <td class="p-2 text-center text-slate-600 font-semibold text-[11px]">{{ d.ocorrencias }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Campo de Assinaturas -->
+                    <div class="mt-8 pt-4 border-t border-slate-200 grid grid-cols-2 gap-8 text-center text-xs text-slate-600">
+                        <div class="space-y-1">
+                            <div class="border-b border-slate-400 pb-2 font-bold text-slate-800">Prof(a). {{ currentFichaPreview.professor }}</div>
+                            <div class="text-[10px] text-slate-400 uppercase tracking-wider">Docente Responsável</div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="border-b border-slate-400 pb-2 font-bold text-slate-800">&nbsp;</div>
+                            <div class="text-[10px] text-slate-400 uppercase tracking-wider">Assinatura do Responsável</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center text-[10px] text-slate-400">
+                        Emitido pelo Diário de Vistos em {{ currentFichaPreview.dataEmissao }}
+                    </div>
+                </div>
+
+                <!-- TABELA DO RESUMO GERAL DA TURMA (QUANDO EXPORTAR PDF GERAL) -->
+                <div v-else-if="modalPreviaPDF.tipo === 'resumo'" id="secaoPreviaFicha" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-4 sm:p-6 max-w-5xl mx-auto text-slate-800 font-sans">
+                    <div class="bg-indigo-950 text-white p-3.5 rounded-xl text-center shadow-xs mb-4">
+                        <h2 class="font-extrabold text-xs sm:text-sm tracking-wide uppercase">E.E. JOSÉ MARCELINO DE ALMEIDA - BARRETOS / SP</h2>
+                        <p class="text-[10px] sm:text-xs text-indigo-200 mt-0.5">{{ modalPreviaPDF.titulo }}</p>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-xs max-h-[60vh]">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead class="sticky top-0 bg-indigo-900 text-white font-bold text-[10px] uppercase z-10">
+                                <tr>
+                                    <th class="p-2 text-center">Nº</th>
+                                    <th class="p-2">Nome do Aluno</th>
+                                    <th class="p-2">RA</th>
+                                    <th class="p-2 text-center">Caderno</th>
+                                    <th class="p-2 text-center">Livro</th>
+                                    <th class="p-2 text-center">Atividade</th>
+                                    <th class="p-2 text-center text-emerald-300">Extras (+)</th>
+                                    <th class="p-2 text-center text-rose-300">Desc. (-)</th>
+                                    <th class="p-2 text-center">Pts Líq.</th>
+                                    <th class="p-2 text-center">Nota</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 font-semibold">
+                                <tr v-for="(linha, lIdx) in modalPreviaPDF.resumoLinhas" :key="lIdx" class="hover:bg-slate-50 transition">
+                                    <td class="p-2 text-center text-slate-500 font-bold">{{ linha[0] }}</td>
+                                    <td class="p-2 text-slate-900 font-bold">{{ linha[1] }}</td>
+                                    <td class="p-2 font-mono text-slate-500 text-[11px]">{{ linha[2] }}</td>
+                                    <td class="p-2 text-center">{{ linha[3] }}</td>
+                                    <td class="p-2 text-center">{{ linha[4] }}</td>
+                                    <td class="p-2 text-center">{{ linha[5] }}</td>
+                                    <td class="p-2 text-center text-emerald-700">{{ linha[6] }}</td>
+                                    <td class="p-2 text-center text-rose-700">{{ linha[7] }}</td>
+                                    <td class="p-2 text-center font-black text-slate-900">{{ linha[8] }}</td>
+                                    <td class="p-2 text-center">
+                                        <span class="px-2 py-0.5 rounded-full font-black text-xs" :class="getNotaClass(Number(linha[9]) || 0)">{{ linha[9] }}</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -2709,40 +2905,61 @@ createApp({
         // --- PRÉ-VISUALIZAÇÃO DE RELATÓRIOS E FICHAS (PDF) ---
         const modalPreviaPDF = ref({
             aberto: false,
-            url: '',
+            tipo: 'ficha', // 'ficha' ou 'resumo'
             titulo: '',
             subtitulo: '',
             nomeArquivo: '',
-            doc: null
+            doc: null,
+            fichas: [],
+            alunoIndex: 0,
+            resumoLinhas: []
         });
 
-        function abrirPreviaPDF(doc, titulo, subtitulo, nomeArquivo) {
-            if (modalPreviaPDF.value.url) {
-                URL.revokeObjectURL(modalPreviaPDF.value.url);
-            }
-            const blob = doc.output('blob');
-            const blobUrl = URL.createObjectURL(blob);
+        const currentFichaPreview = computed(() => {
+            if (!modalPreviaPDF.value.fichas || modalPreviaPDF.value.fichas.length === 0) return null;
+            const idx = Math.max(0, Math.min(modalPreviaPDF.value.alunoIndex, modalPreviaPDF.value.fichas.length - 1));
+            return modalPreviaPDF.value.fichas[idx];
+        });
+
+        function abrirPreviaFichas(doc, titulo, subtitulo, nomeArquivo, fichas) {
             modalPreviaPDF.value = {
                 aberto: true,
-                url: blobUrl,
-                titulo: titulo || 'Pré-Visualização do Documento PDF',
+                tipo: 'ficha',
+                titulo: titulo || 'Ficha Individual dos Alunos',
                 subtitulo: subtitulo || '',
-                nomeArquivo: nomeArquivo || 'Documento.pdf',
-                doc: doc
+                nomeArquivo: nomeArquivo || 'Fichas_Alunos.pdf',
+                doc: doc,
+                fichas: fichas || [],
+                alunoIndex: 0,
+                resumoLinhas: []
+            };
+        }
+
+        function abrirPreviaResumo(doc, titulo, subtitulo, nomeArquivo, linhas) {
+            modalPreviaPDF.value = {
+                aberto: true,
+                tipo: 'resumo',
+                titulo: titulo || 'Resumo Geral da Turma',
+                subtitulo: subtitulo || '',
+                nomeArquivo: nomeArquivo || 'Resumo_Geral.pdf',
+                doc: doc,
+                fichas: [],
+                alunoIndex: 0,
+                resumoLinhas: linhas || []
             };
         }
 
         function fecharPreviaPDF() {
-            if (modalPreviaPDF.value.url) {
-                URL.revokeObjectURL(modalPreviaPDF.value.url);
-            }
             modalPreviaPDF.value = {
                 aberto: false,
-                url: '',
+                tipo: 'ficha',
                 titulo: '',
                 subtitulo: '',
                 nomeArquivo: '',
-                doc: null
+                doc: null,
+                fichas: [],
+                alunoIndex: 0,
+                resumoLinhas: []
             };
         }
 
@@ -2753,15 +2970,35 @@ createApp({
         }
 
         function imprimirPDFPrevia() {
-            if (modalPreviaPDF.value.url) {
-                const w = window.open(modalPreviaPDF.value.url, '_blank');
-                if (w) {
-                    w.focus();
-                    setTimeout(() => {
-                        try { w.print(); } catch (e) {}
-                    }, 600);
+            try {
+                if (modalPreviaPDF.value.doc) {
+                    const blobUrl = modalPreviaPDF.value.doc.output('bloburl');
+                    const printIframe = document.createElement('iframe');
+                    printIframe.style.position = 'fixed';
+                    printIframe.style.right = '0';
+                    printIframe.style.bottom = '0';
+                    printIframe.style.width = '0';
+                    printIframe.style.height = '0';
+                    printIframe.style.border = '0';
+                    printIframe.src = blobUrl;
+                    document.body.appendChild(printIframe);
+                    printIframe.onload = () => {
+                        setTimeout(() => {
+                            printIframe.contentWindow.focus();
+                            printIframe.contentWindow.print();
+                            setTimeout(() => {
+                                if (document.body.contains(printIframe)) {
+                                    document.body.removeChild(printIframe);
+                                }
+                            }, 3000);
+                        }, 300);
+                    };
+                    return;
                 }
+            } catch (e) {
+                console.warn('Erro ao abrir impressão direta PDF, usando window.print:', e);
             }
+            window.print();
         }
 
         function exportarPDF(directDownload = false) {
@@ -2800,73 +3037,20 @@ createApp({
             if (directDownload) {
                 doc.save(fileName);
             } else {
-                abrirPreviaPDF(
+                abrirPreviaResumo(
                     doc,
                     `Resumo Geral da Turma (${selectedClass.value})`,
                     `Fechamento: ${bimLabel} • Prof(a). ${currentUser.value}`,
-                    fileName
+                    fileName,
+                    tableData
                 );
             }
         }
 
-        function gerarFichaAluno(aluno, existingDoc = null, isLast = true, directDownload = false) {
-            const { jsPDF } = window.jspdf;
-            const doc = existingDoc || new jsPDF('p', 'mm', 'a4');
-            const bimFiltro = fechamentoBimestre.value;
+        function extrairDadosFichaAluno(aluno, bimFiltro = fechamentoBimestre.value) {
             const bimLabel = bimFiltro === 'todos' ? 'Todos os Bimestres (Anual)' : `${bimFiltro}º Bimestre`;
-
-            // Cabeçalho Oficial
-            doc.setFillColor(30, 27, 75); // Indigo 950
-            doc.rect(14, 12, 182, 22, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(13);
-            doc.text("E.E. JOSÉ MARCELINO DE ALMEIDA - BARRETOS / SP", 105, 20, { align: "center" });
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(9);
-            doc.text("FICHA INDIVIDUAL DE DESEMPENHO E VISTOS - REUNIÃO DE PAIS / CONSELHO", 105, 28, { align: "center" });
-
-            // Caixa com Identificação do Aluno
-            doc.setDrawColor(203, 213, 225);
-            doc.setFillColor(248, 250, 252);
-            doc.roundedRect(14, 37, 182, 23, 2, 2, 'FD');
-            doc.setTextColor(15, 23, 42);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(10.5);
-            doc.text(`Aluno(a): ${aluno.nome}`, 18, 44);
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(8.5);
-            doc.text(`Nº Chamada: ${aluno.numero || '-'}    |    RA: ${aluno.ra || '-'}    |    Situação: ${aluno.situacao || 'Ativo'}`, 18, 50);
-            doc.text(`Turma: ${selectedClass.value}    |    Bimestre de Avaliação: ${bimLabel}    |    Professor(a): ${currentUser.value}`, 18, 55);
-
-            // Totais e Nota
             const t = getTotaisAluno(aluno.id, bimFiltro);
             const nota = calcularNota(aluno.id, bimFiltro);
-
-            doc.autoTable({
-                startY: 63,
-                head: [['Caderno', 'Livro', 'Atividade', 'Extras (+)', 'Descontos (-)', 'Pontos Líquidos', 'Nota Proporcional']],
-                body: [[
-                    `${t.caderno}`,
-                    `${t.livro}`,
-                    `${t.atividade}`,
-                    `+${t.pontoPositivo.toFixed(1)} pts`,
-                    `-${t.descontos.toFixed(1)} pts`,
-                    `${t.pontosLiquidos.toFixed(1)} pts`,
-                    `${nota.toFixed(1)} / 10,0`
-                ]],
-                theme: 'grid',
-                headStyles: { fillColor: [49, 46, 129], textColor: [255, 255, 255], halign: 'center', fontSize: 8, fontStyle: 'bold' },
-                bodyStyles: { halign: 'center', fontSize: 8.5, fontStyle: 'bold', textColor: [30, 41, 59] },
-                margin: { left: 14, right: 14 }
-            });
-
-            // Histórico Diário Detalhado
-            const startY2 = doc.lastAutoTable.finalY + 6;
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(9);
-            doc.setTextColor(30, 41, 59);
-            doc.text(`Detalhamento das Aulas e Registros do Período (${bimLabel}):`, 14, startY2 - 2);
 
             const turmaReg = registros.value[selectedClass.value] || {};
             const datasRegistradas = Object.keys(turmaReg).sort();
@@ -2895,7 +3079,6 @@ createApp({
                 const defaultDesc = isContagemDia ? 'Contagem de vistos anteriores do bimestre' : 'Atividades de aula';
                 const conteudo = (conteudos.value[selectedClass.value] && conteudos.value[selectedClass.value][d]) || defaultDesc;
 
-                // Identificar quais atividades foram cobradas na turma no dia
                 let turmaTeveCaderno = false;
                 let turmaTeveLivro = false;
                 let turmaTeveAtividade = false;
@@ -2940,20 +3123,90 @@ createApp({
                 if (r.incompleto) obs.push('Incompleto (-0.3)');
                 if (r.dormiu) obs.push('Dormiu (-0.5)');
 
-                return [
-                    formatData(d),
-                    conteudo,
-                    cadTexto,
-                    livTexto,
-                    ativTexto,
-                    obs.length > 0 ? obs.join(', ') : 'Regular'
-                ];
+                return {
+                    data: formatData(d),
+                    conteudo: conteudo,
+                    caderno: cadTexto,
+                    livro: livTexto,
+                    atividade: ativTexto,
+                    ocorrencias: obs.length > 0 ? obs.join(', ') : 'Regular'
+                };
             });
+
+            return {
+                aluno: aluno,
+                turma: selectedClass.value,
+                bimLabel: bimLabel,
+                bimFiltro: bimFiltro,
+                professor: currentUser.value,
+                totais: t,
+                nota: nota,
+                linhasDias: linhasDias,
+                dataEmissao: `${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`
+            };
+        }
+
+        function renderizarPaginaFichaPDF(doc, dFicha) {
+            const { aluno, turma, bimLabel, professor, totais, nota, linhasDias, dataEmissao } = dFicha;
+
+            // Cabeçalho Oficial
+            doc.setFillColor(30, 27, 75); // Indigo 950
+            doc.rect(14, 12, 182, 22, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(13);
+            doc.text("E.E. JOSÉ MARCELINO DE ALMEIDA - BARRETOS / SP", 105, 20, { align: "center" });
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.text("FICHA INDIVIDUAL DE DESEMPENHO E VISTOS - REUNIÃO DE PAIS / CONSELHO", 105, 28, { align: "center" });
+
+            // Caixa com Identificação do Aluno
+            doc.setDrawColor(203, 213, 225);
+            doc.setFillColor(248, 250, 252);
+            doc.roundedRect(14, 37, 182, 23, 2, 2, 'FD');
+            doc.setTextColor(15, 23, 42);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10.5);
+            doc.text(`Aluno(a): ${aluno.nome}`, 18, 44);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8.5);
+            doc.text(`Nº Chamada: ${aluno.numero || '-'}    |    RA: ${aluno.ra || '-'}    |    Situação: ${aluno.situacao || 'Ativo'}`, 18, 50);
+            doc.text(`Turma: ${turma}    |    Bimestre de Avaliação: ${bimLabel}    |    Professor(a): ${professor}`, 18, 55);
+
+            // Totais e Nota
+            doc.autoTable({
+                startY: 63,
+                head: [['Caderno', 'Livro', 'Atividade', 'Extras (+)', 'Descontos (-)', 'Pontos Líquidos', 'Nota Proporcional']],
+                body: [[
+                    `${totais.caderno}`,
+                    `${totais.livro}`,
+                    `${totais.atividade}`,
+                    `+${totais.pontoPositivo.toFixed(1)} pts`,
+                    `-${totais.descontos.toFixed(1)} pts`,
+                    `${totais.pontosLiquidos.toFixed(1)} pts`,
+                    `${nota.toFixed(1)} / 10,0`
+                ]],
+                theme: 'grid',
+                headStyles: { fillColor: [49, 46, 129], textColor: [255, 255, 255], halign: 'center', fontSize: 8, fontStyle: 'bold' },
+                bodyStyles: { halign: 'center', fontSize: 8.5, fontStyle: 'bold', textColor: [30, 41, 59] },
+                margin: { left: 14, right: 14 }
+            });
+
+            // Histórico Diário Detalhado
+            const startY2 = doc.lastAutoTable.finalY + 6;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.setTextColor(30, 41, 59);
+            doc.text(`Detalhamento das Aulas e Registros do Período (${bimLabel}):`, 14, startY2 - 2);
+
+            const bodyLinhas = linhasDias.length > 0
+                ? linhasDias.map(l => [l.data, l.conteudo, l.caderno, l.livro, l.atividade, l.ocorrencias])
+                : [['-', `Nenhum visto registrado para o ${bimLabel} até o momento.`, '-', '-', '-', '-']];
 
             doc.autoTable({
                 startY: startY2,
                 head: [['Data', 'Conteúdo Trabalhado em Sala', 'Caderno', 'Livro', 'Atividade', 'Ocorrências']],
-                body: linhasDias.length > 0 ? linhasDias : [['-', `Nenhum visto registrado para o ${bimLabel} até o momento.`, '-', '-', '-', '-']],
+                body: bodyLinhas,
                 theme: 'striped',
                 headStyles: { fillColor: [71, 85, 105], fontSize: 8, halign: 'center' },
                 bodyStyles: { fontSize: 7.5 },
@@ -2968,13 +3221,13 @@ createApp({
                 didParseCell: function(data) {
                     if (data.section === 'body' && (data.column.index === 2 || data.column.index === 3 || data.column.index === 4)) {
                         if (data.cell.raw === 'NÃO FEZ') {
-                            data.cell.styles.textColor = [190, 18, 60]; // Rose 700
+                            data.cell.styles.textColor = [190, 18, 60];
                             data.cell.styles.fontStyle = 'bold';
                         } else if (data.cell.raw === 'SIM') {
-                            data.cell.styles.textColor = [21, 128, 61]; // Green 700
+                            data.cell.styles.textColor = [21, 128, 61];
                             data.cell.styles.fontStyle = 'bold';
                         } else if (typeof data.cell.raw === 'string' && data.cell.raw.includes('visto')) {
-                            data.cell.styles.textColor = [107, 33, 168]; // Purple 700
+                            data.cell.styles.textColor = [107, 33, 168];
                             data.cell.styles.fontStyle = 'bold';
                         }
                     }
@@ -2994,7 +3247,7 @@ createApp({
             doc.setTextColor(71, 85, 105);
 
             doc.line(18, signY, 90, signY);
-            doc.text(`Prof(a). ${currentUser.value}`, 54, signY + 4, { align: 'center' });
+            doc.text(`Prof(a). ${professor}`, 54, signY + 4, { align: 'center' });
             doc.text('Docente Responsável', 54, signY + 8, { align: 'center' });
 
             doc.line(110, signY, 182, signY);
@@ -3003,18 +3256,29 @@ createApp({
 
             doc.setFontSize(7);
             doc.setTextColor(148, 163, 184);
-            doc.text(`Emitido pelo Diário de Vistos em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 105, 290, { align: 'center' });
+            doc.text(`Emitido pelo Diário de Vistos em ${dataEmissao}`, 105, 290, { align: 'center' });
+        }
+
+        function gerarFichaAluno(aluno, existingDoc = null, isLast = true, directDownload = false) {
+            const { jsPDF } = window.jspdf;
+            const doc = existingDoc || new jsPDF('p', 'mm', 'a4');
+            const bimFiltro = fechamentoBimestre.value;
+            const bimLabel = bimFiltro === 'todos' ? 'Todos os Bimestres (Anual)' : `${bimFiltro}º Bimestre`;
+
+            const dadosFicha = extrairDadosFichaAluno(aluno, bimFiltro);
+            renderizarPaginaFichaPDF(doc, dadosFicha);
 
             if (!existingDoc) {
                 const fileName = `Ficha_Vistos_${aluno.nome.replace(/\s+/g, '_')}_${selectedClass.value}_${bimFiltro}Bim.pdf`;
                 if (directDownload) {
                     doc.save(fileName);
                 } else {
-                    abrirPreviaPDF(
+                    abrirPreviaFichas(
                         doc,
                         `Ficha Individual: ${aluno.nome}`,
                         `Nº ${aluno.numero || '-'} • Turma: ${selectedClass.value} • ${bimLabel} • Prof(a). ${currentUser.value}`,
-                        fileName
+                        fileName,
+                        [dadosFicha]
                     );
                 }
             }
@@ -3032,18 +3296,22 @@ createApp({
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
+            const todasFichas = [];
 
             alunos.forEach((aluno, index) => {
                 if (index > 0) doc.addPage();
-                gerarFichaAluno(aluno, doc, index === alunos.length - 1);
+                const dadosFicha = extrairDadosFichaAluno(aluno, bimFiltro);
+                todasFichas.push(dadosFicha);
+                renderizarPaginaFichaPDF(doc, dadosFicha);
             });
 
             const fileName = `Fichas_Turma_${selectedClass.value}_${bimFiltro}Bim_Prof_${currentUser.value}.pdf`;
-            abrirPreviaPDF(
+            abrirPreviaFichas(
                 doc,
                 `Caderno de Fichas (Turma ${selectedClass.value})`,
                 `${alunos.length} alunos inclusos • ${bimLabel} • Prof(a). ${currentUser.value}`,
-                fileName
+                fileName,
+                todasFichas
             );
         }
 
@@ -3244,7 +3512,7 @@ createApp({
 
             // Backup e Exportações (com Pré-Visualização Interativa)
             exportarBackup, importarBackup, exportarExcel, exportarPDF, gerarFichaAluno, gerarFichasTurmaLote,
-            modalPreviaPDF, abrirPreviaPDF, fecharPreviaPDF, baixarPDFPrevia, imprimirPDFPrevia,
+            modalPreviaPDF, currentFichaPreview, fecharPreviaPDF, baixarPDFPrevia, imprimirPDFPrevia,
 
             // Nuvem e PWA
             modalNuvem, nuvemConectada, abrirModalNuvem, salvarConfigNuvem, sincronizarAgora,
