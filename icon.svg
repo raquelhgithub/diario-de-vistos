@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#312e81"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Background with rounded corners -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <!-- Inner accent ring -->
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="none" stroke="#fbbf24" stroke-width="4" stroke-opacity="0.3"/>
+  <!-- Graduation Cap Icon -->
+  <g transform="translate(56, 76)" filter="url(#shadow)">
+    <!-- Cap top / mortarboard diamond -->
+    <polygon points="200,40 380,130 200,220 20,130" fill="url(#goldGrad)"/>
+    <!-- Cap skull cap base -->
+    <path d="M80,165 L80,245 C80,315 320,315 320,245 L320,165 L200,225 Z" fill="#d97706"/>
+    <!-- Tassel string and pendant -->
+    <path d="M340,150 C350,190 355,230 350,270" fill="none" stroke="#fef08a" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="350" cy="285" r="16" fill="url(#goldGrad)"/>
+    <!-- Checkmark badge in center bottom -->
+    <circle cx="200" cy="270" r="32" fill="#10b981"/>
+    <path d="M188,270 L196,278 L214,260" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- App text label -->
+  <text x="256" y="435" text-anchor="middle" fill="#ffffff" font-family="'Inter', system-ui, sans-serif" font-size="36" font-weight="800" letter-spacing="2">DIÁRIO DE VISTOS</text>
+  <text x="256" y="465" text-anchor="middle" fill="#fbbf24" font-family="'Inter', system-ui, sans-serif" font-size="20" font-weight="700" letter-spacing="1">E.E. JOSÉ MARCELINO</text>
+</svg>

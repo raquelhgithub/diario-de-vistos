@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Regras para Turmas Gerais (Leitura permitida aos professores e ADM)
+    match /diario_turmas/{docId} {
+      allow read: if true;
+      allow write: if true; // No Firebase Auth nativo pode restringir com request.auth != null
+    }
+
+    // Regras de Configurações Escolares (Usuários e Senhas)
+    match /diario_config/{configId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Regras para Registros e Conteúdos por Professor
+    match /diario_professores/{professorId} {
+      allow read, write: if true;
+    }
+  }
+}
