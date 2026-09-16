@@ -127,20 +127,7 @@
                     <i class="fa-solid fa-key"></i> Senha
                 </button>
 
-                <!-- BOTÕES EXCLUSIVOS PARA ADMINISTRADOR (CSV E BACKUP) -->
-                <template v-if="isAdmin">
-                    <label class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-emerald-500 cursor-pointer shadow-sm" title="Importar lista de alunos em CSV">
-                        <i class="fa-solid fa-file-csv"></i> Importar CSV
-                        <input type="file" @change="importarCSV" accept=".csv" class="hidden">
-                    </label>
-                    <button @click="exportarBackup" class="bg-indigo-800 hover:bg-indigo-700 text-indigo-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-700 shadow-sm" title="Backup completo">
-                        <i class="fa-solid fa-download"></i> Backup
-                    </button>
-                    <label class="bg-indigo-800 hover:bg-indigo-700 text-indigo-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-700 cursor-pointer shadow-sm" title="Restaurar backup">
-                        <i class="fa-solid fa-upload"></i> Restaurar
-                        <input type="file" @change="importarBackup" accept=".json" class="hidden">
-                    </label>
-                </template>
+
 
                 <!-- SINCRONIZAÇÃO NUVEM -->
                 <button @click="abrirModalNuvem" :class="['px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 border shadow-sm', nuvemConectada ? 'bg-sky-700 text-white border-sky-500' : 'bg-indigo-800 text-indigo-200 border-indigo-700']" title="Status de sincronização online">
@@ -160,10 +147,7 @@
             
             <!-- SELEÇÃO DE TURMA -->
             <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex justify-between items-center mb-1">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Turma</label>
-                    <span v-if="isAdmin" class="text-[9px] font-bold text-indigo-600 cursor-pointer hover:underline" @click="abrirModalNovaTurma">+ Nova</span>
-                </div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Turma</label>
                 <select v-model="selectedClass" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm cursor-pointer">
                     <option v-for="t in turmasOrdenadas" :key="t" :value="t">
                         {{ t }} ({{ (turmas[t] || []).length }} alu.)
@@ -273,11 +257,7 @@
                 </button>
             </div>
 
-            <div class="py-2 px-2 flex items-center gap-2">
-                <button v-if="isAdmin && currentTab === 'chamada'" @click="abrirModalNovoAluno" class="bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 shadow-sm transition">
-                    <i class="fa-solid fa-user-plus text-amber-400"></i> + Aluno
-                </button>
-            </div>
+
         </div>
 
         <!-- TELA 1: CHAMADA E VISTOS -->
@@ -309,19 +289,7 @@
                                 {{ aluno.numero }}
                             </span>
                             <div class="truncate flex-1">
-                                <div class="flex items-center gap-1.5">
-                                    <h3 class="font-bold text-slate-800 text-xs sm:text-sm leading-tight truncate">{{ aluno.nome }}</h3>
-                                    
-                                    <!-- AÇÕES DO ADMIN: EDITAR E EXCLUIR ALUNO -->
-                                    <div v-if="isAdmin" class="inline-flex items-center gap-1 ml-1">
-                                        <button @click="abrirModalEditarAluno(aluno)" class="text-slate-400 hover:text-indigo-600 p-1 text-xs" title="Editar dados do aluno">
-                                            <i class="fa-solid fa-pencil"></i>
-                                        </button>
-                                        <button @click="excluirAluno(aluno)" class="text-slate-400 hover:text-rose-600 p-1 text-xs" title="Excluir aluno">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                                <h3 class="font-bold text-slate-800 text-xs sm:text-sm leading-tight truncate">{{ aluno.nome }}</h3>
                                 <div class="flex items-center gap-2 mt-0.5">
                                     <span class="text-[10px] font-mono text-slate-400">RA: {{ aluno.ra }}</span>
                                     <span :class="['text-[9px] px-2 py-0.2 rounded-full font-bold uppercase', aluno.situacao.toLowerCase() === 'ativo' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800']">
@@ -1234,6 +1202,7 @@ createApp({
         }
 
         onMounted(() => {
+            corrigirSituacoesCorrompidas();
             if (turmasOrdenadas.value.length > 0) {
                 selectedClass.value = turmasOrdenadas.value[0];
             }
@@ -1632,7 +1601,30 @@ createApp({
             alert(`✅ Turma "${t}" excluída com sucesso.`);
         }
 
-        // IMPORTAÇÃO INTELIGENTE DE CSV (SED)
+        // AUTO-CORREÇÃO DE SITUAÇÕES COM DATA DE NASCIMENTO (RECUPERAÇÃO AUTOMÁTICA)
+        function corrigirSituacoesCorrompidas() {
+            if (!turmas.value) return;
+            let corrigidos = 0;
+            const novasTurmas = { ...turmas.value };
+            let mudou = false;
+            for (const t in novasTurmas) {
+                const lista = novasTurmas[t] || [];
+                lista.forEach(aluno => {
+                    if (aluno.situacao && /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(aluno.situacao.trim())) {
+                        aluno.situacao = 'Ativo';
+                        corrigidos++;
+                        mudou = true;
+                    }
+                });
+            }
+            if (mudou) {
+                turmas.value = novasTurmas;
+                localStorage.setItem('diario_turmas_db', JSON.stringify(novasTurmas));
+                salvarNuvemTurmas(novasTurmas);
+            }
+        }
+
+        // IMPORTAÇÃO INTELIGENTE DE CSV (SED / EXCEL)
         function processarCSVAdmin(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1640,34 +1632,112 @@ createApp({
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
-                    const lines = e.target.result.split('\n');
+                    const content = e.target.result || '';
+                    const lines = content.split(/\r?\n/);
                     const alunosCSV = [];
-                    let headerFound = false;
+                    let headerIndex = -1;
+                    let delimiter = ';';
+                    let colMap = { num: 0, nome: 1, ra: 2, digRa: 3, nasc: 4, sit: 7 };
 
-                    lines.forEach((line, index) => {
-                        if (line.includes('Nome do Aluno') || line.includes('Nº de chamada') || line.includes('N° de chamada')) {
-                            headerFound = true;
-                            return;
+                    // 1. Localizar linha de cabeçalho e determinar delimitador
+                    for (let i = 0; i < lines.length; i++) {
+                        const l = lines[i].trim();
+                        if (!l) continue;
+                        const norm = l.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        if (norm.includes('nome') && (norm.includes('aluno') || norm.includes('chamada') || norm.includes('char') || norm.includes('ra') || norm.includes('nasc') || norm.includes('situa') || norm.includes('email'))) {
+                            headerIndex = i;
+                            const countPV = (l.match(/;/g) || []).length;
+                            const countVirg = (l.match(/,/g) || []).length;
+                            const countTab = (l.match(/\t/g) || []).length;
+                            if (countTab > countPV && countTab > countVirg) delimiter = '\t';
+                            else if (countVirg > countPV) delimiter = ',';
+                            else delimiter = ';';
+
+                            const headerCols = l.split(delimiter).map(c => c.replace(/["']/g, '').trim());
+                            headerCols.forEach((col, idx) => {
+                                const h = col.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                                if (h.includes('chamada') || h.includes('char') || /^(n[ºo°\.]|num)\b/.test(h)) colMap.num = idx;
+                                else if (h.includes('nome')) colMap.nome = idx;
+                                else if (h.includes('dig') && h.includes('ra')) colMap.digRa = idx;
+                                else if (h === 'ra' || (h.includes('ra') && !h.includes('dig'))) colMap.ra = idx;
+                                else if (h.includes('nasc')) colMap.nasc = idx;
+                                else if (h.includes('situa') || h.includes('status')) colMap.sit = idx;
+                            });
+                            break;
                         }
-                        if (headerFound && line.trim()) {
-                            const cols = line.split(';');
-                            if (cols.length >= 2) {
-                                const num = (cols[0] || '').replace(/["']/g, '').trim();
-                                const nome = (cols[1] || '').replace(/["']/g, '').trim();
-                                const ra = (cols[2] || '').replace(/["']/g, '').trim();
-                                const sit = (cols[4] || 'Ativo').replace(/["']/g, '').trim();
+                    }
 
-                                if (nome && nome.toUpperCase() !== 'NOME DO ALUNO') {
-                                    alunosCSV.push({
-                                        numero: num || `${index}`,
-                                        nome: nome,
-                                        ra: ra || 'N/A',
-                                        situacao: sit || 'Ativo'
-                                    });
-                                }
+                    if (headerIndex === -1) {
+                        for (let i = 0; i < lines.length; i++) {
+                            if (lines[i].trim()) {
+                                headerIndex = i;
+                                break;
                             }
                         }
-                    });
+                    }
+
+                    // 2. Extrair dados dos alunos
+                    for (let i = headerIndex + 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+
+                        const cols = line.split(delimiter).map(c => c.replace(/["']/g, '').trim());
+                        if (cols.length < 2) continue;
+
+                        const nome = (cols[colMap.nome] || '').trim();
+                        if (!nome) continue;
+                        const nomeUpper = nome.toUpperCase();
+                        if (nomeUpper.includes('NOME DO ALUNO') || nomeUpper.includes('TOTAL DE ALUNOS') || nomeUpper.includes('FILTROS') || nomeUpper.includes('ANO LETIVO')) continue;
+
+                        const num = (cols[colMap.num] || `${alunosCSV.length + 1}`).trim();
+                        let raRaw = (cols[colMap.ra] || '').trim();
+                        const digRa = colMap.digRa !== -1 && cols[colMap.digRa] ? cols[colMap.digRa].trim() : '';
+
+                        let raFinal = raRaw;
+                        if (digRa && !raFinal.toUpperCase().endsWith(digRa.toUpperCase())) {
+                            raFinal = `${raFinal}-${digRa}`;
+                        }
+                        if (!raFinal) raFinal = 'N/A';
+
+                        // Tratar SITUAÇÃO: rejeitar expressamente datas de nascimento DD/MM/YYYY
+                        let sitRaw = '';
+                        if (colMap.sit !== -1 && cols[colMap.sit]) {
+                            sitRaw = cols[colMap.sit].trim();
+                        }
+
+                        const ehData = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(sitRaw);
+                        if (ehData || !sitRaw) {
+                            // Procura nas outras colunas se há valor de status
+                            const achou = cols.find(c => {
+                                const v = c.toLowerCase();
+                                return v.includes('ativo') || v.includes('reman') || v.includes('transf') || 
+                                       v.includes('baix') || v.includes('canc') || v.includes('desist') || 
+                                       v.includes('evad') || v.includes('nao comp');
+                            });
+                            sitRaw = achou || 'Ativo';
+                        }
+
+                        let sitFinal = 'Ativo';
+                        const sNorm = sitRaw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        if (sNorm.includes('reman')) sitFinal = 'Remanejado';
+                        else if (sNorm.includes('transf')) sitFinal = 'Transferido';
+                        else if (sNorm.includes('baix')) sitFinal = 'Baixado';
+                        else if (sNorm.includes('canc')) sitFinal = 'Cancelado';
+                        else if (sNorm.includes('desist')) sitFinal = 'Desistente';
+                        else if (sNorm.includes('evad')) sitFinal = 'Evadido';
+                        else if (sNorm.includes('nao comp')) sitFinal = 'Não Comparecimento';
+                        else if (sNorm.includes('ativ')) sitFinal = 'Ativo';
+                        else if (sitRaw && !/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(sitRaw)) {
+                            sitFinal = sitRaw.charAt(0).toUpperCase() + sitRaw.slice(1).toLowerCase();
+                        }
+
+                        alunosCSV.push({
+                            numero: num,
+                            nome: nome,
+                            ra: raFinal,
+                            situacao: sitFinal
+                        });
+                    }
 
                     if (alunosCSV.length === 0) {
                         alert('⚠️ Nenhum aluno encontrado no arquivo CSV.');
@@ -1684,10 +1754,17 @@ createApp({
 
                     const listaFinal = [...listaExistente];
 
+                    const cleanRA = (val) => (val || '').replace(/[^0-9a-zA-Z]/g, '').replace(/^0+/, '').toLowerCase();
+                    const cleanNome = (val) => (val || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+
                     alunosCSV.forEach((csvAluno, idx) => {
+                        const raCSV = cleanRA(csvAluno.ra);
+                        const nomeCSV = cleanNome(csvAluno.nome);
+
                         const indexAchado = listaFinal.findIndex(a => {
-                            const matchRa = a.ra && a.ra !== 'N/A' && csvAluno.ra && csvAluno.ra !== 'N/A' && a.ra.replace(/[^0-9a-zA-Z]/g, '') === csvAluno.ra.replace(/[^0-9a-zA-Z]/g, '');
-                            const matchNome = a.nome.trim().toLowerCase() === csvAluno.nome.trim().toLowerCase();
+                            const raA = cleanRA(a.ra);
+                            const matchRa = raA && raCSV && (raA === raCSV || raA.includes(raCSV) || raCSV.includes(raA));
+                            const matchNome = cleanNome(a.nome) === nomeCSV;
                             return matchRa || matchNome;
                         });
 
@@ -1698,7 +1775,7 @@ createApp({
                             listaFinal[indexAchado] = {
                                 ...original,
                                 numero: csvAluno.numero || original.numero,
-                                ra: csvAluno.ra !== 'N/A' ? csvAluno.ra : original.ra,
+                                ra: (csvAluno.ra && csvAluno.ra !== 'N/A') ? csvAluno.ra : original.ra,
                                 situacao: csvAluno.situacao || original.situacao
                             };
                         } else {
@@ -1725,10 +1802,6 @@ createApp({
                 }
             };
             reader.readAsText(file, 'utf-8');
-        }
-
-        function importarCSV(event) {
-            processarCSVAdmin(event);
         }
 
         // GESTÃO DE PROFESSORES E SENHAS
@@ -2163,7 +2236,10 @@ createApp({
                 const docTurmas = await db.collection('diario_turmas').doc('geral').get();
                 if (docTurmas.exists) {
                     const data = docTurmas.data();
-                    if (data && data.turmas) turmas.value = data.turmas;
+                    if (data && data.turmas) {
+                        turmas.value = data.turmas;
+                        corrigirSituacoesCorrompidas();
+                    }
                 } else {
                     await db.collection('diario_turmas').doc('geral').set({ turmas: turmas.value });
                 }
@@ -2231,12 +2307,16 @@ createApp({
             }, 1000);
         }
 
+        let debounceTurmas = null;
         function salvarNuvemTurmas(novasTurmas) {
             if (!db) return;
-            db.collection('diario_turmas').doc('geral').set({
-                turmas: novasTurmas,
-                atualizadoEm: new Date().toISOString()
-            }, { merge: true }).catch(err => console.warn("Erro ao salvar turmas na nuvem:", err));
+            clearTimeout(debounceTurmas);
+            debounceTurmas = setTimeout(() => {
+                db.collection('diario_turmas').doc('geral').set({
+                    turmas: novasTurmas,
+                    atualizadoEm: new Date().toISOString()
+                }, { merge: true }).catch(err => console.warn("Erro ao salvar turmas na nuvem:", err));
+            }, 800);
         }
 
         function salvarNuvemUsuarios(novosUsuarios) {
@@ -2278,7 +2358,7 @@ createApp({
             ferramentaIndividual, ferramentaLote, getQtdVistosNaData, getConteudoNaData, executarCopiaIndividual, limparPreviaLote, gerarPreviaLote, executarLote,
 
             // Backup e Exportações
-            importarCSV, exportarBackup, importarBackup, exportarExcel, exportarPDF,
+            exportarBackup, importarBackup, exportarExcel, exportarPDF,
 
             // Nuvem
             modalNuvem, nuvemConectada, abrirModalNuvem, salvarConfigNuvem, sincronizarAgora
