@@ -792,10 +792,10 @@
                             </div>
 
                             <div>
-                                <label class="block text-[11px] font-bold text-emerald-900 uppercase mb-1">Arquivo CSV da Turma</label>
+                                <label class="block text-[11px] font-bold text-emerald-900 uppercase mb-1">Arquivo da Turma (CSV ou Excel)</label>
                                 <label class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-2.5 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer shadow transition">
-                                    <i class="fa-solid fa-upload"></i> Escolher Arquivo CSV
-                                    <input type="file" @change="processarCSVAdmin" accept=".csv" class="hidden">
+                                    <i class="fa-solid fa-upload"></i> Escolher Arquivo (CSV / Excel)
+                                    <input type="file" @change="processarCSVAdmin" accept=".csv, .xlsx, .xls, .tsv, .txt" class="hidden">
                                 </label>
                             </div>
                         </div>
@@ -2807,7 +2807,191 @@ createApp({
             }
         }
 
-        // IMPORTAÇÃO INTELIGENTE DE CSV (SED / EXCEL)
+        // HELPER: Reconhecimento de colunas de número de chamada
+        function isColunaNumeroAdmin(h) {
+            if (!h || h.includes('nome')) return false;
+            return (
+                h === 'n' || h === 'no' || h === 'nº' || h === 'n°' || h === 'num' ||
+                h.startsWith('nº') || h.startsWith('n°') || h.startsWith('no.') || h.startsWith('n.') ||
+                h.includes('chamada') || h.includes('char') || h.includes('numero')
+            );
+        }
+
+        // HELPER: Conversor de CSV / TSV para Matriz de Células (RFC 4180 complacente)
+        function converterCSVParaMatriz(conteudo) {
+            if (!conteudo) return [];
+            const rawLines = conteudo.split(/\r?\n/);
+            if (rawLines.length === 0) return [];
+
+            let countPV = 0, countVirg = 0, countTab = 0;
+            for (let i = 0; i < Math.min(15, rawLines.length); i++) {
+                const l = rawLines[i];
+                countPV += (l.match(/;/g) || []).length;
+                countVirg += (l.match(/,/g) || []).length;
+                countTab += (l.match(/\t/g) || []).length;
+            }
+
+            let delimiter = ';';
+            if (countTab > countPV && countTab > countVirg) delimiter = '\t';
+            else if (countVirg > countPV && countVirg > countTab) delimiter = ',';
+
+            const rows = [];
+            for (let i = 0; i < rawLines.length; i++) {
+                const line = rawLines[i].trim();
+                if (!line) continue;
+
+                const cells = [];
+                let cur = '';
+                let inQuotes = false;
+                for (let j = 0; j < line.length; j++) {
+                    const ch = line[j];
+                    if (ch === '"') {
+                        if (inQuotes && line[j + 1] === '"') {
+                            cur += '"';
+                            j++;
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (ch === delimiter && !inQuotes) {
+                        cells.push(cur.trim());
+                        cur = '';
+                    } else {
+                        cur += ch;
+                    }
+                }
+                cells.push(cur.trim());
+                rows.push(cells);
+            }
+            return rows;
+        }
+
+        // HELPER: Extração e normalização de alunos a partir de linhas/células
+        function extrairAlunosDeLinhas(rows) {
+            let headerIndex = -1;
+            const colMap = { num: -1, nome: -1, ra: -1, digRa: -1, uf: -1, nasc: -1, sit: -1 };
+
+            // 1. Localizar linha de cabeçalho
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length === 0) continue;
+                const norm = row.map(c => String(c || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()).join(' ');
+                if ((norm.includes('nome') || norm.includes('aluno')) && 
+                    (norm.includes('chamada') || norm.includes('char') || norm.includes('ra') || norm.includes('nasc') || norm.includes('situa') || norm.includes('status') || norm.includes('matricula'))) {
+                    headerIndex = i;
+                    
+                    row.forEach((col, idx) => {
+                        const h = String(col || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                        
+                        // 1. UF do RA (deve ser checado ANTES do RA para evitar colisão com "UF RA")
+                        if (h === 'uf' || h.includes('uf') || h === 'estado') {
+                            colMap.uf = idx;
+                        }
+                        // 2. Dígito do RA
+                        else if (h.includes('dig') || h.includes('digito')) {
+                            colMap.digRa = idx;
+                        }
+                        // 3. Situação / Status (antes de nome/aluno para evitar "situação do aluno")
+                        else if (h.includes('situa') || h.includes('status') || h.includes('condicao') || h.includes('moviment')) {
+                            colMap.sit = idx;
+                        }
+                        // 4. Data de Nascimento
+                        else if (h.includes('nasc') || (h.includes('data') && !h.includes('visto'))) {
+                            colMap.nasc = idx;
+                        }
+                        // 5. Número / Chamada (rejeita qualquer coluna que contenha "nome")
+                        else if (isColunaNumeroAdmin(h)) {
+                            colMap.num = idx;
+                        }
+                        // 6. Nome do Aluno (rejeita se tiver situação ou lista)
+                        else if (h.includes('nome') || (h.includes('aluno') && !h.includes('situa') && !h.includes('lista'))) {
+                            colMap.nome = idx;
+                        }
+                        // 7. RA principal (exclui dígito e UF)
+                        else if (h === 'ra' || (h.includes('ra') && !h.includes('dig') && !h.includes('uf')) || h.includes('matricula') || h.includes('registro')) {
+                            colMap.ra = idx;
+                        }
+                    });
+                    break;
+                }
+            }
+
+            if (headerIndex === -1) {
+                return [];
+            }
+
+            const alunos = [];
+            for (let i = headerIndex + 1; i < rows.length; i++) {
+                const cols = rows[i];
+                if (!cols || cols.length === 0) continue;
+
+                const nome = colMap.nome !== -1 && cols[colMap.nome] ? String(cols[colMap.nome]).trim() : '';
+                if (!nome) continue;
+                const nomeUpper = nome.toUpperCase();
+                if (nomeUpper.includes('NOME DO ALUNO') || nomeUpper.includes('TOTAL DE ALUNOS') || nomeUpper.includes('LISTA DE ALUNOS') || nomeUpper.includes('FILTROS') || nomeUpper.includes('ANO LETIVO')) continue;
+
+                const num = (colMap.num !== -1 && cols[colMap.num] ? String(cols[colMap.num]).trim() : `${alunos.length + 1}`);
+                let raRaw = colMap.ra !== -1 && cols[colMap.ra] ? String(cols[colMap.ra]).trim() : '';
+                let digRa = colMap.digRa !== -1 && cols[colMap.digRa] ? String(cols[colMap.digRa]).trim() : '';
+
+                // Normalização do RA (suporta formato coordenador '125799234 X' e professor '113135121' + '6')
+                let raFinal = raRaw;
+                const matchDigitoNoRA = raRaw.match(/^([0-9]{5,12})[\s\-]+([0-9xX])$/i);
+                if (matchDigitoNoRA) {
+                    raRaw = matchDigitoNoRA[1];
+                    if (!digRa) digRa = matchDigitoNoRA[2].toUpperCase();
+                }
+
+                if (digRa) {
+                    digRa = digRa.toUpperCase();
+                    if (raRaw.endsWith('-' + digRa) || raRaw.endsWith(' ' + digRa)) {
+                        raRaw = raRaw.substring(0, raRaw.length - (digRa.length + 1)).trim();
+                    }
+                    raFinal = `${raRaw}-${digRa}`;
+                } else if (/^[0-9]+-[0-9xX]$/i.test(raRaw)) {
+                    raFinal = raRaw.toUpperCase();
+                } else if (!raFinal) {
+                    raFinal = 'N/A';
+                }
+
+                // Situação do Aluno (com salvaguarda contra coluna de data de nascimento)
+                let sitRaw = colMap.sit !== -1 && cols[colMap.sit] ? String(cols[colMap.sit]).trim() : '';
+                const ehData = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(sitRaw);
+                if (ehData || !sitRaw) {
+                    const achou = cols.find(c => {
+                        const v = String(c || '').toLowerCase();
+                        return v.includes('ativo') || v.includes('reman') || v.includes('transf') || 
+                               v.includes('baix') || v.includes('canc') || v.includes('desist') || 
+                               v.includes('evad') || v.includes('nao comp');
+                    });
+                    sitRaw = achou ? String(achou).trim() : 'Ativo';
+                }
+
+                let sitFinal = 'Ativo';
+                const sNorm = sitRaw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                if (sNorm.includes('reman')) sitFinal = 'Remanejado';
+                else if (sNorm.includes('transf')) sitFinal = 'Transferido';
+                else if (sNorm.includes('baix')) sitFinal = 'Baixado';
+                else if (sNorm.includes('canc')) sitFinal = 'Cancelado';
+                else if (sNorm.includes('desist')) sitFinal = 'Desistente';
+                else if (sNorm.includes('evad')) sitFinal = 'Evadido';
+                else if (sNorm.includes('nao comp')) sitFinal = 'Não Comparecimento';
+                else if (sNorm.includes('ativ')) sitFinal = 'Ativo';
+                else if (sitRaw && !/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(sitRaw)) {
+                    sitFinal = sitRaw.charAt(0).toUpperCase() + sitRaw.slice(1).toLowerCase();
+                }
+
+                alunos.push({
+                    numero: num,
+                    nome: nome,
+                    ra: raFinal,
+                    situacao: sitFinal
+                });
+            }
+
+            return alunos;
+        }
+
+        // IMPORTAÇÃO INTELIGENTE DE CSV E EXCEL (SED / COORDENADOR / PROFESSOR)
         function processarCSVAdmin(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -2815,120 +2999,40 @@ createApp({
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
-                    const content = e.target.result || '';
-                    const lines = content.split(/\r?\n/);
-                    const alunosCSV = [];
-                    let headerIndex = -1;
-                    let delimiter = ';';
-                    let colMap = { num: 0, nome: 1, ra: 2, digRa: 3, nasc: 4, sit: 7 };
+                    let rows = [];
+                    const fileName = file.name.toLowerCase();
+                    const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
 
-                    // 1. Localizar linha de cabeçalho e determinar delimitador
-                    for (let i = 0; i < lines.length; i++) {
-                        const l = lines[i].trim();
-                        if (!l) continue;
-                        const norm = l.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                        if (norm.includes('nome') && (norm.includes('aluno') || norm.includes('chamada') || norm.includes('char') || norm.includes('ra') || norm.includes('nasc') || norm.includes('situa') || norm.includes('email'))) {
-                            headerIndex = i;
-                            const countPV = (l.match(/;/g) || []).length;
-                            const countVirg = (l.match(/,/g) || []).length;
-                            const countTab = (l.match(/\t/g) || []).length;
-                            if (countTab > countPV && countTab > countVirg) delimiter = '\t';
-                            else if (countVirg > countPV) delimiter = ',';
-                            else delimiter = ';';
-
-                            const headerCols = l.split(delimiter).map(c => c.replace(/["']/g, '').trim());
-                            headerCols.forEach((col, idx) => {
-                                const h = col.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                                if (h.includes('chamada') || h.includes('char') || /^(n[ºo°\.]|num)\b/.test(h)) colMap.num = idx;
-                                else if (h.includes('nome')) colMap.nome = idx;
-                                else if (h.includes('dig') && h.includes('ra')) colMap.digRa = idx;
-                                else if (h === 'ra' || (h.includes('ra') && !h.includes('dig'))) colMap.ra = idx;
-                                else if (h.includes('nasc')) colMap.nasc = idx;
-                                else if (h.includes('situa') || h.includes('status')) colMap.sit = idx;
-                            });
-                            break;
+                    if (isExcel && typeof XLSX !== 'undefined') {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                    } else {
+                        // Tenta decodificar como UTF-8; se houver caracteres inválidos, usa ISO-8859-1 (Latin1/Windows-1252)
+                        let text = '';
+                        try {
+                            const decoder = new TextDecoder('utf-8', { fatal: true });
+                            text = decoder.decode(e.target.result);
+                        } catch (_) {
+                            const decoder = new TextDecoder('iso-8859-1');
+                            text = decoder.decode(e.target.result);
                         }
+                        rows = converterCSVParaMatriz(text);
                     }
 
-                    if (headerIndex === -1) {
-                        for (let i = 0; i < lines.length; i++) {
-                            if (lines[i].trim()) {
-                                headerIndex = i;
-                                break;
-                            }
-                        }
-                    }
+                    const alunosImportados = extrairAlunosDeLinhas(rows);
 
-                    // 2. Extrair dados dos alunos
-                    for (let i = headerIndex + 1; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if (!line) continue;
-
-                        const cols = line.split(delimiter).map(c => c.replace(/["']/g, '').trim());
-                        if (cols.length < 2) continue;
-
-                        const nome = (cols[colMap.nome] || '').trim();
-                        if (!nome) continue;
-                        const nomeUpper = nome.toUpperCase();
-                        if (nomeUpper.includes('NOME DO ALUNO') || nomeUpper.includes('TOTAL DE ALUNOS') || nomeUpper.includes('FILTROS') || nomeUpper.includes('ANO LETIVO')) continue;
-
-                        const num = (cols[colMap.num] || `${alunosCSV.length + 1}`).trim();
-                        let raRaw = (cols[colMap.ra] || '').trim();
-                        const digRa = colMap.digRa !== -1 && cols[colMap.digRa] ? cols[colMap.digRa].trim() : '';
-
-                        let raFinal = raRaw;
-                        if (digRa && !raFinal.toUpperCase().endsWith(digRa.toUpperCase())) {
-                            raFinal = `${raFinal}-${digRa}`;
-                        }
-                        if (!raFinal) raFinal = 'N/A';
-
-                        // Tratar SITUAÇÃO: rejeitar expressamente datas de nascimento DD/MM/YYYY
-                        let sitRaw = '';
-                        if (colMap.sit !== -1 && cols[colMap.sit]) {
-                            sitRaw = cols[colMap.sit].trim();
-                        }
-
-                        const ehData = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(sitRaw);
-                        if (ehData || !sitRaw) {
-                            // Procura nas outras colunas se há valor de status
-                            const achou = cols.find(c => {
-                                const v = c.toLowerCase();
-                                return v.includes('ativo') || v.includes('reman') || v.includes('transf') || 
-                                       v.includes('baix') || v.includes('canc') || v.includes('desist') || 
-                                       v.includes('evad') || v.includes('nao comp');
-                            });
-                            sitRaw = achou || 'Ativo';
-                        }
-
-                        let sitFinal = 'Ativo';
-                        const sNorm = sitRaw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                        if (sNorm.includes('reman')) sitFinal = 'Remanejado';
-                        else if (sNorm.includes('transf')) sitFinal = 'Transferido';
-                        else if (sNorm.includes('baix')) sitFinal = 'Baixado';
-                        else if (sNorm.includes('canc')) sitFinal = 'Cancelado';
-                        else if (sNorm.includes('desist')) sitFinal = 'Desistente';
-                        else if (sNorm.includes('evad')) sitFinal = 'Evadido';
-                        else if (sNorm.includes('nao comp')) sitFinal = 'Não Comparecimento';
-                        else if (sNorm.includes('ativ')) sitFinal = 'Ativo';
-                        else if (sitRaw && !/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(sitRaw)) {
-                            sitFinal = sitRaw.charAt(0).toUpperCase() + sitRaw.slice(1).toLowerCase();
-                        }
-
-                        alunosCSV.push({
-                            numero: num,
-                            nome: nome,
-                            ra: raFinal,
-                            situacao: sitFinal
-                        });
-                    }
-
-                    if (alunosCSV.length === 0) {
-                        alert('⚠️ Nenhum aluno encontrado no arquivo CSV.');
+                    if (alunosImportados.length === 0) {
+                        alert('⚠️ Nenhum aluno encontrado no arquivo. Verifique se o formato é do SED (Professor ou Coordenador) ou uma planilha válida com cabeçalhos.');
+                        event.target.value = '';
                         return;
                     }
 
                     const modo = csvConfig.value.modo;
-                    const nomeTurmaFinal = modo === 'nova' ? file.name.replace('.csv', '').trim() : (csvConfig.value.turmaAlvo || selectedClass.value || file.name.replace('.csv', '').trim());
+                    const nomeBaseArquivo = file.name.replace(/\.[^/.]+$/, '').trim();
+                    const nomeTurmaFinal = modo === 'nova' ? nomeBaseArquivo : (csvConfig.value.turmaAlvo || selectedClass.value || nomeBaseArquivo);
                     const listaExistente = [...(turmas.value[nomeTurmaFinal] || [])];
 
                     let mantidos = 0;
@@ -2937,54 +3041,66 @@ createApp({
 
                     const listaFinal = [...listaExistente];
 
-                    const cleanRA = (val) => (val || '').replace(/[^0-9a-zA-Z]/g, '').replace(/^0+/, '').toLowerCase();
-                    const cleanNome = (val) => (val || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+                    const cleanRA = (val) => (val || '').toString().replace(/[^0-9a-zA-Z]/g, '').replace(/^0+/, '').toLowerCase();
+                    const cleanNome = (val) => (val || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
 
-                    alunosCSV.forEach((csvAluno, idx) => {
-                        const raCSV = cleanRA(csvAluno.ra);
-                        const nomeCSV = cleanNome(csvAluno.nome);
+                    alunosImportados.forEach((alunoImp, idx) => {
+                        const raImp = cleanRA(alunoImp.ra);
+                        const nomeImp = cleanNome(alunoImp.nome);
 
                         const indexAchado = listaFinal.findIndex(a => {
                             const raA = cleanRA(a.ra);
-                            const matchRa = raA && raCSV && (raA === raCSV || raA.includes(raCSV) || raCSV.includes(raA));
-                            const matchNome = cleanNome(a.nome) === nomeCSV;
+                            const nomeA = cleanNome(a.nome);
+                            // Se ambos têm RA válido com 5 ou mais dígitos, usa o RA com prioridade
+                            const matchRa = Boolean(raA && raImp && raA.length >= 5 && raImp.length >= 5 && (raA === raImp));
+                            // Casa por nome exato normalizado
+                            const matchNome = Boolean(nomeA && nomeImp && (nomeA === nomeImp));
                             return matchRa || matchNome;
                         });
 
                         if (indexAchado !== -1) {
                             const original = listaFinal[indexAchado];
-                            if (original.situacao !== csvAluno.situacao) statusAtualizados++;
+                            if (original.situacao !== alunoImp.situacao) statusAtualizados++;
                             mantidos++;
                             listaFinal[indexAchado] = {
-                                ...original,
-                                numero: csvAluno.numero || original.numero,
-                                ra: (csvAluno.ra && csvAluno.ra !== 'N/A') ? csvAluno.ra : original.ra,
-                                situacao: csvAluno.situacao || original.situacao
+                                ...original, // PRESERVA ESTRITAMENTE original.id -> NENHUM VISTO É PERDIDO
+                                numero: alunoImp.numero || original.numero,
+                                ra: (alunoImp.ra && alunoImp.ra !== 'N/A') ? alunoImp.ra : original.ra,
+                                situacao: alunoImp.situacao || original.situacao
                             };
                         } else {
                             novos++;
                             listaFinal.push({
-                                id: `${csvAluno.ra || 'ID'}_${csvAluno.numero || idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
-                                numero: csvAluno.numero || `${listaFinal.length + 1}`,
-                                nome: csvAluno.nome,
-                                ra: csvAluno.ra || 'N/A',
-                                situacao: csvAluno.situacao || 'Ativo'
+                                id: `${alunoImp.ra && alunoImp.ra !== 'N/A' ? alunoImp.ra.replace(/[^0-9a-zA-Z]/g, '') : 'ID'}_${alunoImp.numero || idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+                                numero: alunoImp.numero || `${listaFinal.length + 1}`,
+                                nome: alunoImp.nome,
+                                ra: alunoImp.ra || 'N/A',
+                                situacao: alunoImp.situacao || 'Ativo'
                             });
                         }
                     });
 
+                    // Reordena por número de chamada se for numérico
+                    listaFinal.sort((a, b) => {
+                        const numA = parseInt(a.numero, 10);
+                        const numB = parseInt(b.numero, 10);
+                        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+                        return (a.nome || '').localeCompare(b.nome || '');
+                    });
+
                     turmas.value = { ...turmas.value, [nomeTurmaFinal]: listaFinal };
-                    selectedClass.value = nomeTurmaFinal;
+                    localStorage.setItem('diario_turmas_db', JSON.stringify(turmas.value));
                     salvarNuvemTurmas(turmas.value);
+                    selectedClass.value = nomeTurmaFinal;
                     event.target.value = '';
 
-                    alert(`✅ Importação concluída com sucesso para a turma "${nomeTurmaFinal}"!\n\n• ${mantidos} aluno(s) mantidos (${statusAtualizados} status atualizados)\n• ${novos} novo(s) aluno(s) cadastrados`);
+                    alert(`✅ Importação concluída com sucesso para a turma "${nomeTurmaFinal}"!\n\n• ${mantidos} aluno(s) mantidos (${statusAtualizados} status atualizados)\n• ${novos} novo(s) aluno(s) cadastrados\n• Total de alunos na turma: ${listaFinal.length}\n\n* Todos os vistos já lançados continuam 100% preservados.`);
                 } catch (err) {
-                    alert('⚠️ Erro ao processar o arquivo CSV.');
-                    console.error(err);
+                    alert('⚠️ Erro ao processar o arquivo. Certifique-se de que é uma planilha CSV ou Excel válida.');
+                    console.error('Erro na importação:', err);
                 }
             };
-            reader.readAsText(file, 'utf-8');
+            reader.readAsArrayBuffer(file);
         }
 
         // GESTÃO DE PROFESSORES E SENHAS
