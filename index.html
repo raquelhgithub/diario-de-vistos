@@ -1940,7 +1940,15 @@ createApp({
             return n;
         }
 
+        const VERSAO_MATRIZ_OFICIAL = '2026-09-17-v3';
+
         function inicializarUsuariosComMatriz() {
+            const versaoSalva = localStorage.getItem('diario_matriz_versao');
+            if (versaoSalva !== VERSAO_MATRIZ_OFICIAL) {
+                localStorage.setItem('diario_matriz_versao', VERSAO_MATRIZ_OFICIAL);
+                localStorage.setItem('diario_usuarios_db', JSON.stringify(USUARIOS_PADRAO));
+                return JSON.parse(JSON.stringify(USUARIOS_PADRAO));
+            }
             const salvos = JSON.parse(localStorage.getItem('diario_usuarios_db') || 'null');
             if (!salvos || !Array.isArray(salvos) || salvos.length === 0) {
                 return JSON.parse(JSON.stringify(USUARIOS_PADRAO));

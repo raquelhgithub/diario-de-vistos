@@ -1,5 +1,5 @@
 // Service Worker para Diário Digital de Vistos
-const CACHE_NAME = 'diario-vistos-v2';
+const CACHE_NAME = 'diario-vistos-v3';
 
 const STATIC_ASSETS = [
   '/',
