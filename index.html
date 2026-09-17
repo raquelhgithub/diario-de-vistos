@@ -146,6 +146,12 @@
                     <span class="font-extrabold text-white">{{ currentUser }}</span>
                 </div>
 
+                <!-- BOTÃO TOGGLE ADMIN VER TODAS AS TURMAS -->
+                <button v-if="isAdmin" @click="toggleAdminVerTodasTurmas" :class="['px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border shadow-sm transition', adminVerTodasTurmas ? 'bg-amber-400 text-indigo-950 border-amber-300 ring-2 ring-amber-300' : 'bg-indigo-800 text-indigo-200 border-indigo-700 hover:bg-indigo-700']" :title="adminVerTodasTurmas ? 'Modo ADM: Exibindo todas as turmas da escola. Clique para alternar para minhas turmas.' : 'Modo Pessoal: Exibindo apenas minhas turmas. Clique para exibir todas as turmas da escola.'">
+                    <i class="fa-solid fa-school"></i>
+                    <span>{{ adminVerTodasTurmas ? 'Todas as Turmas (ADM)' : 'Minhas Turmas' }}</span>
+                </button>
+
                 <!-- BOTÃO TROCAR SENHA -->
                 <button @click="abrirModalSenha" class="bg-indigo-800 hover:bg-indigo-700 text-indigo-200 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 border border-indigo-700 shadow-sm" title="Alterar minha senha">
                     <i class="fa-solid fa-key"></i> Senha
@@ -170,14 +176,24 @@
         </header>
 
         <!-- BARRA DE SELEÇÃO E CONTROLES -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 mb-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mb-3">
             
             <!-- SELEÇÃO DE TURMA -->
             <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Turma</label>
                 <select v-model="selectedClass" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm cursor-pointer">
-                    <option v-for="t in turmasOrdenadas" :key="t" :value="t">
+                    <option v-for="t in turmasDisponiveis" :key="t" :value="t">
                         {{ t }} ({{ (turmas[t] || []).length }} alu.)
+                    </option>
+                </select>
+            </div>
+
+            <!-- SELEÇÃO DE DISCIPLINA -->
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Disciplina</label>
+                <select v-model="selectedDisciplina" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm cursor-pointer">
+                    <option v-for="d in disciplinasDisponiveis" :key="d" :value="d">
+                        {{ d }}
                     </option>
                 </select>
             </div>
@@ -438,7 +454,7 @@
                         <h2 class="font-bold text-slate-800 text-lg leading-tight">Cálculo Proporcional ao Máximo da Turma</h2>
                     </div>
                     <p class="text-xs text-slate-500">
-                        Professor(a): <strong class="text-indigo-900">{{ currentUser }}</strong> &bull; O aluno com maior pontuação no bimestre ganha Nota 10,0.
+                        Professor(a): <strong class="text-indigo-900">{{ currentUser }}</strong> &bull; Turma: <strong class="text-indigo-950">{{ selectedClass }}</strong> &bull; Disciplina: <strong class="text-indigo-950">{{ selectedDisciplina }}</strong> &bull; O aluno com maior pontuação no bimestre ganha Nota 10,0.
                     </p>
                 </div>
 
@@ -930,6 +946,7 @@
                                 <tr>
                                     <th class="p-3">Professor(a)</th>
                                     <th class="p-3">Nível de Acesso</th>
+                                    <th class="p-3">Turmas e Disciplinas</th>
                                     <th class="p-3">Senha de Acesso</th>
                                     <th class="p-3 text-right">Ações</th>
                                 </tr>
@@ -944,6 +961,11 @@
                                     <td class="p-3">
                                         <span :class="['px-2 py-0.5 rounded-full font-bold text-[10px]', prof.admin ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-700']">
                                             {{ prof.admin ? '👑 Administrador' : '📚 Professor' }}
+                                        </span>
+                                    </td>
+                                    <td class="p-3 text-slate-600 max-w-xs">
+                                        <span class="text-[11px] leading-tight block truncate font-medium" :title="formatarTurmasDisciplinasResumo(prof.turmasDisciplinas)">
+                                            {{ formatarTurmasDisciplinasResumo(prof.turmasDisciplinas) }}
                                         </span>
                                     </td>
                                     <td class="p-3">
@@ -1084,8 +1106,8 @@
 
     <!-- MODAL: PROFESSOR / USUÁRIO (ADMIN) -->
     <div v-if="modalProfessor.aberto" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white max-w-md w-full rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-            <div class="bg-indigo-900 text-white p-4 flex justify-between items-center border-b-2 border-amber-400">
+        <div class="bg-white max-w-2xl w-full rounded-2xl shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="bg-indigo-900 text-white p-4 flex justify-between items-center border-b-2 border-amber-400 shrink-0">
                 <h3 class="font-bold text-sm flex items-center gap-2">
                     <i :class="modalProfessor.modo === 'novo' ? 'fa-solid fa-user-plus text-amber-400' : 'fa-solid fa-user-pen text-amber-400'"></i>
                     {{ modalProfessor.modo === 'novo' ? 'Cadastrar Novo Professor' : 'Editar Dados do Professor' }}
@@ -1094,18 +1116,20 @@
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <div class="p-5 space-y-3.5">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Nome do Professor(a)</label>
-                    <input type="text" v-model="modalProfessor.nome" placeholder="Ex: Professor Silva" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
-                </div>
+            <div class="p-5 space-y-3.5 overflow-y-auto grow">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Nome do Professor(a)</label>
+                        <input type="text" v-model="modalProfessor.nome" placeholder="Ex: Alessandra" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                    </div>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Nível de Acesso</label>
-                    <select v-model="modalProfessor.admin" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
-                        <option :value="false">📚 Professor(a) Comum</option>
-                        <option :value="true">👑 Administrador(a) do Sistema</option>
-                    </select>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Nível de Acesso</label>
+                        <select v-model="modalProfessor.admin" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                            <option :value="false">📚 Professor(a) Comum</option>
+                            <option :value="true">👑 Administrador(a) do Sistema</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div>
@@ -1113,8 +1137,39 @@
                     <input type="text" v-model="modalProfessor.senha" placeholder="Senha do professor (mínimo 3 caracteres)" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
                     <span class="text-[10px] text-slate-400">Padrão sugerido inicial: 0000</span>
                 </div>
+
+                <!-- SEÇÃO: TURMAS E DISCIPLINAS ATRIBUÍDAS -->
+                <div class="pt-3 border-t border-slate-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase">
+                            <i class="fa-solid fa-chalkboard-user text-indigo-600 mr-1"></i> Turmas e Disciplinas Atribuídas
+                        </label>
+                        <span class="text-[10px] text-slate-400">Marque a turma e selecione ou digite as disciplinas</span>
+                    </div>
+                    <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                        <div v-for="tc in TODAS_TURMAS_PADRAO" :key="tc" class="p-2.5 rounded-xl border transition" :class="modalProfessor.turmasDisciplinas && modalProfessor.turmasDisciplinas[tc] ? 'bg-indigo-50/70 border-indigo-300' : 'bg-slate-50 border-slate-200'">
+                            <div class="flex items-center justify-between gap-2 mb-1.5">
+                                <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-slate-800">
+                                    <input type="checkbox" :checked="!!(modalProfessor.turmasDisciplinas && modalProfessor.turmasDisciplinas[tc])" @change="toggleTurmaProfessorModal(tc)" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                                    <span class="font-extrabold text-indigo-950">Turma {{ tc }}</span>
+                                </label>
+                                <span v-if="modalProfessor.turmasDisciplinas && modalProfessor.turmasDisciplinas[tc]" class="text-[10px] text-indigo-600 font-bold">
+                                    {{ (modalProfessor.turmasDisciplinas[tc] || []).length }} disc.
+                                </span>
+                            </div>
+                            <div v-if="modalProfessor.turmasDisciplinas && modalProfessor.turmasDisciplinas[tc]" class="space-y-1.5 pt-1">
+                                <input type="text" :value="getDisciplinasStringModal(tc)" @input="setDisciplinasStringModal(tc, $event.target.value)" placeholder="Ex: BIO, PRAT (separadas por vírgula)" class="w-full bg-white border border-indigo-200 rounded-lg p-1.5 text-xs font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500">
+                                <div class="flex flex-wrap gap-1">
+                                    <button v-for="dSug in DISCIPLINAS_SUGERIDAS" :key="dSug" type="button" @click="toggleDisciplinaModal(tc, dSug)" :class="['text-[10px] px-1.5 py-0.5 rounded font-bold transition', (modalProfessor.turmasDisciplinas[tc] || []).includes(dSug) ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:bg-indigo-100']">
+                                        {{ dSug }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 shrink-0">
                 <button @click="modalProfessor.aberto = false" class="px-3 py-2 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-100">
                     Cancelar
                 </button>
@@ -1618,28 +1673,294 @@ createApp({
             return '4';
         }
 
-        // --- LISTA DE USUÁRIOS E PERMISSÕES DINÂMICAS ---
+        // --- LISTA DE USUÁRIOS E PERMISSÕES DINÂMICAS (MATRIZ OFICIAL DE 19 PROFESSORES) ---
         const USUARIOS_PADRAO = [
-            { id: '1', nome: 'Raquel', admin: true },
-            { id: '2', nome: 'Marcelo', admin: true },
-            { id: '3', nome: 'Alessandra', admin: false },
-            { id: '4', nome: 'Bruna', admin: false },
-            { id: '5', nome: 'Cristina', admin: false },
-            { id: '6', nome: 'Felipe', admin: false },
-            { id: '7', nome: 'Gabriel Vitor', admin: false },
-            { id: '8', nome: 'Glaucia', admin: false },
-            { id: '9', nome: 'Janaina', admin: false },
-            { id: '10', nome: 'Leila', admin: false },
-            { id: '11', nome: 'Luzia', admin: false },
-            { id: '12', nome: 'Mariana', admin: false },
-            { id: '13', nome: 'Natalia', admin: false },
-            { id: '14', nome: 'Odair', admin: false },
-            { id: '15', nome: 'Rodolfo', admin: false },
-            { id: '16', nome: 'Samanta', admin: false },
-            { id: '17', nome: 'Vera', admin: false }
+            {
+                id: '1',
+                nome: 'Alessandra',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['ELE', 'RED'],
+                    '1C': ['RED'],
+                    '2C': ['LPOR'],
+                    '3A': ['OEPORT'],
+                    '3B': ['OEPORT'],
+                    '3ADM': ['LPOR'],
+                    '3AGRO': ['LPOR']
+                }
+            },
+            {
+                id: '2',
+                nome: 'Bruna',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['EDFIS', 'EMA'],
+                    '1C': ['EDFIS', 'ELE'],
+                    '1D': ['EDFIS', 'EMA'],
+                    '2C': ['EDFIS'],
+                    '2ADM': ['EDFIS'],
+                    '2AGRO': ['EDFIS'],
+                    '3A': ['EDFIS', 'PV'],
+                    '3B': ['EDFIS', 'PV'],
+                    '3ADM': ['EDFIS'],
+                    '3AGRO': ['EDFIS']
+                }
+            },
+            {
+                id: '3',
+                nome: 'Cristina',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['ART'],
+                    '1C': ['ART', 'EMA'],
+                    '1D': ['ART', 'ELE', 'PV'],
+                    '2C': ['ARTMID', 'EMA', 'PV'],
+                    '3A': ['EMA'],
+                    '3B': ['EMA']
+                }
+            },
+            {
+                id: '4',
+                nome: 'Felipe',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['FIS'],
+                    '1C': ['FIS'],
+                    '1D': ['FIS', 'PRAT'],
+                    '2C': ['FIS'],
+                    '2ADM': ['FIS'],
+                    '2AGRO': ['FIS'],
+                    '3A': ['FIS'],
+                    '3B': ['FIS'],
+                    '3ADM': ['FIS'],
+                    '3AGRO': ['FIS']
+                }
+            },
+            {
+                id: '5',
+                nome: 'Gabriel V',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['BIO', 'PRAT'],
+                    '1C': ['BIO', 'PRAT'],
+                    '1D': ['BIO'],
+                    '2C': ['BIO', 'PRAT'],
+                    '2ADM': ['BIO'],
+                    '2AGRO': ['BIO'],
+                    '3A': ['APBIO', 'PRAT'],
+                    '3B': ['PRAT']
+                }
+            },
+            {
+                id: '6',
+                nome: 'Glaucia',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['OEMAT', 'ROB'],
+                    '1C': ['MAT', 'OEMAT', 'ROB'],
+                    '1D': ['OEMAT', 'ROB'],
+                    '2C': ['ROB'],
+                    '3A': ['ROB'],
+                    '3B': ['ROB'],
+                    '3ADM': ['OEMAT']
+                }
+            },
+            {
+                id: '7',
+                nome: 'Glauconita',
+                admin: false,
+                turmasDisciplinas: {
+                    '2AGRO': ['CCMT', 'GPCE', 'INFOAGRO', 'INTAGRO']
+                }
+            },
+            {
+                id: '8',
+                nome: 'Janaina',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['EFIN', 'MAT'],
+                    '1C': ['EFIN'],
+                    '1D': ['EFIN', 'MAT'],
+                    '2C': ['EFIN', 'ELE'],
+                    '2ADM': ['EFIN'],
+                    '2AGRO': ['EFIN']
+                }
+            },
+            {
+                id: '9',
+                nome: 'Leila',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['HIS'],
+                    '1C': ['HIS'],
+                    '1D': ['HIS'],
+                    '2C': ['HIS'],
+                    '2ADM': ['HIS'],
+                    '2AGRO': ['HIS'],
+                    '3A': ['HIS'],
+                    '3B': ['HIS'],
+                    '3ADM': ['HIS'],
+                    '3AGRO': ['HIS']
+                }
+            },
+            {
+                id: '10',
+                nome: 'Luzia',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['FIL', 'PV'],
+                    '1C': ['FIL', 'PV'],
+                    '1D': ['FIL'],
+                    '2C': ['SOC'],
+                    '2ADM': ['SOC'],
+                    '2AGRO': ['SOC'],
+                    '3B': ['APFIL', 'APSOC', 'ATUAL']
+                }
+            },
+            {
+                id: '11',
+                nome: 'Marcelo',
+                admin: true,
+                turmasDisciplinas: {
+                    '2C': ['LIDORA', 'OEMAT'],
+                    '3A': ['ELE', 'MAT', 'PROG'],
+                    '3B': ['MAT'],
+                    '3ADM': ['MAT'],
+                    '3AGRO': ['MAT']
+                }
+            },
+            {
+                id: '12',
+                nome: 'Mari',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['LING', 'OEPORT'],
+                    '1C': ['LING', 'OEPORT'],
+                    '1D': ['LING', 'OEPORT'],
+                    '2C': ['LING'],
+                    '2ADM': ['LING'],
+                    '2AGRO': ['LING'],
+                    '3A': ['ING'],
+                    '3B': ['ING'],
+                    '3ADM': ['LING'],
+                    '3AGRO': ['LING']
+                }
+            },
+            {
+                id: '13',
+                nome: 'Natália',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['LPOR'],
+                    '1C': ['LPOR'],
+                    '1D': ['LPOR', 'RED'],
+                    '2C': ['OEPORT', 'RED'],
+                    '2ADM': ['OEPORT', 'RED'],
+                    '2AGRO': ['RED'],
+                    '3B': ['RED']
+                }
+            },
+            {
+                id: '14',
+                nome: 'Odair',
+                admin: false,
+                turmasDisciplinas: {
+                    '1A': ['GEO'],
+                    '1C': ['GEO'],
+                    '1D': ['GEO'],
+                    '2C': ['GEO'],
+                    '2ADM': ['GEO'],
+                    '2AGRO': ['GEO'],
+                    '3B': ['APGEO']
+                }
+            },
+            {
+                id: '15',
+                nome: 'Raquel',
+                admin: true,
+                turmasDisciplinas: {
+                    '1A': ['QUI'],
+                    '1C': ['QUI'],
+                    '1D': ['QUI'],
+                    '2C': ['QUI'],
+                    '2ADM': ['QUI'],
+                    '2AGRO': ['QUI'],
+                    '3A': ['APQUI']
+                }
+            },
+            {
+                id: '16',
+                nome: 'Rodolfo',
+                admin: false,
+                turmasDisciplinas: {
+                    '2C': ['MAT'],
+                    '2ADM': ['MAT', 'OEMAT'],
+                    '2AGRO': ['MAT'],
+                    '3A': ['EMPR', 'OEMAT'],
+                    '3B': ['ELE', 'OEMAT']
+                }
+            },
+            {
+                id: '17',
+                nome: 'Samanta',
+                admin: false,
+                turmasDisciplinas: {
+                    '2ADM': ['LPOR'],
+                    '2AGRO': ['LPOR'],
+                    '3A': ['LPOR', 'RED'],
+                    '3B': ['LPOR'],
+                    '3ADM': ['OEPORT', 'RED'],
+                    '3AGRO': ['RED']
+                }
+            },
+            {
+                id: '18',
+                nome: 'Vera',
+                admin: false,
+                turmasDisciplinas: {
+                    '2ADM': ['CCMT']
+                }
+            },
+            {
+                id: '19',
+                nome: 'Walmir',
+                admin: false,
+                turmasDisciplinas: {
+                    '2ADM': ['INTADM', 'MATADM']
+                }
+            }
         ];
 
-        const usuarios = ref(JSON.parse(localStorage.getItem('diario_usuarios_db') || 'null') || USUARIOS_PADRAO);
+        function normalizarNomeUsuario(nome) {
+            if (!nome) return '';
+            const n = String(nome).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            if (n === 'gabriel vitor') return 'gabriel v';
+            if (n === 'mariana') return 'mari';
+            if (n === 'natalia') return 'natalia';
+            return n;
+        }
+
+        function inicializarUsuariosComMatriz() {
+            const salvos = JSON.parse(localStorage.getItem('diario_usuarios_db') || 'null');
+            if (!salvos || !Array.isArray(salvos) || salvos.length === 0) {
+                return JSON.parse(JSON.stringify(USUARIOS_PADRAO));
+            }
+            const resultado = [...salvos];
+            USUARIOS_PADRAO.forEach(pPadrao => {
+                const normPadrao = normalizarNomeUsuario(pPadrao.nome);
+                const existente = resultado.find(u => normalizarNomeUsuario(u.nome) === normPadrao);
+                if (existente) {
+                    if (!existente.turmasDisciplinas || Object.keys(existente.turmasDisciplinas).length === 0) {
+                        existente.turmasDisciplinas = JSON.parse(JSON.stringify(pPadrao.turmasDisciplinas));
+                    }
+                } else {
+                    resultado.push(JSON.parse(JSON.stringify(pPadrao)));
+                }
+            });
+            return resultado;
+        }
+
+        const usuarios = ref(inicializarUsuariosComMatriz());
 
         // Dropdown formatado: Administradores primeiro (com coroa), depois demais em ordem alfabética
         const listaUsuariosFormatada = computed(() => {
@@ -1732,6 +2053,11 @@ createApp({
 
         const turmas = ref(turmasInicial);
 
+        // Garantir que turmas do 3º ano existam na base
+        if (!turmas.value["Alunos 3B"] && !turmas.value["3B"]) turmas.value["Alunos 3B"] = [];
+        if (!turmas.value["Alunos 3ADM"] && !turmas.value["3ADM"]) turmas.value["Alunos 3ADM"] = [];
+        if (!turmas.value["Alunos 3AGRO"] && !turmas.value["3AGRO"]) turmas.value["Alunos 3AGRO"] = [];
+
         watch(turmas, (newVal) => {
             localStorage.setItem('diario_turmas_db', JSON.stringify(newVal));
             salvarNuvemTurmas(newVal);
@@ -1742,6 +2068,132 @@ createApp({
         });
 
         const selectedClass = ref('');
+        const selectedDisciplina = ref('');
+        const adminVerTodasTurmas = ref(false);
+
+        function toggleAdminVerTodasTurmas() {
+            adminVerTodasTurmas.value = !adminVerTodasTurmas.value;
+        }
+
+        const TODAS_TURMAS_PADRAO = ['1A', '1C', '1D', '1E', '2C', '2D', '2ADM', '2AGRO', '3A', '3B', '3ADM', '3AGRO'];
+        const DISCIPLINAS_SUGERIDAS = ['LPOR', 'MAT', 'EDFIS', 'ART', 'FIS', 'BIO', 'HIS', 'GEO', 'QUI', 'ING', 'RED', 'PV', 'EMA', 'ROB', 'OEMAT', 'OEPORT', 'CCMT', 'EFIN', 'SOC', 'PRAT'];
+
+        function formatarTurmasDisciplinasResumo(td) {
+            if (!td || typeof td !== 'object' || Object.keys(td).length === 0) return 'Nenhuma';
+            return Object.entries(td).map(([turma, discs]) => {
+                const dStr = Array.isArray(discs) && discs.length > 0 ? discs.join(', ') : 'Geral';
+                return `${turma} (${dStr})`;
+            }).join(' • ');
+        }
+
+        function getCodigoTurmaCurto(t) {
+            if (!t) return '';
+            return String(t).replace(/^alunos\s+/i, '').trim();
+        }
+
+        function encontrarTurmaReal(codCurto) {
+            if (!codCurto) return '';
+            const cod = String(codCurto).trim().toLowerCase();
+            const todas = Object.keys(turmas.value || {});
+            const achou = todas.find(t => getCodigoTurmaCurto(t).toLowerCase() === cod || t.toLowerCase() === cod);
+            return achou || codCurto;
+        }
+
+        function getTurmasDoUsuario(usuarioNome) {
+            if (!usuarioNome) return [];
+            const norm = normalizarNomeUsuario(usuarioNome);
+            const u = usuarios.value.find(user => normalizarNomeUsuario(user.nome) === norm);
+            if (!u || !u.turmasDisciplinas || Object.keys(u.turmasDisciplinas).length === 0) {
+                return Object.keys(turmas.value || {}).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            }
+            const codigos = Object.keys(u.turmasDisciplinas);
+            const turmasReais = codigos.map(c => encontrarTurmaReal(c));
+            return [...new Set(turmasReais)].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        }
+
+        function getDisciplinasDoUsuarioETurma(usuarioNome, turmaReal) {
+            if (!usuarioNome || !turmaReal) return ['GERAL'];
+            const norm = normalizarNomeUsuario(usuarioNome);
+            const u = usuarios.value.find(user => normalizarNomeUsuario(user.nome) === norm);
+            const codCurto = getCodigoTurmaCurto(turmaReal);
+            if (!u || !u.turmasDisciplinas) return ['GERAL'];
+            
+            const key = Object.keys(u.turmasDisciplinas).find(k => getCodigoTurmaCurto(k).toLowerCase() === codCurto.toLowerCase());
+            if (key && Array.isArray(u.turmasDisciplinas[key]) && u.turmasDisciplinas[key].length > 0) {
+                return u.turmasDisciplinas[key];
+            }
+            return ['GERAL'];
+        }
+
+        function getTodasDisciplinasDaTurma(turmaReal) {
+            if (!turmaReal) return ['GERAL'];
+            const codCurto = getCodigoTurmaCurto(turmaReal).toLowerCase();
+            const discSet = new Set();
+            usuarios.value.forEach(u => {
+                if (u.turmasDisciplinas) {
+                    Object.keys(u.turmasDisciplinas).forEach(k => {
+                        if (getCodigoTurmaCurto(k).toLowerCase() === codCurto) {
+                            const list = u.turmasDisciplinas[k] || [];
+                            list.forEach(d => discSet.add(d));
+                        }
+                    });
+                }
+            });
+            const arr = [...discSet].sort();
+            return arr.length > 0 ? arr : ['GERAL'];
+        }
+
+        const turmasDisponiveis = computed(() => {
+            if (isAdmin.value && adminVerTodasTurmas.value) {
+                return turmasOrdenadas.value;
+            }
+            const userTurmas = getTurmasDoUsuario(currentUser.value);
+            return userTurmas.length > 0 ? userTurmas : turmasOrdenadas.value;
+        });
+
+        const disciplinasDisponiveis = computed(() => {
+            if (!selectedClass.value) return ['GERAL'];
+            if (isAdmin.value && adminVerTodasTurmas.value) {
+                return getTodasDisciplinasDaTurma(selectedClass.value);
+            }
+            return getDisciplinasDoUsuarioETurma(currentUser.value, selectedClass.value);
+        });
+
+        function getChaveTurmaDisc(turma, disc) {
+            const t = turma || selectedClass.value || '';
+            const d = disc !== undefined ? disc : (selectedDisciplina.value || '');
+            if (!t) return '';
+            return d ? `${t}__${d}` : t;
+        }
+
+        function getChaveAtual() {
+            return getChaveTurmaDisc(selectedClass.value, selectedDisciplina.value);
+        }
+
+        function migrarRegistrosLegadosSeNecessario(turma, disc) {
+            if (!turma || !disc || !currentUser.value) return;
+            const chave = `${turma}__${disc}`;
+            const chaveLegada = turma;
+            
+            // Backup inicial de segurança se ainda não feito
+            const backupKey = `diario_backup_vistos_pre_disciplinas_${currentUser.value}`;
+            if (!localStorage.getItem(backupKey) && registros.value && Object.keys(registros.value).length > 0) {
+                localStorage.setItem(backupKey, JSON.stringify({
+                    registros: registros.value,
+                    conteudos: conteudos.value,
+                    timestamp: new Date().toISOString()
+                }));
+            }
+
+            // Se a chave scoped ainda não existe ou está vazia, e existe histórico na chave legada
+            if ((!registros.value[chave] || Object.keys(registros.value[chave]).length === 0) && registros.value[chaveLegada] && Object.keys(registros.value[chaveLegada]).length > 0) {
+                registros.value[chave] = JSON.parse(JSON.stringify(registros.value[chaveLegada]));
+            }
+            if ((!conteudos.value[chave] || Object.keys(conteudos.value[chave]).length === 0) && conteudos.value[chaveLegada] && Object.keys(conteudos.value[chaveLegada]).length > 0) {
+                conteudos.value[chave] = JSON.parse(JSON.stringify(conteudos.value[chaveLegada]));
+            }
+        }
+
         const selectedDate = ref(new Date().toISOString().split('T')[0]);
         const selectedBimestre = ref(getBimestrePorData(selectedDate.value));
         const isBimestreAuto = ref(true);
@@ -1768,8 +2220,10 @@ createApp({
         const fechamentoBimestre = ref(getBimestrePorData(new Date().toISOString().split('T')[0]));
 
         function getQtdAulasBimestre(bim) {
-            if (!selectedClass.value || !registros.value[selectedClass.value]) return 0;
-            const dates = Object.keys(registros.value[selectedClass.value]);
+            const chave = getChaveAtual();
+            const tData = (chave && registros.value[chave]) ? registros.value[chave] : (selectedClass.value && registros.value[selectedClass.value] ? registros.value[selectedClass.value] : null);
+            if (!tData) return 0;
+            const dates = Object.keys(tData);
             if (bim === 'todos') return dates.length;
             return dates.filter(d => getBimestrePorData(d) === String(bim)).length;
         }
@@ -1790,8 +2244,11 @@ createApp({
 
         onMounted(() => {
             corrigirSituacoesCorrompidas();
-            if (turmasOrdenadas.value.length > 0) {
-                selectedClass.value = turmasOrdenadas.value[0];
+            if (turmasDisponiveis.value.length > 0) {
+                selectedClass.value = turmasDisponiveis.value[0];
+            }
+            if (disciplinasDisponiveis.value.length > 0) {
+                selectedDisciplina.value = disciplinasDisponiveis.value[0];
             }
             if (currentUser.value) {
                 carregarDadosProfessor();
@@ -1814,12 +2271,34 @@ createApp({
             });
         });
 
-        watch(turmasOrdenadas, (novasTurmas) => {
+        watch(turmasDisponiveis, (novasTurmas) => {
             if (!selectedClass.value || !novasTurmas.includes(selectedClass.value)) {
                 if (novasTurmas.length > 0) {
                     selectedClass.value = novasTurmas[0];
                 }
             }
+        }, { immediate: true });
+
+        watch(disciplinasDisponiveis, (novasDiscs) => {
+            if (!selectedDisciplina.value || !novasDiscs.includes(selectedDisciplina.value)) {
+                if (novasDiscs.length > 0) {
+                    selectedDisciplina.value = novasDiscs[0];
+                }
+            }
+            migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
+        }, { immediate: true });
+
+        watch(selectedClass, (novaTurma) => {
+            if (novaTurma && disciplinasDisponiveis.value.length > 0) {
+                if (!disciplinasDisponiveis.value.includes(selectedDisciplina.value)) {
+                    selectedDisciplina.value = disciplinasDisponiveis.value[0];
+                }
+            }
+            migrarRegistrosLegadosSeNecessario(novaTurma, selectedDisciplina.value);
+        });
+
+        watch(selectedDisciplina, (novaDisc) => {
+            migrarRegistrosLegadosSeNecessario(selectedClass.value, novaDisc);
         });
 
         // --- ISOLAMENTO DE DADOS POR PROFESSOR (REGISTROS E CONTEÚDOS) ---
@@ -1837,6 +2316,13 @@ createApp({
             if (!currentUser.value) return;
             registros.value = JSON.parse(localStorage.getItem(getChaveStorageRegistros()) || '{}');
             conteudos.value = JSON.parse(localStorage.getItem(getChaveStorageConteudos()) || '{}');
+            if (turmasDisponiveis.value.length > 0 && (!selectedClass.value || !turmasDisponiveis.value.includes(selectedClass.value))) {
+                selectedClass.value = turmasDisponiveis.value[0];
+            }
+            if (disciplinasDisponiveis.value.length > 0 && (!selectedDisciplina.value || !disciplinasDisponiveis.value.includes(selectedDisciplina.value))) {
+                selectedDisciplina.value = disciplinasDisponiveis.value[0];
+            }
+            migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
         }
 
         watch(registros, (newVal) => {
@@ -1855,14 +2341,21 @@ createApp({
 
         const conteudoDia = computed({
             get() {
-                if (!selectedClass.value || !currentUser.value) return '';
-                if (!conteudos.value[selectedClass.value]) conteudos.value[selectedClass.value] = {};
-                return conteudos.value[selectedClass.value][selectedDate.value] || '';
+                const chave = getChaveAtual();
+                if (!chave || !currentUser.value) return '';
+                if (conteudos.value[chave] && conteudos.value[chave][selectedDate.value] !== undefined) {
+                    return conteudos.value[chave][selectedDate.value];
+                }
+                if (conteudos.value[selectedClass.value] && conteudos.value[selectedClass.value][selectedDate.value] !== undefined) {
+                    return conteudos.value[selectedClass.value][selectedDate.value];
+                }
+                return '';
             },
             set(val) {
-                if (!selectedClass.value || !currentUser.value) return;
-                if (!conteudos.value[selectedClass.value]) conteudos.value[selectedClass.value] = {};
-                conteudos.value[selectedClass.value][selectedDate.value] = val;
+                const chave = getChaveAtual();
+                if (!chave || !currentUser.value) return;
+                if (!conteudos.value[chave]) conteudos.value[chave] = {};
+                conteudos.value[chave][selectedDate.value] = val;
             }
         });
 
@@ -1899,23 +2392,26 @@ createApp({
         });
 
         function initDataStructure() {
-            if (!selectedClass.value) return;
-            if (!registros.value[selectedClass.value]) registros.value[selectedClass.value] = {};
-            if (!registros.value[selectedClass.value][selectedDate.value]) {
-                registros.value[selectedClass.value][selectedDate.value] = {};
+            const chave = getChaveAtual();
+            if (!chave) return;
+            migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
+            if (!registros.value[chave]) registros.value[chave] = {};
+            if (!registros.value[chave][selectedDate.value]) {
+                registros.value[chave][selectedDate.value] = {};
             }
         }
 
         function getRegistro(studentId) {
             initDataStructure();
-            if (!selectedClass.value) return { caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false, pontoPositivo: 0, pontoNegativo: 0 };
-            if (!registros.value[selectedClass.value][selectedDate.value][studentId]) {
-                registros.value[selectedClass.value][selectedDate.value][studentId] = {
+            const chave = getChaveAtual();
+            if (!chave) return { caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false, pontoPositivo: 0, pontoNegativo: 0 };
+            if (!registros.value[chave][selectedDate.value][studentId]) {
+                registros.value[chave][selectedDate.value][studentId] = {
                     caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false,
                     pontoPositivo: 0, pontoNegativo: 0
                 };
             }
-            const reg = registros.value[selectedClass.value][selectedDate.value][studentId];
+            const reg = registros.value[chave][selectedDate.value][studentId];
             if (reg.pontoPositivo === undefined) reg.pontoPositivo = 0;
             if (reg.pontoNegativo === undefined) reg.pontoNegativo = 0;
             return reg;
@@ -1999,7 +2495,8 @@ createApp({
         function getTotaisAluno(studentId, bimestre = fechamentoBimestre.value) {
             let caderno = 0, livro = 0, atividade = 0, copiou = 0, incompleto = 0, dormiu = 0;
             let pontoPositivo = 0, pontoNegativo = 0;
-            const tData = (selectedClass.value && registros.value[selectedClass.value]) ? registros.value[selectedClass.value] : {};
+            const chave = getChaveAtual();
+            const tData = (chave && registros.value[chave]) ? registros.value[chave] : (selectedClass.value && registros.value[selectedClass.value] ? registros.value[selectedClass.value] : {});
             
             Object.keys(tData).forEach(d => {
                 // Filtro por bimestre baseado na data em que foi dado o visto
@@ -2441,7 +2938,15 @@ createApp({
         }
 
         // GESTÃO DE PROFESSORES E SENHAS
-        const modalProfessor = ref({ aberto: false, modo: 'novo', id: '', nome: '', admin: false, senha: '' });
+        const modalProfessor = ref({
+            aberto: false,
+            modo: 'novo',
+            id: '',
+            nome: '',
+            admin: false,
+            senha: '',
+            turmasDisciplinas: {}
+        });
         const mostrarSenhasAdmin = ref({});
 
         function toggleMostrarSenhaAdmin(nome) {
@@ -2451,6 +2956,41 @@ createApp({
             };
         }
 
+        function toggleTurmaProfessorModal(turmaCod) {
+            if (!modalProfessor.value.turmasDisciplinas) modalProfessor.value.turmasDisciplinas = {};
+            if (modalProfessor.value.turmasDisciplinas[turmaCod]) {
+                delete modalProfessor.value.turmasDisciplinas[turmaCod];
+            } else {
+                modalProfessor.value.turmasDisciplinas[turmaCod] = [];
+            }
+        }
+
+        function getDisciplinasStringModal(turmaCod) {
+            if (!modalProfessor.value.turmasDisciplinas || !modalProfessor.value.turmasDisciplinas[turmaCod]) return '';
+            return modalProfessor.value.turmasDisciplinas[turmaCod].join(', ');
+        }
+
+        function setDisciplinasStringModal(turmaCod, val) {
+            if (!modalProfessor.value.turmasDisciplinas) modalProfessor.value.turmasDisciplinas = {};
+            const arr = (val || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+            modalProfessor.value.turmasDisciplinas[turmaCod] = arr;
+        }
+
+        function toggleDisciplinaModal(turmaCod, disc) {
+            if (!modalProfessor.value.turmasDisciplinas) modalProfessor.value.turmasDisciplinas = {};
+            if (!modalProfessor.value.turmasDisciplinas[turmaCod]) {
+                modalProfessor.value.turmasDisciplinas[turmaCod] = [];
+            }
+            const arr = modalProfessor.value.turmasDisciplinas[turmaCod];
+            const upper = disc.trim().toUpperCase();
+            const idx = arr.indexOf(upper);
+            if (idx !== -1) {
+                arr.splice(idx, 1);
+            } else {
+                arr.push(upper);
+            }
+        }
+
         function abrirModalNovoProfessor() {
             modalProfessor.value = {
                 aberto: true,
@@ -2458,7 +2998,8 @@ createApp({
                 id: `${Date.now()}`,
                 nome: '',
                 admin: false,
-                senha: '0000'
+                senha: '0000',
+                turmasDisciplinas: {}
             };
         }
 
@@ -2469,7 +3010,8 @@ createApp({
                 id: prof.id || prof.nome,
                 nome: prof.nome,
                 admin: !!prof.admin,
-                senha: getSenhaUsuario(prof.nome)
+                senha: getSenhaUsuario(prof.nome),
+                turmasDisciplinas: JSON.parse(JSON.stringify(prof.turmasDisciplinas || {}))
             };
         }
 
@@ -2494,12 +3036,18 @@ createApp({
                 lista.push({
                     id: p.id || `${Date.now()}`,
                     nome: nomeLimpo,
-                    admin: p.admin
+                    admin: p.admin,
+                    turmasDisciplinas: p.turmasDisciplinas || {}
                 });
             } else {
                 const index = lista.findIndex(u => (u.id && u.id === p.id) || u.nome === p.nome);
                 if (index !== -1) {
-                    lista[index] = { ...lista[index], nome: nomeLimpo, admin: p.admin };
+                    lista[index] = {
+                        ...lista[index],
+                        nome: nomeLimpo,
+                        admin: p.admin,
+                        turmasDisciplinas: p.turmasDisciplinas || {}
+                    };
                 }
             }
 
@@ -2608,9 +3156,9 @@ createApp({
 
         function carregarContagemData() {
             const dataSel = modalContagem.value.data;
-            const turmaSel = selectedClass.value;
-            const regDia = (registros.value[turmaSel] && registros.value[turmaSel][dataSel]) || {};
-            const descDia = (conteudos.value[turmaSel] && conteudos.value[turmaSel][dataSel]) || '';
+            const chaveSel = getChaveAtual();
+            const regDia = (registros.value[chaveSel] && registros.value[chaveSel][dataSel]) || (registros.value[selectedClass.value] && registros.value[selectedClass.value][dataSel]) || {};
+            const descDia = (conteudos.value[chaveSel] && conteudos.value[chaveSel][dataSel]) || (conteudos.value[selectedClass.value] && conteudos.value[selectedClass.value][dataSel]) || '';
             if (descDia) {
                 modalContagem.value.descricao = descDia;
             } else if (!modalContagem.value.descricao) {
@@ -2648,18 +3196,19 @@ createApp({
 
         function salvarContagemBimestral() {
             const turmaSel = selectedClass.value;
+            const chaveSel = getChaveAtual();
             const dataSel = modalContagem.value.data;
-            if (!turmaSel || !dataSel) {
+            if (!turmaSel || !dataSel || !chaveSel) {
                 alert('Informe a turma e a data da contagem.');
                 return;
             }
 
-            if (!registros.value[turmaSel]) registros.value[turmaSel] = {};
-            if (!registros.value[turmaSel][dataSel]) registros.value[turmaSel][dataSel] = {};
-            if (!conteudos.value[turmaSel]) conteudos.value[turmaSel] = {};
+            if (!registros.value[chaveSel]) registros.value[chaveSel] = {};
+            if (!registros.value[chaveSel][dataSel]) registros.value[chaveSel][dataSel] = {};
+            if (!conteudos.value[chaveSel]) conteudos.value[chaveSel] = {};
 
             const descFinal = (modalContagem.value.descricao || '').trim() || 'Contagem de vistos anteriores do bimestre';
-            conteudos.value[turmaSel][dataSel] = descFinal;
+            conteudos.value[chaveSel][dataSel] = descFinal;
 
             let totalVistosGerais = 0;
             modalContagem.value.alunos.forEach(item => {
@@ -2668,7 +3217,7 @@ createApp({
                 const a = Math.max(0, Number(item.atividade) || 0);
                 totalVistosGerais += (c + l + a);
 
-                registros.value[turmaSel][dataSel][item.id] = {
+                registros.value[chaveSel][dataSel][item.id] = {
                     isContagem: true,
                     caderno: c,
                     livro: l,
@@ -2885,6 +3434,8 @@ createApp({
                     "Nome": aluno.nome,
                     "RA": aluno.ra,
                     "Situação": aluno.situacao,
+                    "Turma": selectedClass.value,
+                    "Disciplina": selectedDisciplina.value || 'Geral',
                     "Bimestre": bimLabel,
                     "Vistos Caderno": t.caderno,
                     "Vistos Livro": t.livro,
@@ -2899,7 +3450,7 @@ createApp({
             const ws = XLSX.utils.json_to_sheet(dataToExport);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, `Fechamento ${bimFiltro === 'todos' ? 'Anual' : bimFiltro + 'Bim'}`);
-            XLSX.writeFile(wb, `Fechamento_Vistos_${selectedClass.value}_${bimFiltro}Bim_Prof_${currentUser.value}.xlsx`);
+            XLSX.writeFile(wb, `Fechamento_Vistos_${selectedClass.value}_${selectedDisciplina.value || 'Geral'}_${bimFiltro}Bim_Prof_${currentUser.value}.xlsx`);
         }
 
         // --- PRÉ-VISUALIZAÇÃO DE RELATÓRIOS E FICHAS (PDF) ---
@@ -3009,7 +3560,7 @@ createApp({
             doc.setFontSize(14);
             doc.text("E.E. José Marcelino de Almeida - Barretos/SP", 14, 15);
             doc.setFontSize(10);
-            doc.text(`Relatório de Vistos - Turma: ${selectedClass.value} | Fechamento: ${bimLabel} | Professor(a): ${currentUser.value}`, 14, 22);
+            doc.text(`Relatório de Vistos - Turma: ${selectedClass.value} | Disciplina: ${selectedDisciplina.value || 'Geral'} | Fechamento: ${bimLabel} | Professor(a): ${currentUser.value}`, 14, 22);
 
             const tableData = currentStudentList.value.map(a => {
                 const t = getTotaisAluno(a.id, bimFiltro);
@@ -3033,14 +3584,14 @@ createApp({
                 headStyles: { fillColor: [30, 58, 138] }
             });
 
-            const fileName = `Diario_Vistos_${selectedClass.value}_${bimFiltro}Bim_Prof_${currentUser.value}.pdf`;
+            const fileName = `Diario_Vistos_${selectedClass.value}_${selectedDisciplina.value || 'Geral'}_${bimFiltro}Bim_Prof_${currentUser.value}.pdf`;
             if (directDownload) {
                 doc.save(fileName);
             } else {
                 abrirPreviaResumo(
                     doc,
                     `Resumo Geral da Turma (${selectedClass.value})`,
-                    `Fechamento: ${bimLabel} • Prof(a). ${currentUser.value}`,
+                    `Disciplina: ${selectedDisciplina.value || 'Geral'} • Fechamento: ${bimLabel} • Prof(a). ${currentUser.value}`,
                     fileName,
                     tableData
                 );
@@ -3052,7 +3603,8 @@ createApp({
             const t = getTotaisAluno(aluno.id, bimFiltro);
             const nota = calcularNota(aluno.id, bimFiltro);
 
-            const turmaReg = registros.value[selectedClass.value] || {};
+            const chave = getChaveAtual();
+            const turmaReg = (chave && registros.value[chave]) ? registros.value[chave] : (selectedClass.value && registros.value[selectedClass.value] ? registros.value[selectedClass.value] : {});
             const datasRegistradas = Object.keys(turmaReg).sort();
             let datasFiltradas = bimFiltro === 'todos'
                 ? datasRegistradas
@@ -3077,7 +3629,8 @@ createApp({
                 const r = diaObj[aluno.id] || {};
                 const isContagemDia = r.isContagem || Object.values(diaObj).some(x => x && x.isContagem);
                 const defaultDesc = isContagemDia ? 'Contagem de vistos anteriores do bimestre' : 'Atividades de aula';
-                const conteudo = (conteudos.value[selectedClass.value] && conteudos.value[selectedClass.value][d]) || defaultDesc;
+                const turmaCont = (chave && conteudos.value[chave]) ? conteudos.value[chave] : (selectedClass.value && conteudos.value[selectedClass.value] ? conteudos.value[selectedClass.value] : {});
+                const conteudo = turmaCont[d] || defaultDesc;
 
                 let turmaTeveCaderno = false;
                 let turmaTeveLivro = false;
@@ -3136,6 +3689,7 @@ createApp({
             return {
                 aluno: aluno,
                 turma: selectedClass.value,
+                disciplina: selectedDisciplina.value || 'Geral',
                 bimLabel: bimLabel,
                 bimFiltro: bimFiltro,
                 professor: currentUser.value,
@@ -3171,7 +3725,7 @@ createApp({
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(8.5);
             doc.text(`Nº Chamada: ${aluno.numero || '-'}    |    RA: ${aluno.ra || '-'}    |    Situação: ${aluno.situacao || 'Ativo'}`, 18, 50);
-            doc.text(`Turma: ${turma}    |    Bimestre de Avaliação: ${bimLabel}    |    Professor(a): ${professor}`, 18, 55);
+            doc.text(`Turma: ${turma}    |    Disciplina: ${dFicha.disciplina || 'Geral'}    |    Bimestre: ${bimLabel}    |    Professor(a): ${professor}`, 18, 55);
 
             // Totais e Nota
             doc.autoTable({
@@ -3491,7 +4045,10 @@ createApp({
             fazerLogin, fazerLogout, modalSenha, abrirModalSenha, salvarNovaSenha,
             
             // Turmas e Alunos
-            turmas, turmasOrdenadas, selectedClass, selectedDate, selectedBimestre, isBimestreAuto, onBimestreManualChange, restaurarBimestreAuto,
+            turmas, turmasOrdenadas, selectedClass, selectedDisciplina, disciplinasDisponiveis, turmasDisponiveis,
+            adminVerTodasTurmas, toggleAdminVerTodasTurmas, TODAS_TURMAS_PADRAO, DISCIPLINAS_SUGERIDAS, formatarTurmasDisciplinasResumo,
+            toggleTurmaProfessorModal, getDisciplinasStringModal, setDisciplinasStringModal, toggleDisciplinaModal,
+            selectedDate, selectedBimestre, isBimestreAuto, onBimestreManualChange, restaurarBimestreAuto,
             CALENDARIO_BIMESTRES_2026, bimestreCorrente, fechamentoBimestre, getQtdAulasBimestre,
             currentTab, apenasAtivos, ordenacaoAlunos, alternarOrdenacao, setOrdenacao,
             conteudoDia, currentStudentList, maxPontuacaoTurma, getRegistro, toggleItem, alterarPontos,
