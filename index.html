@@ -2170,6 +2170,40 @@ createApp({
             return getChaveTurmaDisc(selectedClass.value, selectedDisciplina.value);
         }
 
+        function getRegistrosEfetivosTurma(turma, disc) {
+            const t = turma || selectedClass.value;
+            if (!t) return {};
+            const d = disc !== undefined ? disc : (selectedDisciplina.value || '');
+            const chave = getChaveTurmaDisc(t, d);
+            const regDisc = (chave && registros.value[chave]) ? registros.value[chave] : {};
+            const regLegado = registros.value[t] || {};
+            
+            if (Object.keys(regDisc).length === 0 && Object.keys(regLegado).length === 0) {
+                return {};
+            }
+            if (chave === t || Object.keys(regLegado).length === 0) {
+                return regDisc;
+            }
+            return { ...regLegado, ...regDisc };
+        }
+
+        function getConteudosEfetivosTurma(turma, disc) {
+            const t = turma || selectedClass.value;
+            if (!t) return {};
+            const d = disc !== undefined ? disc : (selectedDisciplina.value || '');
+            const chave = getChaveTurmaDisc(t, d);
+            const contDisc = (chave && conteudos.value[chave]) ? conteudos.value[chave] : {};
+            const contLegado = conteudos.value[t] || {};
+
+            if (Object.keys(contDisc).length === 0 && Object.keys(contLegado).length === 0) {
+                return {};
+            }
+            if (chave === t || Object.keys(contLegado).length === 0) {
+                return contDisc;
+            }
+            return { ...contLegado, ...contDisc };
+        }
+
         function migrarRegistrosLegadosSeNecessario(turma, disc) {
             if (!turma || !disc || !currentUser.value) return;
             const chave = `${turma}__${disc}`;
@@ -2185,12 +2219,21 @@ createApp({
                 }));
             }
 
-            // Se a chave scoped ainda não existe ou está vazia, e existe histórico na chave legada
-            if ((!registros.value[chave] || Object.keys(registros.value[chave]).length === 0) && registros.value[chaveLegada] && Object.keys(registros.value[chaveLegada]).length > 0) {
-                registros.value[chave] = JSON.parse(JSON.stringify(registros.value[chaveLegada]));
+            if (registros.value[chaveLegada] && Object.keys(registros.value[chaveLegada]).length > 0) {
+                if (!registros.value[chave]) registros.value[chave] = {};
+                Object.keys(registros.value[chaveLegada]).forEach(d => {
+                    if (!registros.value[chave][d] || Object.keys(registros.value[chave][d]).length === 0) {
+                        registros.value[chave][d] = JSON.parse(JSON.stringify(registros.value[chaveLegada][d]));
+                    }
+                });
             }
-            if ((!conteudos.value[chave] || Object.keys(conteudos.value[chave]).length === 0) && conteudos.value[chaveLegada] && Object.keys(conteudos.value[chaveLegada]).length > 0) {
-                conteudos.value[chave] = JSON.parse(JSON.stringify(conteudos.value[chaveLegada]));
+            if (conteudos.value[chaveLegada] && Object.keys(conteudos.value[chaveLegada]).length > 0) {
+                if (!conteudos.value[chave]) conteudos.value[chave] = {};
+                Object.keys(conteudos.value[chaveLegada]).forEach(d => {
+                    if (conteudos.value[chave][d] === undefined || conteudos.value[chave][d] === '') {
+                        conteudos.value[chave][d] = conteudos.value[chaveLegada][d];
+                    }
+                });
             }
         }
 
@@ -2220,9 +2263,7 @@ createApp({
         const fechamentoBimestre = ref(getBimestrePorData(new Date().toISOString().split('T')[0]));
 
         function getQtdAulasBimestre(bim) {
-            const chave = getChaveAtual();
-            const tData = (chave && registros.value[chave]) ? registros.value[chave] : (selectedClass.value && registros.value[selectedClass.value] ? registros.value[selectedClass.value] : null);
-            if (!tData) return 0;
+            const tData = getRegistrosEfetivosTurma();
             const dates = Object.keys(tData);
             if (bim === 'todos') return dates.length;
             return dates.filter(d => getBimestrePorData(d) === String(bim)).length;
@@ -2341,15 +2382,8 @@ createApp({
 
         const conteudoDia = computed({
             get() {
-                const chave = getChaveAtual();
-                if (!chave || !currentUser.value) return '';
-                if (conteudos.value[chave] && conteudos.value[chave][selectedDate.value] !== undefined) {
-                    return conteudos.value[chave][selectedDate.value];
-                }
-                if (conteudos.value[selectedClass.value] && conteudos.value[selectedClass.value][selectedDate.value] !== undefined) {
-                    return conteudos.value[selectedClass.value][selectedDate.value];
-                }
-                return '';
+                const cData = getConteudosEfetivosTurma();
+                return cData[selectedDate.value] || '';
             },
             set(val) {
                 const chave = getChaveAtual();
@@ -2397,7 +2431,11 @@ createApp({
             migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
             if (!registros.value[chave]) registros.value[chave] = {};
             if (!registros.value[chave][selectedDate.value]) {
-                registros.value[chave][selectedDate.value] = {};
+                if (registros.value[selectedClass.value] && registros.value[selectedClass.value][selectedDate.value]) {
+                    registros.value[chave][selectedDate.value] = JSON.parse(JSON.stringify(registros.value[selectedClass.value][selectedDate.value]));
+                } else {
+                    registros.value[chave][selectedDate.value] = {};
+                }
             }
         }
 
@@ -2406,10 +2444,15 @@ createApp({
             const chave = getChaveAtual();
             if (!chave) return { caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false, pontoPositivo: 0, pontoNegativo: 0 };
             if (!registros.value[chave][selectedDate.value][studentId]) {
-                registros.value[chave][selectedDate.value][studentId] = {
-                    caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false,
-                    pontoPositivo: 0, pontoNegativo: 0
-                };
+                const regLegado = (registros.value[selectedClass.value] && registros.value[selectedClass.value][selectedDate.value] && registros.value[selectedClass.value][selectedDate.value][studentId]) || null;
+                if (regLegado) {
+                    registros.value[chave][selectedDate.value][studentId] = JSON.parse(JSON.stringify(regLegado));
+                } else {
+                    registros.value[chave][selectedDate.value][studentId] = {
+                        caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false,
+                        pontoPositivo: 0, pontoNegativo: 0
+                    };
+                }
             }
             const reg = registros.value[chave][selectedDate.value][studentId];
             if (reg.pontoPositivo === undefined) reg.pontoPositivo = 0;
@@ -2495,8 +2538,7 @@ createApp({
         function getTotaisAluno(studentId, bimestre = fechamentoBimestre.value) {
             let caderno = 0, livro = 0, atividade = 0, copiou = 0, incompleto = 0, dormiu = 0;
             let pontoPositivo = 0, pontoNegativo = 0;
-            const chave = getChaveAtual();
-            const tData = (chave && registros.value[chave]) ? registros.value[chave] : (selectedClass.value && registros.value[selectedClass.value] ? registros.value[selectedClass.value] : {});
+            const tData = getRegistrosEfetivosTurma();
             
             Object.keys(tData).forEach(d => {
                 // Filtro por bimestre baseado na data em que foi dado o visto
@@ -3113,8 +3155,10 @@ createApp({
         }, { immediate: true });
 
         function getQtdVistosNaData(turma, data) {
-            if (!turma || !data || !registros.value[turma] || !registros.value[turma][data]) return 0;
-            const obj = registros.value[turma][data];
+            if (!turma || !data) return 0;
+            const tData = registros.value[turma] || getRegistrosEfetivosTurma(turma);
+            if (!tData || !tData[data]) return 0;
+            const obj = tData[data];
             let count = 0;
             Object.values(obj).forEach(r => {
                 if (r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu || (r.pontoPositivo > 0) || (r.pontoNegativo > 0) || r.isContagem)) {
@@ -3125,8 +3169,9 @@ createApp({
         }
 
         function getConteudoNaData(turma, data) {
-            if (!turma || !data || !conteudos.value[turma]) return '';
-            return conteudos.value[turma][data] || '';
+            if (!turma || !data) return '';
+            const cData = conteudos.value[turma] || getConteudosEfetivosTurma(turma);
+            return cData[data] || '';
         }
 
         // --- CONTAGEM DE VISTOS BIMESTRAL ---
@@ -3156,9 +3201,10 @@ createApp({
 
         function carregarContagemData() {
             const dataSel = modalContagem.value.data;
-            const chaveSel = getChaveAtual();
-            const regDia = (registros.value[chaveSel] && registros.value[chaveSel][dataSel]) || (registros.value[selectedClass.value] && registros.value[selectedClass.value][dataSel]) || {};
-            const descDia = (conteudos.value[chaveSel] && conteudos.value[chaveSel][dataSel]) || (conteudos.value[selectedClass.value] && conteudos.value[selectedClass.value][dataSel]) || '';
+            const tData = getRegistrosEfetivosTurma();
+            const cData = getConteudosEfetivosTurma();
+            const regDia = tData[dataSel] || {};
+            const descDia = cData[dataSel] || '';
             if (descDia) {
                 modalContagem.value.descricao = descDia;
             } else if (!modalContagem.value.descricao) {
@@ -3304,12 +3350,13 @@ createApp({
             const bimOrigemObj = CALENDARIO_BIMESTRES_2026.find(b => b.bimestre === bimestreOrigem);
             const bimDestinoObj = CALENDARIO_BIMESTRES_2026.find(b => b.bimestre === bimestreDestino);
 
-            if (!registros.value[turma]) {
+            const tData = registros.value[turma] || getRegistrosEfetivosTurma(turma);
+            if (!tData || Object.keys(tData).length === 0) {
                 alert(`Nenhum visto cadastrado na turma "${turma}".`);
                 return;
             }
 
-            const todasDatas = Object.keys(registros.value[turma] || {}).filter(d => {
+            const todasDatas = Object.keys(tData).filter(d => {
                 const qtd = getQtdVistosNaData(turma, d);
                 return d >= bimOrigemObj.inicio && d <= bimOrigemObj.fim && qtd > 0;
             }).sort();
@@ -3603,8 +3650,8 @@ createApp({
             const t = getTotaisAluno(aluno.id, bimFiltro);
             const nota = calcularNota(aluno.id, bimFiltro);
 
-            const chave = getChaveAtual();
-            const turmaReg = (chave && registros.value[chave]) ? registros.value[chave] : (selectedClass.value && registros.value[selectedClass.value] ? registros.value[selectedClass.value] : {});
+            const turmaReg = getRegistrosEfetivosTurma();
+            const turmaCont = getConteudosEfetivosTurma();
             const datasRegistradas = Object.keys(turmaReg).sort();
             let datasFiltradas = bimFiltro === 'todos'
                 ? datasRegistradas
@@ -3629,7 +3676,6 @@ createApp({
                 const r = diaObj[aluno.id] || {};
                 const isContagemDia = r.isContagem || Object.values(diaObj).some(x => x && x.isContagem);
                 const defaultDesc = isContagemDia ? 'Contagem de vistos anteriores do bimestre' : 'Atividades de aula';
-                const turmaCont = (chave && conteudos.value[chave]) ? conteudos.value[chave] : (selectedClass.value && conteudos.value[selectedClass.value] ? conteudos.value[selectedClass.value] : {});
                 const conteudo = turmaCont[d] || defaultDesc;
 
                 let turmaTeveCaderno = false;
@@ -3942,7 +3988,14 @@ createApp({
                 if (docTurmas.exists) {
                     const data = docTurmas.data();
                     if (data && data.turmas) {
-                        turmas.value = data.turmas;
+                        const tNuvem = { ...data.turmas };
+                        ['1A', '1C', '1D', '1E', '2C', '2D', '2E', '2ADM', '2AGRO', '3A', '3B', '3C', '3D', '3ADM', '3AGRO'].forEach(cod => {
+                            const real = encontrarTurmaReal(cod);
+                            if (!tNuvem[real] && !tNuvem[`Alunos ${cod}`] && !tNuvem[cod]) {
+                                tNuvem[`Alunos ${cod}`] = [];
+                            }
+                        });
+                        turmas.value = tNuvem;
                         corrigirSituacoesCorrompidas();
                     }
                 } else {
@@ -3954,8 +4007,21 @@ createApp({
                 if (docUsuarios.exists) {
                     const data = docUsuarios.data();
                     if (data && Array.isArray(data.usuarios) && data.usuarios.length > 0) {
-                        usuarios.value = data.usuarios;
+                        const mesclados = [...data.usuarios];
+                        USUARIOS_PADRAO.forEach(pPadrao => {
+                            const norm = normalizarNomeUsuario(pPadrao.nome);
+                            const u = mesclados.find(user => normalizarNomeUsuario(user.nome) === norm);
+                            if (u) {
+                                if (!u.turmasDisciplinas || Object.keys(u.turmasDisciplinas).length === 0) {
+                                    u.turmasDisciplinas = JSON.parse(JSON.stringify(pPadrao.turmasDisciplinas));
+                                }
+                            } else {
+                                mesclados.push(JSON.parse(JSON.stringify(pPadrao)));
+                            }
+                        });
+                        usuarios.value = mesclados;
                         localStorage.setItem('diario_usuarios_db', JSON.stringify(usuarios.value));
+                        salvarNuvemUsuarios(usuarios.value);
                     }
                 } else {
                     await db.collection('diario_config').doc('usuarios').set({
@@ -3979,8 +4045,15 @@ createApp({
                     if (docProf.exists) {
                         const data = docProf.data();
                         if (data) {
-                            if (data.registros) registros.value = data.registros;
-                            if (data.conteudos) conteudos.value = data.conteudos;
+                            if (data.registros) {
+                                registros.value = data.registros;
+                                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                            }
+                            if (data.conteudos) {
+                                conteudos.value = data.conteudos;
+                                localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
+                            }
+                            migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
                         }
                     } else {
                         await db.collection('diario_professores').doc(currentUser.value).set({

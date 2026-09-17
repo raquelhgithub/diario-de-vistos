@@ -1,5 +1,5 @@
 // Service Worker para Diário Digital de Vistos
-const CACHE_NAME = 'diario-vistos-v1';
+const CACHE_NAME = 'diario-vistos-v2';
 
 const STATIC_ASSETS = [
   '/',
@@ -45,13 +45,31 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Ignora chamadas de API Firestore/Firebase online para não interferir na sincronização nativa
   const url = event.request.url;
+  // Ignora chamadas de API Firestore/Firebase online
   if (url.includes('firestore.googleapis.com') || url.includes('identitytoolkit') || url.includes('securetoken')) {
     return;
   }
 
-  // Estratégia Stale-While-Revalidate para recursos estáticos e navegação
+  // ESTRATÉGIA NETWORK-FIRST PARA PÁGINAS HTML E NAVEGAÇÃO (Garante atualizações imediatas no ar)
+  if (event.request.mode === 'navigate' || url.endsWith('/index.html') || url.endsWith('/')) {
+    event.respondWith(
+      fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        return caches.match('/index.html') || caches.match('/');
+      })
+    );
+    return;
+  }
+
+  // Estratégia Stale-While-Revalidate para demais recursos estáticos
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request).then((networkResponse) => {
@@ -63,10 +81,7 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch(() => {
-        // Se offline e falhar, tenta retornar o fallback index.html para navegação
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html') || caches.match('/');
-        }
+        return cachedResponse;
       });
 
       return cachedResponse || fetchPromise;
