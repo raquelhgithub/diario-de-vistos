@@ -20,6 +20,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+        if (localStorage.getItem('diario_dark_mode') === 'true' || 
+            (!localStorage.getItem('diario_dark_mode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -34,6 +43,29 @@
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
         .touch-btn { min-height: 40px; }
         [v-cloak] { display: none; }
+        
+        /* Regras do Modo Escuro (Dark Mode) Nativo */
+        html.dark body { background-color: #0b0f19; color: #f1f5f9; }
+        html.dark .bg-white { background-color: #1e293b !important; color: #f8fafc; border-color: #334155; }
+        html.dark .bg-slate-50 { background-color: #0f172a !important; color: #f1f5f9; }
+        html.dark .bg-slate-100 { background-color: #1e293b !important; }
+        html.dark .border-slate-200 { border-color: #334155 !important; }
+        html.dark .border-slate-300 { border-color: #475569 !important; }
+        html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #334155 !important; }
+        html.dark .text-slate-800 { color: #f8fafc !important; }
+        html.dark .text-slate-700 { color: #e2e8f0 !important; }
+        html.dark .text-slate-600 { color: #cbd5e1 !important; }
+        html.dark .text-slate-500 { color: #94a3b8 !important; }
+        html.dark .text-slate-400 { color: #94a3b8 !important; }
+        html.dark input, html.dark select, html.dark textarea { 
+            background-color: #0f172a !important; 
+            color: #f8fafc !important; 
+            border-color: #334155 !important; 
+        }
+        html.dark input::placeholder { color: #64748b !important; }
+        html.dark .hover\:bg-slate-50\/80:hover { background-color: #334155 !important; }
+        html.dark .hover\:bg-slate-100:hover { background-color: #334155 !important; }
+
         @media print {
             body * { visibility: hidden; }
             #secaoPreviaFicha, #secaoPreviaFicha * { visibility: visible; }
@@ -50,7 +82,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen pb-10">
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen pb-10 transition-colors duration-200">
 
 <div id="app" v-cloak class="max-w-7xl mx-auto px-2 sm:px-6 pt-3 sm:pt-6">
     
@@ -178,6 +210,14 @@
                         'fa-cloud text-emerald-200'
                     ]"></i>
                     <span>{{ statusConexao === 'offline' ? 'Modo Offline' : statusConexao === 'sincronizando' ? 'Salvando...' : 'Nuvem OK' }}</span>
+                </button>
+
+                <!-- BOTÃO MODO ESCURO (DARK MODE) -->
+                <button @click="toggleDarkMode" 
+                        class="bg-indigo-800 hover:bg-indigo-700 text-indigo-200 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-indigo-700 shadow-sm transition touch-btn" 
+                        :title="isDarkMode ? 'Mudar para Modo Claro' : 'Mudar para Modo Escuro (Descanso visual)'">
+                    <i :class="isDarkMode ? 'fa-solid fa-sun text-amber-300' : 'fa-solid fa-moon text-indigo-200'"></i>
+                    <span class="hidden sm:inline">{{ isDarkMode ? 'Claro' : 'Escuro' }}</span>
                 </button>
 
                 <!-- LOGOUT -->
@@ -565,10 +605,14 @@
                         <span class="text-[10px] text-indigo-700 block font-bold uppercase">Máximo da Turma</span>
                         <span class="text-base font-black text-indigo-900">{{ maxPontuacaoTurma.toFixed(1) }} pts (Nota 10)</span>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 grow sm:grow-0">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 grow sm:grow-0">
                         <button @click="abrirModalContagem" class="bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition touch-btn w-full" title="Lançar Contagem de Vistos Bimestral">
                             <i class="fa-solid fa-calculator text-amber-300"></i>
                             <span class="truncate">Contagem</span>
+                        </button>
+                        <button @click="exportarPadraoSED" class="bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition touch-btn w-full" title="Exportar notas formatadas no padrão da SED (Secretaria Escolar Digital)">
+                            <i class="fa-solid fa-table-list text-amber-300"></i>
+                            <span class="truncate">Padrão SED</span>
                         </button>
                         <button @click="exportarExcel" class="bg-green-700 hover:bg-green-800 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1 shadow-xs transition touch-btn w-full" title="Exportar Fechamento do Bimestre para Excel">
                             <i class="fa-solid fa-file-excel"></i>
@@ -578,7 +622,7 @@
                             <i class="fa-solid fa-file-pdf"></i>
                             <span>PDF</span>
                         </button>
-                        <button @click="gerarFichasTurmaLote" class="bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition touch-btn w-full" title="Pré-visualizar e Gerar Caderno de Fichas da turma em PDF">
+                        <button @click="gerarFichasTurmaLote" class="bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition touch-btn w-full col-span-2 sm:col-span-1" title="Pré-visualizar e Gerar Caderno de Fichas da turma em PDF">
                             <i class="fa-solid fa-id-card-clip text-amber-400"></i>
                             <span class="truncate">Fichas (Pais)</span>
                         </button>
@@ -866,6 +910,9 @@
                         <button @click="adminSubTab = 'professores'" :class="['px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5', adminSubTab === 'professores' ? 'bg-amber-400 text-indigo-950 shadow' : 'text-indigo-200 hover:text-white']">
                             <i class="fa-solid fa-chalkboard-user"></i> Professores & Senhas
                         </button>
+                        <button @click="adminSubTab = 'pedagogico'" :class="['px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5', adminSubTab === 'pedagogico' ? 'bg-amber-400 text-indigo-950 shadow' : 'text-indigo-200 hover:text-white']">
+                            <i class="fa-solid fa-chart-pie"></i> Radar Pedagógico
+                        </button>
                     </div>
                 </div>
 
@@ -1094,6 +1141,142 @@
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SUB-ABA 4: RADAR PEDAGÓGICO DE BUSCA ATIVA & VISÃO MULTIDISCIPLINAR -->
+                <div v-if="adminSubTab === 'pedagogico'" class="p-4 sm:p-6 space-y-6">
+                    <!-- Cabeçalho e Controles do Radar -->
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-indigo-50/70 border border-indigo-200 p-4 sm:p-5 rounded-2xl">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="w-8 h-8 rounded-lg bg-indigo-900 text-amber-400 flex items-center justify-center font-black text-sm">
+                                    <i class="fa-solid fa-chart-pie"></i>
+                                </span>
+                                <h3 class="font-black text-sm sm:text-base text-indigo-950">Radar Pedagógico Multidisciplinar</h3>
+                            </div>
+                            <p class="text-xs text-indigo-900">
+                                Cruzamento do engajamento e entrega de vistos de todos os alunos em todas as matérias da turma para auxílio na Busca Ativa e Conselho de Classe.
+                            </p>
+                        </div>
+
+                        <!-- Seletores de Turma e Bimestre -->
+                        <div class="flex items-center gap-2.5 flex-wrap w-full md:w-auto">
+                            <div>
+                                <label class="block text-[10px] font-bold text-indigo-950 uppercase mb-1">Turma</label>
+                                <select v-model="radarTurma" class="bg-white border border-indigo-300 rounded-xl p-2 font-bold text-xs text-indigo-950 focus:ring-2 focus:ring-indigo-500 shadow-xs">
+                                    <option v-for="t in turmasOrdenadas" :key="t" :value="t">{{ t }}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-indigo-950 uppercase mb-1">Bimestre</label>
+                                <select v-model="radarBimestre" class="bg-white border border-indigo-300 rounded-xl p-2 font-bold text-xs text-indigo-950 focus:ring-2 focus:ring-indigo-500 shadow-xs">
+                                    <option value="1">1º Bimestre</option>
+                                    <option value="2">2º Bimestre</option>
+                                    <option value="3">3º Bimestre</option>
+                                    <option value="4">4º Bimestre</option>
+                                    <option value="todos">Anual (Todos)</option>
+                                </select>
+                            </div>
+                            <div class="self-end">
+                                <button @click="exportarConselhoClasseExcel" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs py-2 px-3.5 rounded-xl flex items-center gap-1.5 shadow-sm transition touch-btn" title="Exportar Matriz Multidisciplinar em Planilha Excel para o Conselho de Classe">
+                                    <i class="fa-solid fa-file-excel text-amber-300"></i>
+                                    <span>Planilha Conselho</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Indicadores Rápidos da Turma -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Total de Alunos</span>
+                            <span class="text-xl font-black text-slate-800">{{ radarMatrizAlunos.length }}</span>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Disciplinas na Matriz</span>
+                            <span class="text-xl font-black text-indigo-700">{{ radarDisciplinasDaTurma.length }}</span>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Em Alerta (< 5,0)</span>
+                            <span class="text-xl font-black text-amber-600">
+                                {{ radarMatrizAlunos.filter(a => a.mediaGeral < 5.0 && a.situacao === 'Ativo').length }}
+                            </span>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl border border-rose-200 bg-rose-50/50 shadow-xs">
+                            <span class="text-[10px] font-black text-rose-700 uppercase block">Zerados (Busca Ativa)</span>
+                            <span class="text-xl font-black text-rose-700">
+                                {{ radarMatrizAlunos.filter(a => a.isCritico).length }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Tabela Matriz Multidisciplinar -->
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto shadow-xs">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 font-bold uppercase border-b border-slate-200 text-[11px]">
+                                    <th class="p-3 w-12 text-center">Nº</th>
+                                    <th class="p-3 min-w-[200px]">Estudante</th>
+                                    <th class="p-3 text-center">Situação</th>
+                                    <th v-for="d in radarDisciplinasDaTurma" :key="d" class="p-3 text-center min-w-[70px]" :title="'Disciplina ' + d">
+                                        {{ d }}
+                                    </th>
+                                    <th class="p-3 text-center bg-indigo-50 text-indigo-950 font-black">Média</th>
+                                    <th class="p-3 text-center">Diagnóstico</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 font-medium">
+                                <tr v-if="radarMatrizAlunos.length === 0">
+                                    <td :colspan="radarDisciplinasDaTurma.length + 5" class="p-6 text-center text-slate-400 font-bold">
+                                        Nenhum aluno cadastrado nesta turma.
+                                    </td>
+                                </tr>
+                                <tr v-for="aluno in radarMatrizAlunos" :key="aluno.id" class="hover:bg-slate-50 transition" :class="aluno.isCritico ? 'bg-rose-50/40' : ''">
+                                    <td class="p-3 text-center font-bold text-slate-500">{{ aluno.numero || '-' }}</td>
+                                    <td class="p-3 font-bold text-slate-800">
+                                        <div class="flex items-center gap-2">
+                                            <span>{{ aluno.nome }}</span>
+                                            <span v-if="aluno.isCritico" class="bg-rose-600 text-white text-[9px] px-1.5 py-0.2 rounded font-black uppercase shadow-2xs">Risco</span>
+                                        </div>
+                                        <span class="text-[10px] text-slate-400 font-mono">RA: {{ aluno.ra || '-' }}</span>
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        <span :class="['text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase border', getSituacaoBadge(aluno.situacao).classe]">
+                                            {{ aluno.situacao }}
+                                        </span>
+                                    </td>
+                                    <!-- Notas por Disciplina -->
+                                    <td v-for="d in radarDisciplinasDaTurma" :key="d" class="p-3 text-center font-mono">
+                                        <span v-if="aluno.notas[d]" :class="[
+                                            'px-2 py-0.5 rounded-md font-extrabold text-xs inline-block min-w-[38px]',
+                                            aluno.notas[d].nota >= 6.0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                                            aluno.notas[d].nota >= 4.0 ? 'bg-amber-100 text-amber-800 border border-amber-300' :
+                                            'bg-rose-100 text-rose-800 border border-rose-300'
+                                        ]" :title="d + ': ' + aluno.notas[d].pontos.toFixed(1) + ' vistos líquidos (Nota: ' + aluno.notas[d].nota.toFixed(1) + ')'">
+                                            {{ aluno.notas[d].nota.toFixed(1) }}
+                                        </span>
+                                        <span v-else class="text-slate-300 font-bold">-</span>
+                                    </td>
+                                    <!-- Média Geral -->
+                                    <td class="p-3 text-center bg-indigo-50/60 font-mono font-black text-xs text-indigo-950">
+                                        {{ aluno.mediaGeral.toFixed(1) }}
+                                    </td>
+                                    <!-- Diagnóstico -->
+                                    <td class="p-3 text-center text-[10px]">
+                                        <span v-if="aluno.isCritico" class="text-rose-700 font-black flex items-center justify-center gap-1">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> Busca Ativa
+                                        </span>
+                                        <span v-else-if="aluno.discSemVisto > 0" class="text-amber-700 font-bold">
+                                            {{ aluno.discSemVisto }} disc. zerada(s)
+                                        </span>
+                                        <span v-else class="text-emerald-700 font-bold flex items-center justify-center gap-1">
+                                            <i class="fa-solid fa-check"></i> Regular
+                                        </span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -1522,7 +1705,21 @@
                     </div>
                 </div>
                 <!-- Ações do Cabeçalho -->
-                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-wrap sm:flex-nowrap">
+                    <button v-if="modalPreviaPDF.tipo === 'ficha' && currentFichaPreview" 
+                            @click="compartilharWhatsAppFicha" 
+                            class="bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white text-xs font-bold py-2 px-3 rounded-xl transition shadow-xs flex items-center gap-1.5 touch-btn" 
+                            title="Enviar resumo do aluno no WhatsApp dos Pais">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        <span class="hidden sm:inline">WhatsApp</span>
+                    </button>
+                    <button v-if="modalPreviaPDF.tipo === 'ficha' && currentFichaPreview" 
+                            @click="toggleQRCodeFicha" 
+                            class="bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-xs font-bold py-2 px-3 rounded-xl transition shadow-xs flex items-center gap-1.5 touch-btn" 
+                            title="Gerar QR Code para escaneamento na Reunião de Pais">
+                        <i class="fa-solid fa-qrcode text-sm"></i>
+                        <span class="hidden sm:inline">QR Code</span>
+                    </button>
                     <button @click="baixarPDFPrevia" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold py-2 px-3 rounded-xl transition shadow-xs flex items-center gap-1.5 touch-btn" title="Baixar arquivo PDF no dispositivo">
                         <i class="fa-solid fa-download"></i>
                         <span class="hidden sm:inline">Baixar PDF</span>
@@ -1548,6 +1745,31 @@
                     <button @click="imprimirPDFPrevia" class="font-bold text-indigo-700 hover:text-indigo-900 flex items-center gap-1">
                         <i class="fa-solid fa-print text-xs"></i> Imprimir Documento
                     </button>
+                </div>
+
+                <!-- CARD DINÂMICO DO QR CODE PARA REUNIÃO DE PAIS -->
+                <div v-if="modalQRCodeAberto && currentFichaPreview" class="mb-4 bg-gradient-to-r from-sky-50 to-indigo-50 border-2 border-sky-400 p-4 rounded-2xl shadow-md flex flex-col sm:flex-row items-center gap-4">
+                    <div class="bg-white p-2 rounded-xl shadow border border-sky-200 shrink-0">
+                        <img :src="getQRCodeUrlFicha()" alt="QR Code da Ficha do Aluno" class="w-36 h-36 rounded-lg object-contain">
+                    </div>
+                    <div class="space-y-1.5 text-center sm:text-left flex-1">
+                        <div class="flex items-center justify-center sm:justify-start gap-2">
+                            <span class="bg-sky-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Reunião de Pais</span>
+                            <h4 class="font-extrabold text-sm text-slate-800">QR Code de Consulta Rápida</h4>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            Aponte a câmera do celular para este QR Code para visualizar ou salvar o espelho de vistos do estudante <strong>{{ currentFichaPreview.aluno.nome }}</strong>.
+                        </p>
+                        <div class="flex items-center justify-center sm:justify-start gap-2 pt-1">
+                            <button @click="copiarTextoResumoFicha" class="bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition touch-btn shadow-xs">
+                                <i class="fa-solid fa-copy"></i>
+                                <span>{{ textoCopiadoSucesso ? 'Copiado!' : 'Copiar Texto Resumo' }}</span>
+                            </button>
+                            <button @click="modalQRCodeAberto = false" class="text-slate-500 hover:text-slate-700 text-xs font-bold px-2 py-1.5">
+                                Fechar QR
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- SELETOR DE PÁGINAS/ALUNOS (QUANDO EM LOTE) -->
@@ -2128,6 +2350,18 @@ createApp({
         const loginForm = ref({ usuario: '', senha: '' });
         const loginError = ref('');
         const mostrarSenha = ref(false);
+
+        // --- MODO ESCURO (DARK MODE) NATIVO ---
+        const isDarkMode = ref(localStorage.getItem('diario_dark_mode') === 'true');
+        function toggleDarkMode() {
+            isDarkMode.value = !isDarkMode.value;
+            localStorage.setItem('diario_dark_mode', isDarkMode.value ? 'true' : 'false');
+            if (isDarkMode.value) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
 
         const isAdmin = computed(() => {
             if (!currentUser.value) return false;
@@ -3088,6 +3322,147 @@ createApp({
             return list.filter(a => (a.nome || '').toLowerCase().includes(termo) || (a.ra || '').toLowerCase().includes(termo));
         });
 
+        // --- RADAR PEDAGÓGICO DE BUSCA ATIVA & VISÃO MULTIDISCIPLINAR ---
+        const radarTurma = ref('1A');
+        const radarBimestre = ref('1');
+
+        const radarDisciplinasDaTurma = computed(() => {
+            const t = radarTurma.value;
+            const setDisc = new Set();
+            (usuarios.value || []).forEach(u => {
+                if (u.turmasDisciplinas && u.turmasDisciplinas[t]) {
+                    u.turmasDisciplinas[t].forEach(d => setDisc.add(d));
+                }
+            });
+            const lista = Array.from(setDisc);
+            return lista.length > 0 ? lista : ['GERAL'];
+        });
+
+        const radarMatrizAlunos = computed(() => {
+            const t = radarTurma.value;
+            const b = radarBimestre.value;
+            const alunos = turmas.value[t] || [];
+            const discList = radarDisciplinasDaTurma.value;
+
+            return alunos.map(aluno => {
+                const notasPorDisc = {};
+                let somaNotas = 0;
+                let countDisc = 0;
+
+                discList.forEach(disc => {
+                    const regTurmaDisc = getRegistrosEfetivosTurma(t, disc);
+                    let pts = 0;
+                    let maxTurmaDisc = 0;
+
+                    alunos.forEach(a => {
+                        let ptsA = 0;
+                        Object.keys(regTurmaDisc).forEach(dataKey => {
+                            if (b !== 'todos' && getBimestrePorData(dataKey) !== String(b)) return;
+                            const reg = regTurmaDisc[dataKey]?.[a.id];
+                            if (reg) {
+                                if (reg.caderno) ptsA += (typeof reg.caderno === 'number' ? reg.caderno : (reg.caderno ? 1 : 0));
+                                if (reg.livro) ptsA += (typeof reg.livro === 'number' ? reg.livro : (reg.livro ? 1 : 0));
+                                if (reg.atividade) ptsA += (typeof reg.atividade === 'number' ? reg.atividade : (reg.atividade ? 1 : 0));
+                                ptsA += Number(reg.pontoPositivo || 0);
+                                ptsA -= Number(reg.pontoNegativo || 0);
+                                if (reg.copiou) ptsA -= 0.2;
+                                if (reg.incompleto) ptsA -= 0.3;
+                                if (reg.dormiu) ptsA -= 0.5;
+                            }
+                        });
+                        if (ptsA > maxTurmaDisc) maxTurmaDisc = ptsA;
+                    });
+
+                    Object.keys(regTurmaDisc).forEach(dataKey => {
+                        if (b !== 'todos' && getBimestrePorData(dataKey) !== String(b)) return;
+                        const reg = regTurmaDisc[dataKey]?.[aluno.id];
+                        if (reg) {
+                            if (reg.caderno) pts += (typeof reg.caderno === 'number' ? reg.caderno : (reg.caderno ? 1 : 0));
+                            if (reg.livro) pts += (typeof reg.livro === 'number' ? reg.livro : (reg.livro ? 1 : 0));
+                            if (reg.atividade) pts += (typeof reg.atividade === 'number' ? reg.atividade : (reg.atividade ? 1 : 0));
+                            pts += Number(reg.pontoPositivo || 0);
+                            pts -= Number(reg.pontoNegativo || 0);
+                            if (reg.copiou) pts -= 0.2;
+                            if (reg.incompleto) pts -= 0.3;
+                            if (reg.dormiu) pts -= 0.5;
+                        }
+                    });
+
+                    pts = Math.max(0, Math.round(pts * 10) / 10);
+                    let nota = 0;
+                    if (maxTurmaDisc > 0) {
+                        nota = Math.min(10, Math.max(0, Math.round(((pts / maxTurmaDisc) * 10) * 10) / 10));
+                    } else if (pts > 0) {
+                        nota = 10;
+                    }
+
+                    notasPorDisc[disc] = {
+                        pontos: pts,
+                        nota: nota,
+                        teveVisto: pts > 0
+                    };
+                    somaNotas += nota;
+                    countDisc++;
+                });
+
+                const mediaGeral = countDisc > 0 ? (Math.round((somaNotas / countDisc) * 10) / 10) : 0;
+                const discSemVisto = discList.filter(d => !notasPorDisc[d].teveVisto).length;
+                const isCritico = (discSemVisto === discList.length || mediaGeral < 3.0) && 
+                                  (aluno.situacao || '').toLowerCase() === 'ativo';
+
+                return {
+                    id: aluno.id,
+                    numero: aluno.numero,
+                    nome: aluno.nome,
+                    ra: aluno.ra,
+                    situacao: aluno.situacao || 'Ativo',
+                    notas: notasPorDisc,
+                    mediaGeral: mediaGeral,
+                    discSemVisto: discSemVisto,
+                    isCritico: isCritico
+                };
+            });
+        });
+
+        function exportarConselhoClasseExcel() {
+            const t = radarTurma.value;
+            const b = radarBimestre.value;
+            const bLabel = b === 'todos' ? 'Anual' : `${b}º Bimestre`;
+            const discList = radarDisciplinasDaTurma.value;
+            const matriz = radarMatrizAlunos.value;
+
+            let csv = '\uFEFF';
+            let cabecalho = ['"Numero"', '"RA"', '"Nome_Aluno"', '"Situacao"'];
+            discList.forEach(d => cabecalho.push(`"${d}"`));
+            cabecalho.push('"Media_Geral"');
+            cabecalho.push('"Disciplinas_Zeradas"');
+            csv += cabecalho.join(';') + '\r\n';
+
+            matriz.forEach(m => {
+                let linha = [
+                    `"${m.numero || ''}"`,
+                    `"${m.ra || ''}"`,
+                    `"${(m.nome || '').replace(/"/g, '""')}"`,
+                    `"${m.situacao}"`
+                ];
+                discList.forEach(d => {
+                    const info = m.notas[d];
+                    linha.push(`"${info ? info.nota.toFixed(1).replace('.', ',') : '-'}"`);
+                });
+                linha.push(`"${m.mediaGeral.toFixed(1).replace('.', ',')}"`);
+                linha.push(`"${m.discSemVisto}"`);
+                csv += linha.join(';') + '\r\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Conselho_Classe_${t}_${b}Bim_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         // RENOMEAR TURMA
         const modalRenomearTurma = ref({ aberto: false, turmaAtual: '', novoNome: '' });
         function abrirModalRenomearTurma(t) {
@@ -3978,6 +4353,65 @@ createApp({
             XLSX.writeFile(wb, `Fechamento_Vistos_${selectedClass.value}_${selectedDisciplina.value || 'Geral'}_${bimFiltro}Bim_Prof_${currentUser.value}.xlsx`);
         }
 
+        // --- EXPORTAÇÃO OFICIAL NO PADRÃO DA SED (SECRETARIA ESCOLAR DIGITAL) ---
+        function exportarPadraoSED() {
+            const turma = selectedClass.value;
+            const disc = selectedDisciplina.value || 'Geral';
+            const bim = fechamentoBimestre.value;
+            const bimLabel = bim === 'todos' ? 'Anual' : `${bim}º Bimestre`;
+            const alunos = currentStudentList.value;
+
+            if (!alunos || alunos.length === 0) {
+                alert('Nenhum aluno encontrado para exportar.');
+                return;
+            }
+
+            let csv = '\uFEFF';
+            csv += '"Numero";"RA";"Digito_RA";"UF";"Nome_Aluno";"Situacao";"Nota_Fechamento";"Bimestre";"Disciplina";"Turma";"Professor";"Data_Fechamento"\r\n';
+
+            alunos.forEach(aluno => {
+                const nota = calcularNota(aluno.id, bim);
+                const notaFormatada = Number(nota).toFixed(1).replace('.', ',');
+
+                let raClean = (aluno.ra || '').toString().trim();
+                let digito = '';
+                let uf = 'SP';
+                if (raClean.includes('-')) {
+                    const parts = raClean.split('-');
+                    raClean = parts[0];
+                    digito = parts[1] || '';
+                } else if (raClean.length > 1) {
+                    digito = raClean.slice(-1);
+                    raClean = raClean.slice(0, -1);
+                }
+
+                const sit = aluno.situacao || 'Ativo';
+                const linha = [
+                    `"${aluno.numero || ''}"`,
+                    `"${raClean}"`,
+                    `"${digito}"`,
+                    `"${uf}"`,
+                    `"${(aluno.nome || '').replace(/"/g, '""')}"`,
+                    `"${sit}"`,
+                    `"${notaFormatada}"`,
+                    `"${bimLabel}"`,
+                    `"${disc}"`,
+                    `"${turma}"`,
+                    `"${currentUser.value}"`,
+                    `"${new Date().toLocaleDateString('pt-BR')}"`
+                ];
+                csv += linha.join(';') + '\r\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `SED_Notas_${turma}_${disc}_${bim}Bim_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         // --- PRÉ-VISUALIZAÇÃO DE RELATÓRIOS E FICHAS (PDF) ---
         const modalPreviaPDF = ref({
             aberto: false,
@@ -3996,6 +4430,68 @@ createApp({
             const idx = Math.max(0, Math.min(modalPreviaPDF.value.alunoIndex, modalPreviaPDF.value.fichas.length - 1));
             return modalPreviaPDF.value.fichas[idx];
         });
+
+        // --- COMPARTILHAMENTO WHATSAPP E QR CODE NA FICHA DO ALUNO ---
+        const modalQRCodeAberto = ref(false);
+        const textoCopiadoSucesso = ref(false);
+
+        function toggleQRCodeFicha() {
+            modalQRCodeAberto.value = !modalQRCodeAberto.value;
+        }
+
+        function gerarTextoResumoFicha(dados) {
+            const f = dados || currentFichaPreview.value;
+            if (!f) return '';
+            const aluno = f.aluno || {};
+            const totais = f.totais || {};
+            const bim = f.bimLabel || (fechamentoBimestre.value + 'º Bimestre');
+            const disc = f.disciplina || selectedDisciplina.value || 'Geral';
+            const turma = f.turma || selectedClass.value;
+            const prof = f.professor || currentUser.value;
+            const nota = (f.nota !== undefined ? f.nota : 0).toFixed(1);
+            const maxPts = maxPontuacaoTurma.value ? maxPontuacaoTurma.value.toFixed(1) : '10.0';
+
+            return `*E.E. JOSÉ MARCELINO DE ALMEIDA* 🏫\n` +
+                   `*Acompanhamento de Vistos e Atividades*\n\n` +
+                   `👤 *Estudante:* ${aluno.nome}\n` +
+                   `📌 *Nº Chamada:* ${aluno.numero || '-'} | *RA:* ${aluno.ra || '-'}\n` +
+                   `📚 *Turma:* ${turma} | *Disciplina:* ${disc}\n` +
+                   `🗓️ *Período:* ${bim}\n` +
+                   `👨‍🏫 *Professor(a):* ${prof}\n\n` +
+                   `📊 *RESUMO DE ATIVIDADES:*\n` +
+                   `• Caderno em dia: *${totais.caderno || 0}*\n` +
+                   `• Livro didático: *${totais.livro || 0}*\n` +
+                   `• Atividades em sala: *${totais.atividade || 0}*\n` +
+                   `• Pontuação Extra: *+${(totais.pontoPositivo || 0).toFixed(1)} pts*\n` +
+                   `• Ocorrências/Descontos: *-${(totais.descontos || 0).toFixed(1)} pts*\n\n` +
+                   `⭐ *Total de Vistos Líquidos:* *${(totais.pontosLiquidos || 0).toFixed(1)} pts* (Máximo da turma: ${maxPts} pts)\n` +
+                   `🎯 *Nota Proporcional:* *${nota} / 10,0*\n\n` +
+                   `_Mensagem emitida pelo Diário Digital de Vistos._`;
+        }
+
+        function compartilharWhatsAppFicha() {
+            const texto = gerarTextoResumoFicha(currentFichaPreview.value);
+            if (!texto) return;
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
+        }
+
+        function getQRCodeUrlFicha() {
+            const texto = gerarTextoResumoFicha(currentFichaPreview.value);
+            if (!texto) return '';
+            return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(texto)}`;
+        }
+
+        function copiarTextoResumoFicha() {
+            const texto = gerarTextoResumoFicha(currentFichaPreview.value);
+            if (!texto) return;
+            navigator.clipboard.writeText(texto).then(() => {
+                textoCopiadoSucesso.value = true;
+                setTimeout(() => { textoCopiadoSucesso.value = false; }, 3000);
+            }).catch(() => {
+                alert('Não foi possível copiar automaticamente. Selecione e copie o texto manualmente.');
+            });
+        }
 
         function abrirPreviaFichas(doc, titulo, subtitulo, nomeArquivo, fichas) {
             modalPreviaPDF.value = {
@@ -4634,8 +5130,15 @@ createApp({
             modalContagem, abrirModalContagem, fecharModalContagem, carregarContagemData, aplicarMassaContagem, salvarContagemBimestral, getBimestrePorData,
 
             // Backup e Exportações (com Pré-Visualização Interativa)
-            exportarBackup, importarBackup, exportarExcel, exportarPDF, gerarFichaAluno, gerarFichasTurmaLote,
+            exportarBackup, importarBackup, exportarExcel, exportarPadraoSED, exportarPDF, gerarFichaAluno, gerarFichasTurmaLote,
             modalPreviaPDF, currentFichaPreview, fecharPreviaPDF, baixarPDFPrevia, imprimirPDFPrevia,
+            modalQRCodeAberto, textoCopiadoSucesso, toggleQRCodeFicha, compartilharWhatsAppFicha, getQRCodeUrlFicha, copiarTextoResumoFicha,
+
+            // Radar Pedagógico e Visão Multidisciplinar
+            radarTurma, radarBimestre, radarDisciplinasDaTurma, radarMatrizAlunos, exportarConselhoClasseExcel,
+
+            // Tema e Modo Escuro
+            isDarkMode, toggleDarkMode,
 
             // Nuvem, Conectividade e PWA
             modalNuvem, nuvemConectada, statusConexao, abrirModalNuvem, salvarConfigNuvem, sincronizarAgora,
