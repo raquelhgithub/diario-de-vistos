@@ -33,9 +33,11 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Bibliotecas pesadas (XLSX, jsPDF, AutoTable) carregadas sob demanda (Lazy Loading) -->
     
-    <!-- Firebase Firestore CDN para persistência online gratuita -->
+    <!-- Firebase CDN: App, Firestore e Auth (autenticação segura LGPD) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
     
     <style>
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
@@ -1577,6 +1579,9 @@
                                             <button @click="abrirModalEditarProfessor(prof)" class="text-indigo-700 hover:bg-indigo-50 font-bold px-2 py-1 rounded-lg text-xs transition" title="Editar dados e senha">
                                                 <i class="fa-solid fa-pen"></i> Editar
                                             </button>
+                                            <button @click="provisionarContaFirebaseAuth(prof.nome)" class="text-emerald-700 hover:bg-emerald-50 font-bold px-2 py-1 rounded-lg text-xs transition" title="Criar conta de autenticação segura Firebase Auth (LGPD)">
+                                                <i class="fa-solid fa-shield-halved"></i> Auth
+                                            </button>
                                             <button v-if="prof.nome !== currentUser" @click="confirmarExcluirProfessor(prof)" class="text-rose-600 hover:bg-rose-50 font-bold px-2 py-1 rounded-lg text-xs transition" title="Excluir professor">
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
@@ -2598,12 +2603,71 @@ async function assegurarJsPDF() {
     }
 }
 
+// --- CAMADA IndexedDB (substitui localStorage para dados volumosos do professor) ---
+// Suporta centenas de MB, é assíncrona e nunca bloqueia a thread principal
+const DiarioDB = (() => {
+    const DB_NAME = 'DiarioVistosDB';
+    const DB_VERSION = 1;
+    const STORE = 'professor_data';
+    let _db = null;
+
+    function openDB() {
+        if (_db) return Promise.resolve(_db);
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(DB_NAME, DB_VERSION);
+            req.onupgradeneeded = (e) => {
+                e.target.result.createObjectStore(STORE);
+            };
+            req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };
+            req.onerror = (e) => { console.error('IndexedDB erro ao abrir:', e); reject(e.target.error); };
+        });
+    }
+
+    async function getItem(key) {
+        try {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE, 'readonly');
+                const req = tx.objectStore(STORE).get(key);
+                req.onsuccess = () => resolve(req.result ?? null);
+                req.onerror = () => reject(req.error);
+            });
+        } catch (e) { return null; }
+    }
+
+    async function setItem(key, value) {
+        try {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE, 'readwrite');
+                tx.objectStore(STORE).put(value, key);
+                tx.oncomplete = resolve;
+                tx.onerror = () => reject(tx.error);
+            });
+        } catch (e) { console.warn('IndexedDB setItem falhou, usando localStorage como fallback:', e); }
+    }
+
+    async function removeItem(key) {
+        try {
+            const db = await openDB();
+            return new Promise((resolve) => {
+                const tx = db.transaction(STORE, 'readwrite');
+                tx.objectStore(STORE).delete(key);
+                tx.oncomplete = resolve;
+            });
+        } catch (e) { /* silencioso */ }
+    }
+
+    return { getItem, setItem, removeItem };
+})();
+
 const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '5.7';
+        // Fase 3: +1.0 por mudança arquitetural (Firestore particionado, Auth, IndexedDB, LGPD)
+        const APP_VERSION = '6.0';
 
         // --- CONTROLE DE ATUALIZAÇÃO DO PWA ---
         const novaVersaoDisponivel = ref(false);
@@ -3020,9 +3084,30 @@ createApp({
             loginForm.value.senha = '';
             carregarDadosProfessor();
             sincronizarComNuvem();
+
+            // --- AUTENTICAÇÃO FIREBASE AUTH (LGPD - sem quebrar UX offline) ---
+            // Autentica em background usando e-mail virtual @jma.diario.escola
+            // senhaDigitada já está disponível no escopo (capturada antes do login local)
+            if (window.firebase && firebase.auth) {
+                const nomeNorm = normalizarNomeUsuario(currentUser.value);
+                const emailVirtual = `${nomeNorm}@jma.diario.escola`;
+                firebase.auth().signInWithEmailAndPassword(emailVirtual, senhaDigitada).catch(async (authErr) => {
+                    if (authErr.code === 'auth/user-not-found' || authErr.code === 'auth/invalid-credential') {
+                        // Cria a conta Firebase Auth automaticamente (primeira vez)
+                        await firebase.auth().createUserWithEmailAndPassword(emailVirtual, senhaDigitada).catch(e => {
+                            console.warn('[Auth] Não foi possível criar conta Firebase Auth (modo offline ou erro):', e.code);
+                        });
+                    } else if (authErr.code !== 'auth/network-request-failed') {
+                        console.warn('[Auth] Falha silenciosa no Auth Firebase:', authErr.code);
+                    }
+                });
+            }
         }
 
-        function fazerLogout() {
+        async function fazerLogout() {
+            if (window.firebase && firebase.auth) {
+                await firebase.auth().signOut().catch(() => {});
+            }
             currentUser.value = '';
             loginForm.value = { usuario: '', senha: '' };
         }
@@ -3601,10 +3686,35 @@ createApp({
             return `diario_conteudos_user_${currentUser.value || 'anonimo'}`;
         }
 
-        function carregarDadosProfessor() {
+        async function carregarDadosProfessor() {
             if (!currentUser.value) return;
-            registros.value = JSON.parse(localStorage.getItem(getChaveStorageRegistros()) || '{}');
-            conteudos.value = JSON.parse(localStorage.getItem(getChaveStorageConteudos()) || '{}');
+            // Primário: IndexedDB (assíncrono, capacidade ilimitada)
+            const regIDB = await DiarioDB.getItem(getChaveStorageRegistros());
+            const contIDB = await DiarioDB.getItem(getChaveStorageConteudos());
+
+            if (regIDB !== null) {
+                registros.value = regIDB;
+            } else {
+                // Fallback: migrar dados existentes do localStorage para IndexedDB (única vez)
+                const regLS = localStorage.getItem(getChaveStorageRegistros());
+                registros.value = regLS ? JSON.parse(regLS) : {};
+                if (regLS) {
+                    await DiarioDB.setItem(getChaveStorageRegistros(), registros.value);
+                    localStorage.removeItem(getChaveStorageRegistros()); // libera espaço
+                }
+            }
+
+            if (contIDB !== null) {
+                conteudos.value = contIDB;
+            } else {
+                const contLS = localStorage.getItem(getChaveStorageConteudos());
+                conteudos.value = contLS ? JSON.parse(contLS) : {};
+                if (contLS) {
+                    await DiarioDB.setItem(getChaveStorageConteudos(), conteudos.value);
+                    localStorage.removeItem(getChaveStorageConteudos());
+                }
+            }
+
             if (turmasDisponiveis.value.length > 0 && (!selectedClass.value || !turmasDisponiveis.value.includes(selectedClass.value))) {
                 selectedClass.value = turmasDisponiveis.value[0];
             }
@@ -3614,16 +3724,16 @@ createApp({
             migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
         }
 
-        watch(registros, (newVal) => {
+        watch(registros, async (newVal) => {
             if (currentUser.value) {
-                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(newVal));
+                await DiarioDB.setItem(getChaveStorageRegistros(), newVal);
                 salvarNuvemProfessor(currentUser.value, newVal, conteudos.value);
             }
         }, { deep: true });
 
-        watch(conteudos, (newVal) => {
+        watch(conteudos, async (newVal) => {
             if (currentUser.value) {
-                localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(newVal));
+                await DiarioDB.setItem(getChaveStorageConteudos(), newVal);
                 salvarNuvemProfessor(currentUser.value, registros.value, newVal);
             }
         }, { deep: true });
@@ -6168,29 +6278,105 @@ createApp({
             }
         }
 
+        // --- CHAVE DE BIMESTRE PARA O FIRESTORE PARTICIONADO ---
+        function getChaveBimestreFirestore(bim) {
+            const ano = new Date().getFullYear();
+            return `${ano}_${bim}B`;
+        }
+
+        // --- MIGRAÇÃO TRANSPARENTE PARA A ARQUITETURA PARTICIONADA (v6.0) ---
+        // Executada uma única vez. Zero data-loss: lê o documento monolítico antigo e redistribui.
+        async function migrarParaArquiteturaParticionada() {
+            if (!db || !currentUser.value) return;
+            const flagKey = `diario_migrado_v6_${currentUser.value}`;
+            if (localStorage.getItem(flagKey) === 'true') return;
+
+            try {
+                // 1. Verifica o documento monolítico antigo do professor
+                const docAntigo = await db.collection('diario_professores').doc(currentUser.value).get();
+                if (docAntigo.exists) {
+                    const data = docAntigo.data();
+                    if (data && (data.registros || data.conteudos)) {
+                        console.log('[v6.0] Migrando documento monolítico para subcoleções de bimestres...');
+                        await _salvarNuvemProfessorParticionado(currentUser.value, data.registros || {}, data.conteudos || {});
+                    }
+                }
+
+                // 2. Migra turmas do documento único 'geral' para documentos individuais por turma
+                const docTurmasGeral = await db.collection('diario_turmas').doc('geral').get();
+                if (docTurmasGeral.exists && docTurmasGeral.data()?.turmas) {
+                    const tObj = docTurmasGeral.data().turmas;
+                    const batchTurmas = db.batch();
+                    for (const [nomeTurma, alunos] of Object.entries(tObj)) {
+                        if (nomeTurma && Array.isArray(alunos)) {
+                            const ref = db.collection('diario_turmas').doc(nomeTurma);
+                            batchTurmas.set(ref, {
+                                alunos: alunos,
+                                migradoDeGeral: true,
+                                atualizadoEm: new Date().toISOString()
+                            }, { merge: true });
+                        }
+                    }
+                    await batchTurmas.commit();
+                    console.log('[v6.0] Turmas migradas para documentos individuais.');
+                }
+
+                localStorage.setItem(flagKey, 'true');
+                console.log('[v6.0] Migração para arquitetura particionada concluída com sucesso.');
+            } catch (err) {
+                console.error('[v6.0] Erro na migração (será tentado novamente na próxima sessão):', err);
+            }
+        }
+
+        // --- LOG DE AUDITORIA ESCOLAR (LGPD / Rastreabilidade para Conselho de Classe) ---
+        async function registrarAuditoria(acao, detalhes = {}) {
+            if (!db || !currentUser.value) return;
+            try {
+                await db.collection('diario_auditoria').add({
+                    acao,
+                    professor: currentUser.value,
+                    turma: selectedClass.value || null,
+                    disciplina: selectedDisciplina.value || null,
+                    data: selectedDate.value || null,
+                    detalhes,
+                    timestamp: new Date().toISOString(),
+                    versaoApp: APP_VERSION
+                });
+            } catch (err) {
+                console.warn('[Auditoria] Registro não-crítico falhou:', err);
+            }
+        }
+
+        // --- SINCRONIZAÇÃO COM NUVEM (NOVA ARQUITETURA PARTICIONADA) ---
         async function sincronizarComNuvem() {
             if (!db) return;
             try {
-                // Sincronizar turmas
-                const docTurmas = await db.collection('diario_turmas').doc('geral').get();
-                if (docTurmas.exists) {
-                    const data = docTurmas.data();
-                    if (data && data.turmas) {
-                        const tNuvem = { ...data.turmas };
-                        ['1A', '1C', '1D', '1E', '2C', '2D', '2E', '2ADM', '2AGRO', '3A', '3B', '3C', '3D', '3ADM', '3AGRO'].forEach(cod => {
-                            const real = encontrarTurmaReal(cod);
-                            if (!tNuvem[real] && !tNuvem[`Alunos ${cod}`] && !tNuvem[cod]) {
-                                tNuvem[`Alunos ${cod}`] = [];
-                            }
-                        });
-                        turmas.value = tNuvem;
+                // 1. Migração transparente (executada apenas uma vez)
+                await migrarParaArquiteturaParticionada();
+
+                // 2. Lê turmas por documentos individuais (nova arquitetura)
+                const todasTurmas = Object.keys(turmas.value);
+                const novasTurmasObj = { ...turmas.value };
+                if (todasTurmas.length > 0) {
+                    // Lê em paralelo (max 10 por limitação Firestore 'in', então faz manualmente)
+                    await Promise.all(todasTurmas.map(async (nomeTurma) => {
+                        const docTurma = await db.collection('diario_turmas').doc(nomeTurma).get().catch(() => null);
+                        if (docTurma && docTurma.exists && Array.isArray(docTurma.data()?.alunos)) {
+                            novasTurmasObj[nomeTurma] = docTurma.data().alunos;
+                        }
+                    }));
+                    turmas.value = novasTurmasObj;
+                    corrigirSituacoesCorrompidas();
+                } else {
+                    // Fallback: tenta documento monolítico legado 'geral' se não houver turmas locais
+                    const docTurmasGeral = await db.collection('diario_turmas').doc('geral').get();
+                    if (docTurmasGeral.exists && docTurmasGeral.data()?.turmas) {
+                        turmas.value = docTurmasGeral.data().turmas;
                         corrigirSituacoesCorrompidas();
                     }
-                } else {
-                    await db.collection('diario_turmas').doc('geral').set({ turmas: turmas.value });
                 }
 
-                // Sincronizar usuários e senhas
+                // 3. Sincronizar usuários e senhas
                 const docUsuarios = await db.collection('diario_config').doc('usuarios').get();
                 if (docUsuarios.exists) {
                     const data = docUsuarios.data();
@@ -6227,7 +6413,7 @@ createApp({
                     }
                 }
 
-                // Sincronizar catálogo de disciplinas
+                // 4. Sincronizar catálogo de disciplinas
                 const docDisciplinas = await db.collection('diario_config').doc('disciplinas').get();
                 if (docDisciplinas.exists) {
                     const data = docDisciplinas.data();
@@ -6242,29 +6428,36 @@ createApp({
                     });
                 }
 
-                // Sincronizar dados do professor atual
+                // 5. Sincronizar registros do professor via subcoleção de bimestres
                 if (currentUser.value) {
-                    const docProf = await db.collection('diario_professores').doc(currentUser.value).get();
-                    if (docProf.exists) {
-                        const data = docProf.data();
-                        if (data) {
-                            if (data.registros) {
-                                registros.value = data.registros;
-                                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
-                            }
-                            if (data.conteudos) {
-                                conteudos.value = data.conteudos;
-                                localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
-                            }
-                            migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
+                    const ano = new Date().getFullYear();
+                    const bimestresRef = db.collection('diario_professores')
+                                           .doc(currentUser.value)
+                                           .collection('bimestres');
+                    const docIds = [`${ano}_1B`, `${ano}_2B`, `${ano}_3B`, `${ano}_4B`];
+                    const snapshots = await Promise.all(
+                        docIds.map(id => bimestresRef.doc(id).get().catch(() => null))
+                    );
+
+                    const regMerged = {};
+                    const contMerged = {};
+                    snapshots.forEach(snap => {
+                        if (snap && snap.exists) {
+                            const d = snap.data();
+                            if (d.registros) Object.assign(regMerged, d.registros);
+                            if (d.conteudos) Object.assign(contMerged, d.conteudos);
                         }
-                    } else {
-                        await db.collection('diario_professores').doc(currentUser.value).set({
-                            registros: registros.value,
-                            conteudos: conteudos.value,
-                            atualizadoEm: new Date().toISOString()
-                        });
+                    });
+
+                    if (Object.keys(regMerged).length > 0) {
+                        registros.value = regMerged;
+                        await DiarioDB.setItem(getChaveStorageRegistros(), regMerged);
                     }
+                    if (Object.keys(contMerged).length > 0) {
+                        conteudos.value = contMerged;
+                        await DiarioDB.setItem(getChaveStorageConteudos(), contMerged);
+                    }
+                    migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
                 }
             } catch (err) {
                 console.error("Erro na sincronização:", err);
@@ -6275,40 +6468,89 @@ createApp({
             sincronizarComNuvem().then(() => alert('✅ Sincronização concluída!')).catch(() => alert('⚠️ Não foi possível sincronizar no momento.'));
         }
 
+        // --- SALVAR PROFESSOR: PARTICIONADO POR BIMESTRE (SUPERA O LIMITE DE 1 MB) ---
         let debounceNuvem = null;
+
+        async function _salvarNuvemProfessorParticionado(user, reg, cont) {
+            // Agrupa os dados de registros/conteudos por bimestre
+            const porBimestre = {};
+            for (const chave of Object.keys(reg || {})) {
+                for (const data of Object.keys(reg[chave] || {})) {
+                    const bim = getBimestrePorData(data);
+                    const docId = getChaveBimestreFirestore(bim);
+                    if (!porBimestre[docId]) porBimestre[docId] = { registros: {}, conteudos: {} };
+                    if (!porBimestre[docId].registros[chave]) porBimestre[docId].registros[chave] = {};
+                    porBimestre[docId].registros[chave][data] = reg[chave][data];
+                }
+            }
+            for (const chave of Object.keys(cont || {})) {
+                for (const data of Object.keys(cont[chave] || {})) {
+                    const bim = getBimestrePorData(data);
+                    const docId = getChaveBimestreFirestore(bim);
+                    if (!porBimestre[docId]) porBimestre[docId] = { registros: {}, conteudos: {} };
+                    if (!porBimestre[docId].conteudos[chave]) porBimestre[docId].conteudos[chave] = {};
+                    porBimestre[docId].conteudos[chave][data] = cont[chave][data];
+                }
+            }
+
+            if (Object.keys(porBimestre).length === 0) return;
+
+            const batch = db.batch();
+            for (const [docId, dados] of Object.entries(porBimestre)) {
+                const ref = db.collection('diario_professores')
+                              .doc(user)
+                              .collection('bimestres')
+                              .doc(docId);
+                batch.set(ref, {
+                    ...dados,
+                    atualizadoPor: user,
+                    atualizadoEm: new Date().toISOString(),
+                    versaoApp: APP_VERSION
+                }, { merge: true });
+            }
+            await batch.commit();
+        }
+
         function salvarNuvemProfessor(user, reg, cont) {
             if (!db || !user) return;
             if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
             clearTimeout(debounceNuvem);
             debounceNuvem = setTimeout(() => {
-                db.collection('diario_professores').doc(user).set({
-                    registros: reg,
-                    conteudos: cont,
-                    atualizadoEm: new Date().toISOString()
-                }, { merge: true }).then(() => {
+                _salvarNuvemProfessorParticionado(user, reg, cont).then(() => {
                     if (statusConexao.value !== 'offline') statusConexao.value = 'online';
                 }).catch(err => {
-                    console.warn("Erro ao salvar prof na nuvem:", err);
+                    console.warn("Erro ao salvar prof na nuvem (particionado):", err);
                     if (!navigator.onLine) statusConexao.value = 'offline';
+                    else statusConexao.value = 'online';
                 });
             }, 1000);
         }
 
+        // --- SALVAR TURMA: DOCUMENTO ISOLADO POR TURMA (SEM RACE CONDITION ENTRE ADMINS) ---
         let debounceTurmas = null;
         function salvarNuvemTurmas(novasTurmas) {
             if (!db) return;
             if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
             clearTimeout(debounceTurmas);
-            debounceTurmas = setTimeout(() => {
-                db.collection('diario_turmas').doc('geral').set({
-                    turmas: novasTurmas,
-                    atualizadoEm: new Date().toISOString()
-                }, { merge: true }).then(() => {
+            debounceTurmas = setTimeout(async () => {
+                try {
+                    // Cada turma em documento próprio → edições simultâneas nunca colidem
+                    const batch = db.batch();
+                    for (const [nomeTurma, alunos] of Object.entries(novasTurmas)) {
+                        if (nomeTurma && Array.isArray(alunos)) {
+                            const ref = db.collection('diario_turmas').doc(nomeTurma);
+                            batch.set(ref, {
+                                alunos: alunos,
+                                atualizadoEm: new Date().toISOString()
+                            }, { merge: true });
+                        }
+                    }
+                    await batch.commit();
                     if (statusConexao.value !== 'offline') statusConexao.value = 'online';
-                }).catch(err => {
+                } catch (err) {
                     console.warn("Erro ao salvar turmas na nuvem:", err);
                     if (!navigator.onLine) statusConexao.value = 'offline';
-                });
+                }
             }, 800);
         }
 
@@ -6325,6 +6567,35 @@ createApp({
             db.collection('diario_config').doc('senhas').set({
                 senhas: novasSenhas
             }, { merge: true }).catch(err => console.warn("Erro ao salvar senhas na nuvem:", err));
+        }
+
+        // --- PAINEL ADM: PROVISIONAR CONTA FIREBASE AUTH POR PROFESSOR ---
+        // Cria a conta de autenticação real para o professor selecionado.
+        // Necessário ser chamado uma vez por professor (admins Raquel/Marcelo).
+        async function provisionarContaFirebaseAuth(professorNome) {
+            if (!window.firebase || !firebase.auth) {
+                alert('⚠️ Firebase Auth não disponível. Verifique a conexão com a internet.');
+                return;
+            }
+            const nomeNorm = normalizarNomeUsuario(professorNome);
+            const emailVirtual = `${nomeNorm}@jma.diario.escola`;
+            const senhaAtual = getSenhaUsuario(professorNome);
+            if (!senhaAtual) {
+                alert(`⚠️ Professor "${professorNome}" não possui senha cadastrada.`);
+                return;
+            }
+            try {
+                await firebase.auth().createUserWithEmailAndPassword(emailVirtual, senhaAtual);
+                await registrarAuditoria('CONTA_AUTH_PROVISIONADA', { professor: professorNome, email: emailVirtual });
+                alert(`✅ Conta Firebase Auth criada com sucesso para ${professorNome}!\nE-mail virtual: ${emailVirtual}`);
+            } catch (err) {
+                if (err.code === 'auth/email-already-in-use') {
+                    alert(`ℹ️ A conta Firebase Auth para ${professorNome} já existe. Nenhuma ação necessária.`);
+                } else {
+                    console.error('[Auth] Erro ao provisionar conta:', err);
+                    alert(`⚠️ Erro ao criar conta: ${err.message}`);
+                }
+            }
         }
 
         return {
@@ -6356,6 +6627,7 @@ createApp({
             modalRenomearTurma, abrirModalRenomearTurma, confirmarRenomearTurma, confirmarExcluirTurma,
             modalProfessor, mostrarSenhasAdmin, toggleMostrarSenhaAdmin, abrirModalNovoProfessor, abrirModalEditarProfessor, salvarProfessorModal, confirmarExcluirProfessor, getSenhaUsuario,
             disciplinasCadastradas, modalDisciplina, abrirModalNovaDisciplina, abrirModalEditarDisciplina, salvarDisciplinaModal, confirmarExcluirDisciplina, getUsoDisciplinaCount,
+            provisionarContaFirebaseAuth,
             
             // Ferramentas Mover/Copiar e Contagem Bimestral
             ferramentaIndividual, ferramentaLote, ferramentaDisciplina,

@@ -1,22 +1,73 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Regras para Turmas Gerais (Leitura permitida aos professores e ADM)
-    match /diario_turmas/{docId} {
-      allow read: if true;
-      allow write: if true; // No Firebase Auth nativo pode restringir com request.auth != null
+
+    // Checa se o requisitante está autenticado via Firebase Auth (qualquer professor com conta)
+    function isProfessor() {
+      return request.auth != null;
     }
 
-    // Regras de Configurações Escolares (Usuários e Senhas)
-    match /diario_config/{configId} {
-      allow read: if true;
-      allow write: if true;
+    // Checa se o requisitante é administrador (Raquel ou Marcelo)
+    // O documento diario_config/admins deve conter: { "<uid>": true, "<uid2>": true }
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/diario_config/admins) &&
+        get(/databases/$(database)/documents/diario_config/admins).data.keys().hasAny([request.auth.uid]);
     }
 
-    // Regras para Registros e Conteúdos por Professor
+    // Checa se o requisitante é o próprio professor dono dos dados
+    // O e-mail virtual tem formato: {nomeNormalizado}@jma.diario.escola
+    function isOwnProfessor(professorId) {
+      return request.auth != null &&
+        request.auth.token.email.split('@')[0] == professorId;
+    }
+
+    // Turmas: qualquer professor autenticado lê; apenas ADM grava
+    match /diario_turmas/{turmaId} {
+      allow read: if isProfessor();
+      allow write: if isAdmin();
+    }
+
+    // Registros do Professor: o próprio professor ou admin lê/grava seus dados
     match /diario_professores/{professorId} {
-      allow read, write: if true;
+      allow read, write: if isOwnProfessor(professorId) || isAdmin();
+    }
+
+    // Subcoleção de bimestres (nova arquitetura particionada)
+    match /diario_professores/{professorId}/bimestres/{bimestreId} {
+      allow read, write: if isOwnProfessor(professorId) || isAdmin();
+    }
+
+    // Configurações de usuários e disciplinas: professores autenticados leem; apenas ADM grava
+    match /diario_config/usuarios {
+      allow read: if isProfessor();
+      allow write: if isAdmin();
+    }
+
+    match /diario_config/disciplinas {
+      allow read: if isProfessor();
+      allow write: if isAdmin();
+    }
+
+    // Senhas e admins: EXCLUSIVO para ADM (dados sensíveis)
+    match /diario_config/senhas {
+      allow read, write: if isAdmin();
+    }
+
+    match /diario_config/admins {
+      allow read, write: if isAdmin();
+    }
+
+    // Log de Auditoria: professores inserem (apenas append); apenas ADM lê o histórico
+    match /diario_auditoria/{logId} {
+      allow create: if isProfessor();
+      allow read: if isAdmin();
+      allow update, delete: if false; // Imutável: não pode ser alterado ou apagado
+    }
+
+    // Bloqueia qualquer acesso não mapeado acima (segurança por padrão)
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
