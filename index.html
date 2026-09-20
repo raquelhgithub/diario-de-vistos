@@ -31,9 +31,7 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <!-- Bibliotecas pesadas (XLSX, jsPDF, AutoTable) carregadas sob demanda (Lazy Loading) -->
     
     <!-- Firebase Firestore CDN para persistência online gratuita -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -2524,15 +2522,94 @@
             </button>
         </div>
     </transition>
+
+    <!-- NOTIFICAÇÃO FLUTUANTE DE ATUALIZAÇÃO DO APP (SERVICE WORKER PWA) -->
+    <transition enter-active-class="transform transition ease-out duration-300"
+                enter-from-class="translate-y-10 opacity-0"
+                enter-to-class="translate-y-0 opacity-100"
+                leave-active-class="transition ease-in duration-200"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0">
+        <div v-if="novaVersaoDisponivel" class="fixed bottom-5 right-5 z-50 bg-indigo-950/95 text-white p-3.5 px-4 rounded-2xl shadow-2xl border border-indigo-500/50 flex items-center gap-3.5 backdrop-blur max-w-sm">
+            <span class="w-8 h-8 rounded-full bg-amber-400/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-400/30">
+                <i class="fa-solid fa-arrows-rotate fa-spin text-sm"></i>
+            </span>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-black leading-tight text-amber-300">Nova versão disponível!</p>
+                <p class="text-[10px] text-indigo-200 mt-0.5">Atualização v{{ APP_VERSION }} instalada no dispositivo.</p>
+            </div>
+            <button @click="aplicarAtualizacaoApp" class="bg-amber-400 hover:bg-amber-300 active:scale-95 text-indigo-950 font-black text-xs px-3 py-1.5 rounded-xl border border-amber-200 shadow-md transition flex items-center gap-1.5 shrink-0 touch-btn">
+                <i class="fa-solid fa-cloud-arrow-down"></i> Atualizar
+            </button>
+        </div>
+    </transition>
 </div>
 
 <script>
+// --- BLINDAGEM DE STORAGE CONTRA QUOTA EXCEDIDA ---
+try {
+    const originalSetItem = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = function(key, value) {
+        try {
+            originalSetItem(key, value);
+        } catch (e) {
+            if (e && (e.name === 'QuotaExceededError' || e.code === 22 || e.number === -2147024882)) {
+                console.error('Cota do localStorage excedida!', e);
+                alert('⚠️ Atenção: A memória do navegador está cheia!\n\nRecomendamos exportar um backup (em Nuvem/Backup) para garantir que seus dados estejam protegidos.');
+            } else {
+                console.error('Erro ao gravar no localStorage:', e);
+            }
+        }
+    };
+} catch (e) {
+    console.warn('Não foi possível encapsular localStorage:', e);
+}
+
+// --- UTILITÁRIO DE CARREGAMENTO SOB DEMANDA (LAZY LOADING) ---
+const scriptsCarregados = new Set();
+function carregarScriptSobDemanda(url) {
+    if (scriptsCarregados.has(url) || document.querySelector(`script[src="${url}"]`)) {
+        return Promise.resolve();
+    }
+    return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = url;
+        s.async = true;
+        s.onload = () => {
+            scriptsCarregados.add(url);
+            resolve();
+        };
+        s.onerror = (e) => reject(new Error(`Falha ao carregar script: ${url}`));
+        document.head.appendChild(s);
+    });
+}
+
+async function assegurarXLSX() {
+    if (window.XLSX) return;
+    await carregarScriptSobDemanda('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+}
+
+async function assegurarJsPDF() {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        await carregarScriptSobDemanda('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    }
+    if (!window.jspdf || !window.jspdf.jsPDF || !window.jspdf.jsPDF.API || !window.jspdf.jsPDF.API.autoTable) {
+        await carregarScriptSobDemanda('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js');
+    }
+}
+
 const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '5.6';
+        const APP_VERSION = '5.7';
+
+        // --- CONTROLE DE ATUALIZAÇÃO DO PWA ---
+        const novaVersaoDisponivel = ref(false);
+        function aplicarAtualizacaoApp() {
+            window.location.reload();
+        }
 
         // --- CALENDÁRIO OFICIAL DE BIMESTRES 2026 ---
         const CALENDARIO_BIMESTRES_2026 = [
@@ -3415,10 +3492,26 @@ createApp({
             }
             inicializarNuvem();
 
-            // Registrar Service Worker para Funcionamento Offline
+            // Registrar Service Worker para Funcionamento Offline e Atualizações
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/sw.js').then((reg) => {
                     console.log('PWA Service Worker ativo:', reg.scope);
+                    
+                    // Se já existir um worker esperando para assumir o controle, avisa o usuário
+                    if (reg.waiting) {
+                        novaVersaoDisponivel.value = true;
+                    }
+                    
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        if (newWorker) {
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    novaVersaoDisponivel.value = true;
+                                }
+                            });
+                        }
+                    });
                 }).catch((err) => {
                     console.warn('Service Worker não suportado ou erro:', err);
                 });
@@ -3453,6 +3546,15 @@ createApp({
 
         function atualizarStatusOnline() {
             statusConexao.value = 'online';
+            // Auto-sincronização imediata ao restabelecer conectividade
+            if (db && isLogado.value) {
+                statusConexao.value = 'sincronizando';
+                sincronizarComNuvem().then(() => {
+                    statusConexao.value = 'online';
+                }).catch(() => {
+                    statusConexao.value = 'online';
+                });
+            }
         }
         function atualizarStatusOffline() {
             statusConexao.value = 'offline';
@@ -4624,16 +4726,26 @@ createApp({
         }
 
         // IMPORTAÇÃO INTELIGENTE DE CSV E EXCEL (SED / COORDENADOR / PROFESSOR)
-        function processarCSVAdmin(event) {
+        async function processarCSVAdmin(event) {
             const file = event.target.files[0];
             if (!file) return;
+
+            const fileName = file.name.toLowerCase();
+            const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
+
+            if (isExcel) {
+                try {
+                    await assegurarXLSX();
+                } catch (err) {
+                    alert('⚠️ Não foi possível carregar o leitor de arquivos Excel (.xlsx). Verifique a conexão com a internet.');
+                    return;
+                }
+            }
 
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     let rows = [];
-                    const fileName = file.name.toLowerCase();
-                    const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
 
                     if (isExcel && typeof XLSX !== 'undefined') {
                         const data = new Uint8Array(e.target.result);
@@ -5402,7 +5514,13 @@ createApp({
             reader.readAsText(file);
         }
 
-        function exportarExcel() {
+        async function exportarExcel() {
+            try {
+                await assegurarXLSX();
+            } catch (err) {
+                alert('⚠️ Não foi possível carregar o módulo de exportação Excel. Verifique a conexão com a internet.');
+                return;
+            }
             const bimFiltro = fechamentoBimestre.value;
             const bimLabel = bimFiltro === 'todos' ? 'Todos os Bimestres (Anual)' : `${bimFiltro}º Bimestre`;
             const dataToExport = currentStudentList.value.map(aluno => {
@@ -5651,7 +5769,13 @@ createApp({
             window.print();
         }
 
-        function exportarPDF(directDownload = false) {
+        async function exportarPDF(directDownload = false) {
+            try {
+                await assegurarJsPDF();
+            } catch (err) {
+                alert('⚠️ Não foi possível carregar o módulo de exportação PDF. Verifique a conexão com a internet.');
+                return;
+            }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const bimFiltro = fechamentoBimestre.value;
@@ -5911,7 +6035,13 @@ createApp({
             doc.text(`Emitido pelo Diário de Vistos em ${dataEmissao}`, 105, 290, { align: 'center' });
         }
 
-        function gerarFichaAluno(aluno, existingDoc = null, isLast = true, directDownload = false) {
+        async function gerarFichaAluno(aluno, existingDoc = null, isLast = true, directDownload = false) {
+            try {
+                await assegurarJsPDF();
+            } catch (err) {
+                alert('⚠️ Não foi possível carregar o módulo de exportação PDF. Verifique a conexão com a internet.');
+                return;
+            }
             const { jsPDF } = window.jspdf;
             const doc = existingDoc || new jsPDF('p', 'mm', 'a4');
             const bimFiltro = fechamentoBimestre.value;
@@ -5937,10 +6067,16 @@ createApp({
             return doc;
         }
 
-        function gerarFichasTurmaLote() {
+        async function gerarFichasTurmaLote() {
             const alunos = currentStudentList.value;
             if (!alunos || alunos.length === 0) {
                 alert('Nenhum aluno encontrado para exportar fichas.');
+                return;
+            }
+            try {
+                await assegurarJsPDF();
+            } catch (err) {
+                alert('⚠️ Não foi possível carregar o módulo de exportação PDF. Verifique a conexão com a internet.');
                 return;
             }
             const bimFiltro = fechamentoBimestre.value;
@@ -6243,7 +6379,8 @@ createApp({
 
             // Nuvem, Conectividade e PWA
             modalNuvem, nuvemConectada, statusConexao, abrirModalNuvem, salvarConfigNuvem, sincronizarAgora,
-            pwaPrompt, mostrarBotaoInstalar, instalarAppPWA
+            pwaPrompt, mostrarBotaoInstalar, instalarAppPWA,
+            novaVersaoDisponivel, aplicarAtualizacaoApp
         };
     }
 }).mount('#app');
