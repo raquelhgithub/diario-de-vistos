@@ -9,8 +9,8 @@ Consulte o arquivo principal [`GEMINI.md`](./GEMINI.md) para os detalhes complet
    - Se for um commit de grande porte / mudança estrutural / novas telas principais: somar `+1.0` (ex: `5.2 -> 6.0`).
    - Se for correções, pequenos ajustes ou melhorias visuais: somar `+0.1` (ex: `5.2 -> 5.3`).
    - A versão deve estar visível na Tela de Login e no Cabeçalho do sistema.
-2. **Design & Modo Escuro (Dark Mode):**
-   - Utilizar contrastes suaves, modernos e elegantes (`#0c121e`, `#141e30`, `#18243a`).
-   - Nunca usar pretos puros nem contrastes agressivos que cansem os olhos dos professores.
+2. **Modo Claro como Padrão & Qualidade do Modo Escuro:**
+   - O **Modo Claro é sempre o padrão do sistema**. O modo escuro só é ativado se o usuário clicar explicitamente para ligá-lo.
+   - Quando o Modo Escuro estiver ativado, utilizar contrastes suaves, modernos e elegantes (`#0c121e`, `#141e30`, `#18243a`), sem pretos puros.
 3. **Deploy Vercel / Git:**
    - A Vercel puxa da branch `main`. Sincronize e dê push tanto na branch de trabalho (`Usuarios-e-login-firebase`) quanto na `main`.

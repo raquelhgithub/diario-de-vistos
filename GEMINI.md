@@ -37,10 +37,15 @@ O próprio assistente/desenvolvedor é responsável por realizar a contagem e a 
 
 ## 2. 🎨 Diretriz de Design & Modo Escuro (Dark Mode)
 
+### Modo Claro como Padrão Obrigatório (Regra Permanente)
+* O **Modo Claro (Light Mode) DEVE ser sempre o padrão inicial do sistema**.
+* O **Modo Escuro (Dark Mode)** só é ativado se o usuário clicar deliberadamente no botão de alternar tema (armazenado como `'true'` no `localStorage.getItem('diario_dark_mode')`).
+* Nunca ativar o modo escuro automaticamente por padrão ou por preferência do sistema operacional (`prefers-color-scheme`).
+
 ### Filosofia Visual
 O sistema deve priorizar **descanso visual para professores** com contrastes ergonômicos, modernos e suaves, evitando fadiga ocular em salas de aula e à noite.
 
-### Regras de Cores do Modo Escuro
+### Regras de Cores do Modo Escuro (quando ativado pelo usuário)
 * **Fundo Geral (`body`):** Tom ardósia/azul escuro profundo (`#0c121e`), nunca preto puro (`#000000`).
 * **Cards e Painéis Principais (`bg-white`):** Tom navy refinado (`#141e30`) com bordas suaves (`#22314d`) e sombras aveludadas.
 * **Superfícies Secundárias (`bg-slate-50`, `bg-slate-100`):** Levemente contrastantes (`#18243a` e `#1a273f`).
