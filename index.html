@@ -1034,7 +1034,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
                     <!-- OPÇÃO 1: POR DIA ESPECÍFICO -->
                     <div class="bg-slate-50 rounded-2xl border border-slate-200 p-4 sm:p-5 flex flex-col justify-between space-y-4">
                         <div>
@@ -1082,10 +1082,10 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200">
-                            <button @click="executarCopiaIndividual(false)" class="bg-indigo-900 hover:bg-indigo-800 active:bg-indigo-950 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm">
+                            <button @click="executarCopiaIndividual(false)" class="bg-indigo-900 hover:bg-indigo-800 active:bg-indigo-950 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm touch-btn">
                                 <i class="fa-solid fa-copy text-amber-400"></i> Copiar Vistos
                             </button>
-                            <button @click="executarCopiaIndividual(true)" class="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm" title="Transfere para a data destino e apaga da data origem">
+                            <button @click="executarCopiaIndividual(true)" class="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm touch-btn" title="Transfere para a data destino e apaga da data origem">
                                 <i class="fa-solid fa-arrows-turn-right"></i> Mover Vistos
                             </button>
                         </div>
@@ -1096,7 +1096,7 @@
                         <div>
                             <div class="flex items-center justify-between mb-3 border-b border-slate-200 pb-2">
                                 <h3 class="font-bold text-sm text-indigo-950 flex items-center gap-2">
-                                    <i class="fa-solid fa-layer-group text-amber-600"></i> Mover / Copiar em Lote (Bimestres)
+                                    <i class="fa-solid fa-layer-group text-amber-600"></i> Em Lote (Bimestres)
                                 </h3>
                                 <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Em Lote</span>
                             </div>
@@ -1111,21 +1111,21 @@
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Bimestre Origem</label>
+                                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Bim. Origem</label>
                                         <select v-model="ferramentaLote.bimestreOrigem" @change="limparPreviaLote" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
-                                            <option value="1">1º Bim (04/02 a 22/04)</option>
-                                            <option value="2">2º Bim (23/04 a 06/07)</option>
-                                            <option value="3">3º Bim (24/07 a 02/10)</option>
-                                            <option value="4">4º Bim (05/10 a 18/12)</option>
+                                            <option value="1">1º Bimestre</option>
+                                            <option value="2">2º Bimestre</option>
+                                            <option value="3">3º Bimestre</option>
+                                            <option value="4">4º Bimestre</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Bimestre Destino</label>
+                                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Bim. Destino</label>
                                         <select v-model="ferramentaLote.bimestreDestino" @change="limparPreviaLote" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
-                                            <option value="1">1º Bim (04/02 a 22/04)</option>
-                                            <option value="2">2º Bim (23/04 a 06/07)</option>
-                                            <option value="3">3º Bim (24/07 a 02/10)</option>
-                                            <option value="4">4º Bim (05/10 a 18/12)</option>
+                                            <option value="1">1º Bimestre</option>
+                                            <option value="2">2º Bimestre</option>
+                                            <option value="3">3º Bimestre</option>
+                                            <option value="4">4º Bimestre</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1133,17 +1133,146 @@
                                 <div class="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-600">
                                     <div class="flex items-center gap-2">
                                         <input type="checkbox" id="checkCopiarConteudoLote" v-model="ferramentaLote.copiarConteudo" class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                                        <label for="checkCopiarConteudoLote" class="font-semibold cursor-pointer select-none">Copiar também conteúdos/matérias das aulas</label>
+                                        <label for="checkCopiarConteudoLote" class="font-semibold cursor-pointer select-none">Copiar conteúdos/matérias</label>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="pt-2 border-t border-slate-200">
-                            <button @click="gerarPreviaLote" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm">
-                                <i class="fa-solid fa-magnifying-glass-chart text-amber-400"></i> Visualizar Prévia de Datas
+                            <button @click="gerarPreviaLote" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm touch-btn">
+                                <i class="fa-solid fa-magnifying-glass-chart text-amber-400"></i> Visualizar Prévia
                             </button>
                         </div>
+                    </div>
+
+                    <!-- OPÇÃO 3: ENTRE DISCIPLINAS -->
+                    <div class="bg-slate-50 rounded-2xl border border-slate-200 p-4 sm:p-5 flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex items-center justify-between mb-3 border-b border-slate-200 pb-2">
+                                <h3 class="font-bold text-sm text-indigo-950 flex items-center gap-2">
+                                    <i class="fa-solid fa-arrows-rotate text-purple-600"></i> Entre Disciplinas
+                                </h3>
+                                <span class="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">Disciplinas</span>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Turma</label>
+                                    <select v-model="ferramentaDisciplina.turma" @change="limparPreviaDisciplina" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                                        <option v-for="t in turmasOrdenadas" :key="t" :value="t">{{ t }}</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Origem</label>
+                                        <select v-model="ferramentaDisciplina.disciplinaOrigem" @change="limparPreviaDisciplina" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                                            <option value="" disabled>Selecione</option>
+                                            <option v-for="d in getDisciplinasDisponiveisTurmaFerramenta(ferramentaDisciplina.turma)" :key="'orig_'+d" :value="d">{{ d }}</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Destino</label>
+                                        <select v-model="ferramentaDisciplina.disciplinaDestino" @change="limparPreviaDisciplina" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                                            <option value="" disabled>Selecione</option>
+                                            <option v-for="d in getDisciplinasDisponiveisTurmaFerramenta(ferramentaDisciplina.turma)" :key="'dest_'+d" :value="d">{{ d }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <label class="block text-[11px] font-bold text-slate-600 uppercase">Período / Escopo</label>
+                                        <span v-if="ferramentaDisciplina.disciplinaOrigem" class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded truncate max-w-[140px]">
+                                            {{ getResumoVistosDisciplinaOrigem().totalDatas }} datas ({{ getResumoVistosDisciplinaOrigem().totalVistos }} vistos)
+                                        </span>
+                                    </div>
+                                    <select v-model="ferramentaDisciplina.escopo" @change="limparPreviaDisciplina" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                                        <option value="todos">Todo o Ano Letivo (Todas as Aulas)</option>
+                                        <option value="1">Apenas 1º Bimestre</option>
+                                        <option value="2">Apenas 2º Bimestre</option>
+                                        <option value="3">Apenas 3º Bimestre</option>
+                                        <option value="4">Apenas 4º Bimestre</option>
+                                        <option value="data">Data Específica...</option>
+                                    </select>
+                                </div>
+
+                                <div v-if="ferramentaDisciplina.escopo === 'data'">
+                                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Data Específica</label>
+                                    <input type="date" v-model="ferramentaDisciplina.dataEspecifica" @change="limparPreviaDisciplina" class="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                                </div>
+
+                                <div class="p-2.5 bg-white rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1.5">
+                                    <div class="flex items-center gap-2">
+                                        <input type="checkbox" id="checkCopiarConteudoDisc" v-model="ferramentaDisciplina.copiarConteudo" class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                        <label for="checkCopiarConteudoDisc" class="font-semibold cursor-pointer select-none">Copiar também conteúdos/matérias</label>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <input type="checkbox" id="checkSobrescreverDisc" v-model="ferramentaDisciplina.sobrescreverConflitos" class="rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
+                                        <label for="checkSobrescreverDisc" class="font-medium cursor-pointer select-none text-slate-500 text-[11px]">Sobrescrever caso já exista visto</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-200">
+                            <button @click="gerarPreviaDisciplina" class="w-full bg-purple-900 hover:bg-purple-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm touch-btn">
+                                <i class="fa-solid fa-magnifying-glass-chart text-amber-400"></i> Visualizar Prévia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABELA DE PRÉVIA ENTRE DISCIPLINAS (SE GERADA) -->
+                <div v-if="ferramentaDisciplina.previaGerada" class="mt-6 border-t border-slate-200 pt-5 space-y-3">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div>
+                            <h4 class="font-black text-sm text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-rotate text-purple-600"></i> Prévia da Transferência entre Disciplinas:
+                            </h4>
+                            <p class="text-xs text-slate-500">
+                                {{ ferramentaDisciplina.itensPrevia.length }} data(s) mapeada(s) de <strong class="text-indigo-900">{{ ferramentaDisciplina.disciplinaOrigem }}</strong> para <strong class="text-purple-900">{{ ferramentaDisciplina.disciplinaDestino }}</strong> na turma <strong>{{ ferramentaDisciplina.turma }}</strong>.
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button @click="executarCopiaDisciplina(false)" class="bg-indigo-900 hover:bg-indigo-800 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm flex items-center gap-1.5 touch-btn">
+                                <i class="fa-solid fa-copy text-amber-400"></i> Confirmar Cópia
+                            </button>
+                            <button @click="executarCopiaDisciplina(true)" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs shadow-sm flex items-center gap-1.5 touch-btn" title="Transfere para o destino e apaga da disciplina origem">
+                                <i class="fa-solid fa-arrows-turn-right"></i> Confirmar Mover
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="max-h-60 overflow-y-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead class="bg-slate-100 text-slate-600 font-bold uppercase sticky top-0">
+                                <tr>
+                                    <th class="p-2.5">Data da Aula</th>
+                                    <th class="p-2.5 text-center">Bimestre</th>
+                                    <th class="p-2.5 text-center">Vistos na Origem</th>
+                                    <th class="p-2.5 text-center">Situação no Destino</th>
+                                    <th class="p-2.5">Conteúdo / Matéria</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white">
+                                <tr v-for="item in ferramentaDisciplina.itensPrevia" :key="item.data" class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-800">{{ item.dataFormatada }}</td>
+                                    <td class="p-2.5 text-center font-bold text-slate-600">{{ item.bimestre }}º Bim</td>
+                                    <td class="p-2.5 text-center font-extrabold text-indigo-700">{{ item.vistosOrigem }} visto(s)</td>
+                                    <td class="p-2.5 text-center">
+                                        <span v-if="item.temConflito" class="bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded font-bold text-[10px]">
+                                            Já possui {{ item.vistosDestinoAtual }} vistos
+                                        </span>
+                                        <span v-else class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded font-bold text-[10px]">
+                                            Livre (0 vistos)
+                                        </span>
+                                    </td>
+                                    <td class="p-2.5 text-slate-500 truncate max-w-[220px]">{{ item.conteudo || '—' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -1219,6 +1348,9 @@
                         </button>
                         <button @click="adminSubTab = 'professores'" :class="['px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5', adminSubTab === 'professores' ? 'bg-amber-400 text-indigo-950 shadow' : 'text-indigo-200 hover:text-white']">
                             <i class="fa-solid fa-chalkboard-user"></i> Professores & Senhas
+                        </button>
+                        <button @click="adminSubTab = 'disciplinas'" :class="['px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5', adminSubTab === 'disciplinas' ? 'bg-amber-400 text-indigo-950 shadow' : 'text-indigo-200 hover:text-white']">
+                            <i class="fa-solid fa-book-open"></i> Disciplinas
                         </button>
                         <button @click="adminSubTab = 'pedagogico'" :class="['px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5', adminSubTab === 'pedagogico' ? 'bg-amber-400 text-indigo-950 shadow' : 'text-indigo-200 hover:text-white']">
                             <i class="fa-solid fa-chart-pie"></i> Radar Pedagógico
@@ -1593,6 +1725,47 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- SUB-ABA 5: GESTÃO DE DISCIPLINAS ESCOLARES -->
+                <div v-if="adminSubTab === 'disciplinas'" class="p-4 sm:p-6 space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200 pb-4">
+                        <div>
+                            <h3 class="font-black text-slate-800 text-base sm:text-lg flex items-center gap-2">
+                                <i class="fa-solid fa-book-open text-indigo-600"></i> Catálogo de Disciplinas ({{ disciplinasCadastradas.length }})
+                            </h3>
+                            <p class="text-xs text-slate-500">Cadastre novas matérias, renomeie siglas com propagação automática de dados ou remova disciplinas não utilizadas.</p>
+                        </div>
+                        <button @click="abrirModalNovaDisciplina" class="bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center gap-1.5 shadow transition touch-btn">
+                            <i class="fa-solid fa-plus text-amber-400"></i> + Nova Disciplina
+                        </button>
+                    </div>
+
+                    <!-- Grid de Cards de Disciplinas -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                        <div v-for="d in disciplinasCadastradas" :key="d.codigo" class="bg-slate-50 border border-slate-200 rounded-2xl p-4 hover:border-indigo-300 hover:shadow-xs transition flex flex-col justify-between space-y-3">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-1.5">
+                                    <span class="bg-indigo-100 text-indigo-950 font-black text-xs px-2.5 py-1 rounded-lg tracking-wider border border-indigo-200">
+                                        {{ d.codigo }}
+                                    </span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" :class="getUsoDisciplinaCount(d.codigo) > 0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-600'">
+                                        <i class="fa-solid fa-chalkboard-user mr-1"></i> {{ getUsoDisciplinaCount(d.codigo) }} prof(s)
+                                    </span>
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-sm leading-snug">{{ d.nome }}</h4>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-1.5 pt-2 border-t border-slate-200">
+                                <button @click="abrirModalEditarDisciplina(d)" class="text-slate-700 hover:bg-indigo-50 hover:text-indigo-900 font-bold px-2.5 py-1.5 rounded-lg text-xs transition border border-slate-200 hover:border-indigo-200 flex items-center gap-1 touch-btn" title="Renomear sigla ou nome da disciplina">
+                                    <i class="fa-solid fa-pen text-indigo-600"></i> Editar
+                                </button>
+                                <button @click="confirmarExcluirDisciplina(d)" class="text-rose-600 hover:bg-rose-50 font-bold px-2.5 py-1.5 rounded-lg text-xs transition border border-slate-200 hover:border-rose-200 flex items-center gap-1 touch-btn" title="Excluir disciplina">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1777,6 +1950,47 @@
                 </button>
                 <button @click="salvarProfessorModal" class="px-4 py-2 rounded-lg text-xs font-bold text-white bg-indigo-900 hover:bg-indigo-800 shadow">
                     Salvar Professor
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: INCLUIR / EDITAR DISCIPLINA (ADMIN) -->
+    <div v-if="modalDisciplina.aberto" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-indigo-900 text-white p-4 flex justify-between items-center border-b-2 border-amber-400">
+                <h3 class="font-bold text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-amber-400"></i>
+                    <span>{{ modalDisciplina.modo === 'novo' ? 'Cadastrar Nova Disciplina' : 'Editar / Renomear Disciplina' }}</span>
+                </h3>
+                <button @click="modalDisciplina.aberto = false" class="text-indigo-200 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Sigla / Código da Disciplina</label>
+                    <input type="text" v-model="modalDisciplina.codigo" placeholder="Ex: FIL, SOC, EMPR" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-black uppercase text-indigo-900 focus:ring-2 focus:ring-indigo-500">
+                    <p class="text-[10px] text-slate-400 mt-1">Geralmente de 2 a 6 letras maiúsculas (ex: MAT, LPOR, FIS, ART).</p>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Nome Completo da Disciplina</label>
+                    <input type="text" v-model="modalDisciplina.nome" placeholder="Ex: Filosofia e Cidadania" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div v-if="modalDisciplina.modo === 'editar' && modalDisciplina.codigo !== modalDisciplina.codigoOriginal" class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+                    <div>
+                        <span class="font-bold">Aviso de Propagação:</span>
+                        <p class="text-[11px] mt-0.5">Ao alterar a sigla de <strong>{{ modalDisciplina.codigoOriginal }}</strong> para <strong>{{ modalDisciplina.codigo }}</strong>, as atribuições dos professores e o histórico de vistos associados serão atualizados automaticamente.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+                <button @click="modalDisciplina.aberto = false" class="px-3 py-2 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-100">
+                    Cancelar
+                </button>
+                <button @click="salvarDisciplinaModal" class="px-4 py-2 rounded-lg text-xs font-bold text-white bg-indigo-900 hover:bg-indigo-800 shadow">
+                    {{ modalDisciplina.modo === 'novo' ? 'Cadastrar Disciplina' : 'Salvar Alterações' }}
                 </button>
             </div>
         </div>
@@ -2318,7 +2532,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '5.5';
+        const APP_VERSION = '5.6';
 
         // --- CALENDÁRIO OFICIAL DE BIMESTRES 2026 ---
         const CALENDARIO_BIMESTRES_2026 = [
@@ -2764,7 +2978,224 @@ createApp({
         }
 
         const TODAS_TURMAS_PADRAO = ['1A', '1C', '1D', '1E', '2C', '2D', '2ADM', '2AGRO', '3A', '3B', '3ADM', '3AGRO'];
-        const DISCIPLINAS_SUGERIDAS = ['LPOR', 'MAT', 'EDFIS', 'ART', 'FIS', 'BIO', 'HIS', 'GEO', 'QUI', 'ING', 'RED', 'PV', 'EMA', 'ROB', 'OEMAT', 'OEPORT', 'CCMT', 'EFIN', 'SOC', 'PRAT'];
+
+        // --- CATÁLOGO DINÂMICO DE DISCIPLINAS ---
+        const DISCIPLINAS_PADRAO = [
+            { codigo: 'LPOR', nome: 'Língua Portuguesa' },
+            { codigo: 'MAT', nome: 'Matemática' },
+            { codigo: 'EDFIS', nome: 'Educação Física' },
+            { codigo: 'ART', nome: 'Arte' },
+            { codigo: 'FIS', nome: 'Física' },
+            { codigo: 'BIO', nome: 'Biologia' },
+            { codigo: 'HIS', nome: 'História' },
+            { codigo: 'GEO', nome: 'Geografia' },
+            { codigo: 'QUI', nome: 'Química' },
+            { codigo: 'ING', nome: 'Inglês' },
+            { codigo: 'RED', nome: 'Redação e Leitura' },
+            { codigo: 'PV', nome: 'Projeto de Vida' },
+            { codigo: 'EMA', nome: 'Eletiva / Matemática' },
+            { codigo: 'ROB', nome: 'Robótica' },
+            { codigo: 'OEMAT', nome: 'Orientação de Estudos (Mat)' },
+            { codigo: 'OEPORT', nome: 'Orientação de Estudos (Port)' },
+            { codigo: 'CCMT', nome: 'Criação e Comportamento dos Materiais' },
+            { codigo: 'EFIN', nome: 'Educação Financeira' },
+            { codigo: 'SOC', nome: 'Sociologia' },
+            { codigo: 'PRAT', nome: 'Práticas Experimentais' },
+            { codigo: 'FIL', nome: 'Filosofia' },
+            { codigo: 'ARTMID', nome: 'Arte e Mídias Digitais' },
+            { codigo: 'INFOAGRO', nome: 'Informática Aplicada ao Agro' },
+            { codigo: 'INTAGRO', nome: 'Introdução ao Agronegócio' },
+            { codigo: 'GPCE', nome: 'Gestão de Produção e Custos' },
+            { codigo: 'APBIO', nome: 'Aprofundamento Biologia' }
+        ];
+
+        const disciplinasCadastradas = ref((() => {
+            try {
+                const salvo = localStorage.getItem('diario_disciplinas_db');
+                if (salvo) {
+                    const parsed = JSON.parse(salvo);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
+            } catch (e) {
+                console.warn("Erro ao carregar disciplinas salvas:", e);
+            }
+            return DISCIPLINAS_PADRAO;
+        })());
+
+        const DISCIPLINAS_SUGERIDAS = computed(() => disciplinasCadastradas.value.map(d => d.codigo));
+
+        function salvarDisciplinasLocalENuvem() {
+            localStorage.setItem('diario_disciplinas_db', JSON.stringify(disciplinasCadastradas.value));
+            if (db) {
+                db.collection('diario_config').doc('disciplinas').set({
+                    disciplinas: disciplinasCadastradas.value,
+                    atualizadoEm: new Date().toISOString()
+                }, { merge: true }).catch(err => console.warn("Erro ao salvar disciplinas na nuvem:", err));
+            }
+        }
+
+        const modalDisciplina = ref({
+            aberto: false,
+            modo: 'novo',
+            codigoOriginal: '',
+            codigo: '',
+            nome: ''
+        });
+
+        function abrirModalNovaDisciplina() {
+            modalDisciplina.value = {
+                aberto: true,
+                modo: 'novo',
+                codigoOriginal: '',
+                codigo: '',
+                nome: ''
+            };
+        }
+
+        function abrirModalEditarDisciplina(disc) {
+            modalDisciplina.value = {
+                aberto: true,
+                modo: 'editar',
+                codigoOriginal: disc.codigo,
+                codigo: disc.codigo,
+                nome: disc.nome || ''
+            };
+        }
+
+        function salvarDisciplinaModal() {
+            const cod = (modalDisciplina.value.codigo || '').trim().toUpperCase().replace(/\s+/g, '');
+            const nome = (modalDisciplina.value.nome || '').trim();
+            if (!cod) {
+                alert('Por favor, informe a sigla/código da disciplina (ex: MAT, LPOR).');
+                return;
+            }
+            if (!nome) {
+                alert('Por favor, informe o nome descritivo da disciplina.');
+                return;
+            }
+
+            if (modalDisciplina.value.modo === 'novo') {
+                const jaExiste = disciplinasCadastradas.value.some(d => d.codigo === cod);
+                if (jaExiste) {
+                    alert(`A disciplina com código "${cod}" já está cadastrada.`);
+                    return;
+                }
+                disciplinasCadastradas.value.push({ codigo: cod, nome });
+                salvarDisciplinasLocalENuvem();
+                modalDisciplina.value.aberto = false;
+            } else {
+                const codOrig = modalDisciplina.value.codigoOriginal;
+                if (cod !== codOrig) {
+                    const jaExiste = disciplinasCadastradas.value.some(d => d.codigo === cod);
+                    if (jaExiste) {
+                        alert(`A disciplina com código "${cod}" já está cadastrada.`);
+                        return;
+                    }
+                }
+
+                const idx = disciplinasCadastradas.value.findIndex(d => d.codigo === codOrig);
+                if (idx !== -1) {
+                    disciplinasCadastradas.value[idx] = { codigo: cod, nome };
+                }
+
+                // Propagação se mudou o código da disciplina
+                if (cod !== codOrig) {
+                    // 1. Atualizar professores
+                    let profsAlterados = 0;
+                    usuarios.value.forEach(u => {
+                        if (u.turmasDisciplinas) {
+                            let alterou = false;
+                            Object.keys(u.turmasDisciplinas).forEach(t => {
+                                const arr = u.turmasDisciplinas[t] || [];
+                                const pos = arr.indexOf(codOrig);
+                                if (pos !== -1) {
+                                    arr[pos] = cod;
+                                    alterou = true;
+                                }
+                            });
+                            if (alterou) profsAlterados++;
+                        }
+                    });
+                    if (profsAlterados > 0) {
+                        localStorage.setItem('diario_usuarios_db', JSON.stringify(usuarios.value));
+                        salvarNuvemUsuarios(usuarios.value);
+                    }
+
+                    // 2. Atualizar chaves em registros e conteudos
+                    let dadosAlterados = false;
+                    Object.keys(registros.value || {}).forEach(k => {
+                        if (k.endsWith(`__${codOrig}`)) {
+                            const turmaPrefix = k.slice(0, -(codOrig.length + 2));
+                            const novaChave = `${turmaPrefix}__${cod}`;
+                            registros.value[novaChave] = registros.value[k];
+                            delete registros.value[k];
+                            dadosAlterados = true;
+                        }
+                    });
+                    Object.keys(conteudos.value || {}).forEach(k => {
+                        if (k.endsWith(`__${codOrig}`)) {
+                            const turmaPrefix = k.slice(0, -(codOrig.length + 2));
+                            const novaChave = `${turmaPrefix}__${cod}`;
+                            conteudos.value[novaChave] = conteudos.value[k];
+                            delete conteudos.value[k];
+                            dadosAlterados = true;
+                        }
+                    });
+
+                    if (dadosAlterados && currentUser.value) {
+                        localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                        localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
+                        salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
+                    }
+
+                    if (selectedDisciplina.value === codOrig) {
+                        selectedDisciplina.value = cod;
+                    }
+                }
+
+                salvarDisciplinasLocalENuvem();
+                modalDisciplina.value.aberto = false;
+            }
+        }
+
+        function confirmarExcluirDisciplina(disc) {
+            const cod = disc.codigo;
+            const profsComDisc = usuarios.value.filter(u => {
+                if (!u.turmasDisciplinas) return false;
+                return Object.values(u.turmasDisciplinas).some(arr => (arr || []).includes(cod));
+            });
+
+            let msg = `Tem certeza que deseja excluir a disciplina "${cod} - ${disc.nome}"?`;
+            if (profsComDisc.length > 0) {
+                msg = `⚠️ ATENÇÃO: Esta disciplina está atribuída a ${profsComDisc.length} professor(es) (${profsComDisc.map(p => p.nome).join(', ')}).\n\nSe continuar, a disciplina será removida das atribuições desses professores.\n\nDeseja realmente excluir?`;
+            }
+
+            if (!confirm(msg)) return;
+
+            usuarios.value.forEach(u => {
+                if (u.turmasDisciplinas) {
+                    Object.keys(u.turmasDisciplinas).forEach(t => {
+                        u.turmasDisciplinas[t] = (u.turmasDisciplinas[t] || []).filter(d => d !== cod);
+                    });
+                }
+            });
+            localStorage.setItem('diario_usuarios_db', JSON.stringify(usuarios.value));
+            salvarNuvemUsuarios(usuarios.value);
+
+            disciplinasCadastradas.value = disciplinasCadastradas.value.filter(d => d.codigo !== cod);
+            salvarDisciplinasLocalENuvem();
+        }
+
+        function getUsoDisciplinaCount(cod) {
+            let profsCount = 0;
+            usuarios.value.forEach(u => {
+                if (u.turmasDisciplinas) {
+                    const tem = Object.values(u.turmasDisciplinas).some(arr => (arr || []).includes(cod));
+                    if (tem) profsCount++;
+                }
+            });
+            return profsCount;
+        }
 
         function formatarTurmasDisciplinasResumo(td) {
             if (!td || typeof td !== 'object' || Object.keys(td).length === 0) return 'Nenhuma';
@@ -4469,9 +4900,22 @@ createApp({
             previa: []
         });
 
+        const ferramentaDisciplina = ref({
+            turma: '',
+            disciplinaOrigem: '',
+            disciplinaDestino: '',
+            escopo: 'todos',
+            dataEspecifica: '',
+            copiarConteudo: true,
+            sobrescreverConflitos: false,
+            previaGerada: false,
+            itensPrevia: []
+        });
+
         watch(selectedClass, (novaTurma) => {
             if (!ferramentaIndividual.value.turma) ferramentaIndividual.value.turma = novaTurma;
             if (!ferramentaLote.value.turma) ferramentaLote.value.turma = novaTurma;
+            if (!ferramentaDisciplina.value.turma) ferramentaDisciplina.value.turma = novaTurma;
             if (!csvConfig.value.turmaAlvo) csvConfig.value.turmaAlvo = novaTurma;
         }, { immediate: true });
 
@@ -4749,6 +5193,168 @@ createApp({
 
             alert(`✅ Sucesso! ${previa.length} dia(s) foram ${isMover ? 'movidos' : 'copiados'} para o ${bimestreDestino}º Bimestre!`);
             limparPreviaLote();
+        }
+
+        // --- FERRAMENTA: MOVER / COPIAR VISTOS ENTRE DISCIPLINAS ---
+        function limparPreviaDisciplina() {
+            ferramentaDisciplina.value.previaGerada = false;
+            ferramentaDisciplina.value.itensPrevia = [];
+        }
+
+        function getDisciplinasDisponiveisTurmaFerramenta(turma) {
+            if (!turma) return disciplinasCadastradas.value.map(d => d.codigo);
+            const dasTurma = getTodasDisciplinasDaTurma(turma);
+            const todas = disciplinasCadastradas.value.map(d => d.codigo);
+            return [...new Set([...dasTurma, ...todas])].sort();
+        }
+
+        function getResumoVistosDisciplinaOrigem() {
+            const { turma, disciplinaOrigem } = ferramentaDisciplina.value;
+            if (!turma || !disciplinaOrigem) return { totalDatas: 0, totalVistos: 0 };
+            const chave = `${turma}__${disciplinaOrigem}`;
+            const dados = registros.value?.[chave] || {};
+            let totalDatas = 0;
+            let totalVistos = 0;
+            Object.keys(dados).forEach(d => {
+                const dia = dados[d];
+                if (dia && typeof dia === 'object') {
+                    let diaVistos = 0;
+                    Object.values(dia).forEach(r => {
+                        if (r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu || (r.pontoPositivo > 0) || (r.pontoNegativo > 0) || r.isContagem)) {
+                            diaVistos++;
+                        }
+                    });
+                    if (diaVistos > 0) {
+                        totalDatas++;
+                        totalVistos += diaVistos;
+                    }
+                }
+            });
+            return { totalDatas, totalVistos };
+        }
+
+        function gerarPreviaDisciplina() {
+            const { turma, disciplinaOrigem, disciplinaDestino, escopo, dataEspecifica } = ferramentaDisciplina.value;
+            if (!turma || !disciplinaOrigem || !disciplinaDestino) {
+                alert('Por favor, selecione a Turma, Disciplina Origem e Disciplina Destino.');
+                return;
+            }
+            if (disciplinaOrigem === disciplinaDestino) {
+                alert('A disciplina de origem e a de destino não podem ser a mesma.');
+                return;
+            }
+            if (escopo === 'data' && !dataEspecifica) {
+                alert('Por favor, informe a data específica para transferência.');
+                return;
+            }
+
+            const chaveOrigem = `${turma}__${disciplinaOrigem}`;
+            const chaveDestino = `${turma}__${disciplinaDestino}`;
+            const dadosOrigem = registros.value?.[chaveOrigem] || {};
+            const conteudosOrigem = conteudos.value?.[chaveOrigem] || {};
+            const dadosDestino = registros.value?.[chaveDestino] || {};
+
+            const itens = [];
+            const datas = Object.keys(dadosOrigem).sort();
+
+            datas.forEach(d => {
+                if (escopo !== 'todos' && escopo !== 'data') {
+                    if (getBimestrePorData(d) !== String(escopo)) return;
+                } else if (escopo === 'data') {
+                    if (d !== dataEspecifica) return;
+                }
+
+                const diaObj = dadosOrigem[d] || {};
+                const countOrigem = Object.values(diaObj).filter(r => r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu || (r.pontoPositivo > 0) || (r.pontoNegativo > 0) || r.isContagem)).length;
+                
+                const diaDestinoObj = dadosDestino[d] || {};
+                const countDestino = Object.values(diaDestinoObj).filter(r => r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu || (r.pontoPositivo > 0) || (r.pontoNegativo > 0) || r.isContagem)).length;
+
+                if (countOrigem > 0 || (conteudosOrigem[d] && conteudosOrigem[d].trim())) {
+                    itens.push({
+                        data: d,
+                        dataFormatada: formatData(d),
+                        bimestre: getBimestrePorData(d),
+                        vistosOrigem: countOrigem,
+                        vistosDestinoAtual: countDestino,
+                        temConflito: countDestino > 0,
+                        conteudo: conteudosOrigem[d] || ''
+                    });
+                }
+            });
+
+            ferramentaDisciplina.value.itensPrevia = itens;
+            ferramentaDisciplina.value.previaGerada = true;
+
+            if (itens.length === 0) {
+                alert(`Nenhum visto ou matéria encontrado na disciplina ${disciplinaOrigem} para o filtro selecionado.`);
+            }
+        }
+
+        function executarCopiaDisciplina(mover = false) {
+            const { turma, disciplinaOrigem, disciplinaDestino, copiarConteudo, sobrescreverConflitos, itensPrevia } = ferramentaDisciplina.value;
+            if (!itensPrevia || itensPrevia.length === 0) {
+                alert('Por favor, gere a prévia antes de executar a transferência.');
+                return;
+            }
+
+            const acaoVerbo = mover ? 'MOVER (transferir e apagar da origem)' : 'COPIAR (duplicar)';
+            const conflitos = itensPrevia.filter(i => i.temConflito).length;
+            let avisoConflito = '';
+            if (conflitos > 0) {
+                avisoConflito = sobrescreverConflitos 
+                    ? `\n⚠️ ATENÇÃO: Há ${conflitos} data(s) que já possuem vistos na disciplina destino. Elas serão SOBRESCRITAS conforme opção marcada.`
+                    : `\nℹ️ Há ${conflitos} data(s) com vistos no destino. Os registros já existentes serão preservados, mesclando apenas os novos.`;
+            }
+
+            const msg = `Confirma ${acaoVerbo} os vistos de ${itensPrevia.length} data(s) da disciplina ${disciplinaOrigem} para ${disciplinaDestino} na turma ${turma}?${avisoConflito}`;
+            if (!confirm(msg)) return;
+
+            const chaveOrigem = `${turma}__${disciplinaOrigem}`;
+            const chaveDestino = `${turma}__${disciplinaDestino}`;
+
+            if (!registros.value[chaveDestino]) registros.value[chaveDestino] = {};
+            if (!conteudos.value[chaveDestino]) conteudos.value[chaveDestino] = {};
+
+            itensPrevia.forEach(item => {
+                const d = item.data;
+                const regOrig = registros.value[chaveOrigem]?.[d];
+                if (regOrig) {
+                    if (!registros.value[chaveDestino][d] || sobrescreverConflitos) {
+                        registros.value[chaveDestino][d] = JSON.parse(JSON.stringify(regOrig));
+                    } else {
+                        Object.keys(regOrig).forEach(alunoId => {
+                            if (!registros.value[chaveDestino][d][alunoId]) {
+                                registros.value[chaveDestino][d][alunoId] = JSON.parse(JSON.stringify(regOrig[alunoId]));
+                            }
+                        });
+                    }
+                }
+
+                if (copiarConteudo && conteudos.value[chaveOrigem]?.[d]) {
+                    if (!conteudos.value[chaveDestino][d] || sobrescreverConflitos) {
+                        conteudos.value[chaveDestino][d] = conteudos.value[chaveOrigem][d];
+                    }
+                }
+
+                if (mover) {
+                    if (registros.value[chaveOrigem]) {
+                        delete registros.value[chaveOrigem][d];
+                    }
+                    if (copiarConteudo && conteudos.value[chaveOrigem]) {
+                        delete conteudos.value[chaveOrigem][d];
+                    }
+                }
+            });
+
+            if (currentUser.value) {
+                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
+                salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
+            }
+
+            alert(`✅ Sucesso! Vistos ${mover ? 'movidos' : 'copiados'} com sucesso para a disciplina ${disciplinaDestino}.`);
+            limparPreviaDisciplina();
         }
 
         function exportarBackup() {
@@ -5485,6 +6091,21 @@ createApp({
                     }
                 }
 
+                // Sincronizar catálogo de disciplinas
+                const docDisciplinas = await db.collection('diario_config').doc('disciplinas').get();
+                if (docDisciplinas.exists) {
+                    const data = docDisciplinas.data();
+                    if (data && Array.isArray(data.disciplinas) && data.disciplinas.length > 0) {
+                        disciplinasCadastradas.value = data.disciplinas;
+                        localStorage.setItem('diario_disciplinas_db', JSON.stringify(disciplinasCadastradas.value));
+                    }
+                } else {
+                    await db.collection('diario_config').doc('disciplinas').set({
+                        disciplinas: disciplinasCadastradas.value,
+                        atualizadoEm: new Date().toISOString()
+                    });
+                }
+
                 // Sincronizar dados do professor atual
                 if (currentUser.value) {
                     const docProf = await db.collection('diario_professores').doc(currentUser.value).get();
@@ -5598,9 +6219,12 @@ createApp({
             modalNovaTurma, abrirModalNovaTurma, criarNovaTurma,
             modalRenomearTurma, abrirModalRenomearTurma, confirmarRenomearTurma, confirmarExcluirTurma,
             modalProfessor, mostrarSenhasAdmin, toggleMostrarSenhaAdmin, abrirModalNovoProfessor, abrirModalEditarProfessor, salvarProfessorModal, confirmarExcluirProfessor, getSenhaUsuario,
+            disciplinasCadastradas, modalDisciplina, abrirModalNovaDisciplina, abrirModalEditarDisciplina, salvarDisciplinaModal, confirmarExcluirDisciplina, getUsoDisciplinaCount,
             
             // Ferramentas Mover/Copiar e Contagem Bimestral
-            ferramentaIndividual, ferramentaLote, getQtdVistosNaData, getConteudoNaData, executarCopiaIndividual, limparPreviaLote, gerarPreviaLote, executarLote,
+            ferramentaIndividual, ferramentaLote, ferramentaDisciplina,
+            limparPreviaDisciplina, getDisciplinasDisponiveisTurmaFerramenta, getResumoVistosDisciplinaOrigem, gerarPreviaDisciplina, executarCopiaDisciplina,
+            getQtdVistosNaData, getConteudoNaData, executarCopiaIndividual, limparPreviaLote, gerarPreviaLote, executarLote,
             modalContagem, abrirModalContagem, fecharModalContagem, carregarContagemData, aplicarMassaContagem, salvarContagemBimestral, getBimestrePorData,
 
             // Backup e Exportações (com Pré-Visualização Interativa)
