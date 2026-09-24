@@ -2454,11 +2454,24 @@
 
                     <!-- Tabela do Histórico Diário Detalhado -->
                     <div class="mt-4">
-                        <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
                             <h4 class="font-black text-xs text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
                                 <i class="fa-solid fa-calendar-days text-indigo-700"></i> Detalhamento das Aulas e Registros do Período ({{ currentFichaPreview.bimLabel }}):
                             </h4>
-                            <span class="text-[10px] text-slate-400 font-semibold">{{ currentFichaPreview.linhasDias.length }} datas registradas</span>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="text-[10px] text-slate-600 font-bold bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                                    {{ currentFichaPreview.linhasDias.length }} aulas registradas
+                                </span>
+                                <span v-if="currentFichaPreview.totais.dormiu > 0" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1 shadow-2xs" title="Total de aulas em que dormiu">
+                                    <span>💤</span> {{ currentFichaPreview.totais.dormiu }} dormiu
+                                </span>
+                                <span v-if="currentFichaPreview.totais.copiou > 0" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1 shadow-2xs" title="Total de aulas em que copiou visto">
+                                    <span>📋</span> {{ currentFichaPreview.totais.copiou }} copiou
+                                </span>
+                                <span v-if="currentFichaPreview.totais.incompleto > 0" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-900 border border-yellow-300 flex items-center gap-1 shadow-2xs" title="Total de tarefas incompletas">
+                                    <span>⚠️</span> {{ currentFichaPreview.totais.incompleto }} incompleto
+                                </span>
+                            </div>
                         </div>
                         <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-xs max-h-96">
                             <table class="w-full text-left border-collapse text-xs">
@@ -2478,8 +2491,9 @@
                                             Nenhum visto registrado para o {{ currentFichaPreview.bimLabel }} até o momento.
                                         </td>
                                     </tr>
-                                    <tr v-for="(d, dIdx) in currentFichaPreview.linhasDias" :key="dIdx" class="hover:bg-slate-50 transition">
-                                        <td class="p-2 text-center font-bold text-slate-600 whitespace-nowrap">{{ d.data }}</td>
+                                    <tr v-for="(d, dIdx) in currentFichaPreview.linhasDias" :key="dIdx" 
+                                        :class="['transition', d.temOcorrenciaConduta ? 'bg-amber-50/80 border-l-4 border-rose-500 font-semibold shadow-2xs' : 'hover:bg-slate-50']">
+                                        <td class="p-2 text-center font-bold whitespace-nowrap" :class="d.temOcorrenciaConduta ? 'text-rose-900 font-black' : 'text-slate-600'">{{ d.data }}</td>
                                         <td class="p-2 text-slate-800">{{ d.conteudo }}</td>
                                         <!-- Caderno -->
                                         <td class="p-2 text-center">
@@ -2502,8 +2516,24 @@
                                             <span v-else-if="d.atividade.includes('visto')" class="px-2 py-0.5 rounded font-black text-purple-700 bg-purple-50 text-[11px]">{{ d.atividade }}</span>
                                             <span v-else class="text-slate-400 font-bold">-</span>
                                         </td>
-                                        <!-- Ocorrências -->
-                                        <td class="p-2 text-center text-slate-600 font-semibold text-[11px]">{{ d.ocorrencias }}</td>
+                                        <!-- Ocorrências com Destaque Visual Imediato -->
+                                        <td class="p-2 text-center">
+                                            <div v-if="d.obsItens && d.obsItens.length > 0" class="flex flex-wrap items-center justify-center gap-1">
+                                                <span v-for="(obs, oIdx) in d.obsItens" :key="oIdx"
+                                                      :class="[
+                                                          'px-2 py-0.5 rounded-full font-bold text-[10px] inline-flex items-center gap-1 shadow-2xs',
+                                                          obs.tipo === 'dormiu' ? 'bg-rose-100 text-rose-800 border border-rose-300 font-extrabold' :
+                                                          obs.tipo === 'copiou' ? 'bg-amber-100 text-amber-900 border border-amber-300 font-extrabold' :
+                                                          obs.tipo === 'incompleto' ? 'bg-yellow-100 text-yellow-900 border border-yellow-300 font-extrabold' :
+                                                          obs.tipo === 'penalidade' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                                                          obs.tipo === 'bonus' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+                                                          'bg-slate-100 text-slate-700'
+                                                      ]">
+                                                    {{ obs.texto }}
+                                                </span>
+                                            </div>
+                                            <span v-else class="text-slate-400 font-medium text-[11px]">Regular</span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -2694,7 +2724,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '6.1';
+        const APP_VERSION = '6.2';
 
         // --- CONTROLE DE ATUALIZAÇÃO DO PWA ---
         const novaVersaoDisponivel = ref(false);
@@ -6105,19 +6135,20 @@ createApp({
                 ? datasRegistradas
                 : datasRegistradas.filter(d => getBimestrePorData(d) === String(bimFiltro));
 
-            // REGRA: Na ficha do aluno, exibe de forma simples apenas as datas onde o aluno teve visto entregue, trabalho entregue ou ocorrência registrada
+            // REGRA: Na ficha do aluno, exibe todas as datas com atividades pedagógicas da turma no bimestre
             datasFiltradas = datasFiltradas.filter(d => {
                 const diaObj = turmaReg[d] || {};
-                const r = diaObj[aluno.id];
-                if (!r) return false;
-                const c = typeof r.caderno === 'number' ? r.caderno : (r.caderno ? 1 : 0);
-                const l = typeof r.livro === 'number' ? r.livro : (r.livro ? 1 : 0);
-                const a = typeof r.atividade === 'number' ? r.atividade : (r.atividade ? 1 : 0);
-                const pp = Number(r.pontoPositivo || 0);
-                const pn = Number(r.pontoNegativo || 0);
-                const ppt = Number(r.pontoPositivoTrabalho || 0);
-                const pnt = Number(r.pontoNegativoTrabalho || 0);
-                return c > 0 || l > 0 || a > 0 || pp > 0 || pn > 0 || ppt > 0 || pnt > 0 || r.copiou || r.incompleto || r.dormiu || r.isContagem;
+                return Object.values(diaObj).some(r => {
+                    if (!r) return false;
+                    const c = typeof r.caderno === 'number' ? r.caderno : (r.caderno ? 1 : 0);
+                    const l = typeof r.livro === 'number' ? r.livro : (r.livro ? 1 : 0);
+                    const a = typeof r.atividade === 'number' ? r.atividade : (r.atividade ? 1 : 0);
+                    const pp = Number(r.pontoPositivo || 0);
+                    const pn = Number(r.pontoNegativo || 0);
+                    const ppt = Number(r.pontoPositivoTrabalho || 0);
+                    const pnt = Number(r.pontoNegativoTrabalho || 0);
+                    return c > 0 || l > 0 || a > 0 || pp > 0 || pn > 0 || ppt > 0 || pnt > 0 || r.copiou || r.incompleto || r.dormiu || r.isContagem;
+                });
             });
 
             const linhasDias = datasFiltradas.map(d => {
@@ -6145,33 +6176,66 @@ createApp({
                 let cadTexto = '-';
                 if (isContagemDia) {
                     cadTexto = cVal > 0 ? `${cVal} ${cVal === 1 ? 'visto' : 'vistos'}` : '0';
+                } else if (cVal > 0) {
+                    cadTexto = 'SIM';
                 } else if (turmaTeveCaderno) {
-                    cadTexto = cVal > 0 ? 'SIM' : 'NÃO FEZ';
+                    cadTexto = 'NÃO FEZ';
                 }
 
                 let livTexto = '-';
                 if (isContagemDia) {
                     livTexto = lVal > 0 ? `${lVal} ${lVal === 1 ? 'visto' : 'vistos'}` : '0';
+                } else if (lVal > 0) {
+                    livTexto = 'SIM';
                 } else if (turmaTeveLivro) {
-                    livTexto = lVal > 0 ? 'SIM' : 'NÃO FEZ';
+                    livTexto = 'NÃO FEZ';
                 }
 
                 let ativTexto = '-';
                 if (isContagemDia) {
                     ativTexto = aVal > 0 ? `${aVal} ${aVal === 1 ? 'visto' : 'vistos'}` : '0';
+                } else if (aVal > 0) {
+                    ativTexto = 'SIM';
                 } else if (turmaTeveAtividade) {
-                    ativTexto = aVal > 0 ? 'SIM' : 'NÃO FEZ';
+                    ativTexto = 'NÃO FEZ';
                 }
 
                 const obs = [];
-                if (isContagemDia) obs.push('Contagem Bimestral');
-                if (r.pontoPositivoTrabalho > 0) obs.push(`+${r.pontoPositivoTrabalho.toFixed(1)} pt (Trab)`);
-                if (r.pontoNegativoTrabalho > 0) obs.push(`-${r.pontoNegativoTrabalho.toFixed(1)} pt (Trab)`);
-                if (r.pontoPositivo > 0) obs.push(`+${r.pontoPositivo.toFixed(1)} pt`);
-                if (r.pontoNegativo > 0) obs.push(`-${r.pontoNegativo.toFixed(1)} pt`);
-                if (r.copiou) obs.push('Copiou (-0.2)');
-                if (r.incompleto) obs.push('Incompleto (-0.3)');
-                if (r.dormiu) obs.push('Dormiu (-0.5)');
+                const obsItens = [];
+                if (isContagemDia) {
+                    obs.push('Contagem Bimestral');
+                    obsItens.push({ tipo: 'info', texto: 'Contagem Bimestral' });
+                }
+                if (r.pontoPositivoTrabalho > 0) {
+                    obs.push(`+${r.pontoPositivoTrabalho.toFixed(1)} pt (Trab)`);
+                    obsItens.push({ tipo: 'bonus', texto: `+${r.pontoPositivoTrabalho.toFixed(1)} pt (Trab)` });
+                }
+                if (r.pontoNegativoTrabalho > 0) {
+                    obs.push(`-${r.pontoNegativoTrabalho.toFixed(1)} pt (Trab)`);
+                    obsItens.push({ tipo: 'penalidade', texto: `-${r.pontoNegativoTrabalho.toFixed(1)} pt (Trab)` });
+                }
+                if (r.pontoPositivo > 0) {
+                    obs.push(`+${r.pontoPositivo.toFixed(1)} pt`);
+                    obsItens.push({ tipo: 'bonus', texto: `+${r.pontoPositivo.toFixed(1)} pt` });
+                }
+                if (r.pontoNegativo > 0) {
+                    obs.push(`-${r.pontoNegativo.toFixed(1)} pt`);
+                    obsItens.push({ tipo: 'penalidade', texto: `-${r.pontoNegativo.toFixed(1)} pt` });
+                }
+                if (r.dormiu) {
+                    obs.push('Dormiu (-0.5)');
+                    obsItens.push({ tipo: 'dormiu', texto: '💤 Dormiu (-0,5)' });
+                }
+                if (r.copiou) {
+                    obs.push('Copiou (-0.2)');
+                    obsItens.push({ tipo: 'copiou', texto: '📋 Copiou (-0,2)' });
+                }
+                if (r.incompleto) {
+                    obs.push('Incompleto (-0.3)');
+                    obsItens.push({ tipo: 'incompleto', texto: '⚠️ Incompleto (-0,3)' });
+                }
+
+                const temOcorrenciaConduta = !!(r.dormiu || r.copiou || r.incompleto);
 
                 return {
                     data: formatData(d),
@@ -6179,7 +6243,12 @@ createApp({
                     caderno: cadTexto,
                     livro: livTexto,
                     atividade: ativTexto,
-                    ocorrencias: obs.length > 0 ? obs.join(', ') : 'Regular'
+                    obsItens: obsItens,
+                    ocorrencias: obs.length > 0 ? obs.join(', ') : 'Regular',
+                    temOcorrenciaConduta: temOcorrenciaConduta,
+                    dormiu: !!r.dormiu,
+                    copiou: !!r.copiou,
+                    incompleto: !!r.incompleto
                 };
             });
 
@@ -6273,16 +6342,26 @@ createApp({
                     5: { cellWidth: 28, halign: 'center' }
                 },
                 didParseCell: function(data) {
-                    if (data.section === 'body' && (data.column.index === 2 || data.column.index === 3 || data.column.index === 4)) {
-                        if (data.cell.raw === 'NÃO FEZ') {
+                    if (data.section === 'body') {
+                        const lOriginal = linhasDias[data.row.index];
+                        if (lOriginal && lOriginal.temOcorrenciaConduta) {
+                            data.cell.styles.fillColor = [255, 241, 242]; // Destaque suave em tom rose para dias com indisciplina/ocorrência
+                        }
+                        if (data.column.index === 5 && lOriginal && lOriginal.temOcorrenciaConduta) {
                             data.cell.styles.textColor = [190, 18, 60];
                             data.cell.styles.fontStyle = 'bold';
-                        } else if (data.cell.raw === 'SIM') {
-                            data.cell.styles.textColor = [21, 128, 61];
-                            data.cell.styles.fontStyle = 'bold';
-                        } else if (typeof data.cell.raw === 'string' && data.cell.raw.includes('visto')) {
-                            data.cell.styles.textColor = [107, 33, 168];
-                            data.cell.styles.fontStyle = 'bold';
+                        }
+                        if (data.column.index === 2 || data.column.index === 3 || data.column.index === 4) {
+                            if (data.cell.raw === 'NÃO FEZ') {
+                                data.cell.styles.textColor = [190, 18, 60];
+                                data.cell.styles.fontStyle = 'bold';
+                            } else if (data.cell.raw === 'SIM') {
+                                data.cell.styles.textColor = [21, 128, 61];
+                                data.cell.styles.fontStyle = 'bold';
+                            } else if (typeof data.cell.raw === 'string' && data.cell.raw.includes('visto')) {
+                                data.cell.styles.textColor = [107, 33, 168];
+                                data.cell.styles.fontStyle = 'bold';
+                            }
                         }
                     }
                 },
