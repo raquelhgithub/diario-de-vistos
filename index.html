@@ -702,13 +702,52 @@
                                     <span>Livro</span>
                                 </button>
 
-                                <button @click="toggleItem(aluno.id, 'atividade')" 
-                                        :aria-label="'Marcar visto de trabalho / atividade para ' + aluno.nome"
-                                        :class="['h-8 px-2.5 sm:px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 touch-btn', 
-                                                getRegistro(aluno.id).atividade ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900']">
-                                    <i class="fa-solid fa-file-lines text-xs" :class="getRegistro(aluno.id).atividade ? 'text-white' : 'text-emerald-600'"></i>
-                                    <span>Trabalho / Ativ.</span>
-                                </button>
+                                <div class="inline-flex items-center gap-1">
+                                    <button @click="toggleItem(aluno.id, 'atividade')" 
+                                            :aria-label="'Marcar visto de trabalho / atividade para ' + aluno.nome"
+                                            :class="['h-8 px-2.5 sm:px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 touch-btn', 
+                                                    getRegistro(aluno.id).atividade ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900']">
+                                        <i class="fa-solid fa-file-lines text-xs" :class="getRegistro(aluno.id).atividade ? 'text-white' : 'text-emerald-600'"></i>
+                                        <span>Trabalho / Ativ.</span>
+                                    </button>
+
+                                    <!-- AJUSTES DE TRABALHO: ACRÉSCIMO (+0,5) E DECRÉSCIMO (-0,5) -->
+                                    <div v-if="getRegistro(aluno.id).atividade" class="inline-flex items-center gap-1">
+                                        <!-- Acréscimo (+) -->
+                                        <div class="inline-flex items-center rounded-lg border overflow-hidden shadow-2xs transition h-8"
+                                             :class="(getRegistro(aluno.id).pontoPositivoTrabalho || 0) > 0 ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-emerald-300 bg-emerald-50 text-emerald-800'">
+                                            <button v-if="(getRegistro(aluno.id).pontoPositivoTrabalho || 0) > 0"
+                                                    @click.stop="alterarPontosTrabalho(aluno.id, 'positivo', -0.5)"
+                                                    class="w-5 h-full bg-emerald-800 hover:bg-emerald-900 text-white text-[11px] font-black transition flex items-center justify-center touch-btn shrink-0"
+                                                    title="Reduzir acréscimo de trabalho em 0,5">
+                                                -
+                                            </button>
+                                            <button @click.stop="alterarPontosTrabalho(aluno.id, 'positivo', 0.5)"
+                                                    class="h-full px-1.5 text-[11px] font-bold transition flex items-center justify-center gap-0.5 touch-btn whitespace-nowrap hover:bg-emerald-600 hover:text-white"
+                                                    :title="'Acréscimo no Trabalho: +' + ((getRegistro(aluno.id).pontoPositivoTrabalho || 0).toFixed(1)) + ' pt. Clique para somar +0,5'">
+                                                <i class="fa-solid fa-plus text-[9px]"></i>
+                                                <span>{{ (getRegistro(aluno.id).pontoPositivoTrabalho || 0) > 0 ? '+' + (getRegistro(aluno.id).pontoPositivoTrabalho).toFixed(1) : '+0,5' }}</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- Decréscimo (-) -->
+                                        <div class="inline-flex items-center rounded-lg border overflow-hidden shadow-2xs transition h-8"
+                                             :class="(getRegistro(aluno.id).pontoNegativoTrabalho || 0) > 0 ? 'border-rose-700 bg-rose-700 text-white' : 'border-rose-300 bg-rose-50 text-rose-800'">
+                                            <button v-if="(getRegistro(aluno.id).pontoNegativoTrabalho || 0) > 0"
+                                                    @click.stop="alterarPontosTrabalho(aluno.id, 'negativo', -0.5)"
+                                                    class="w-5 h-full bg-rose-800 hover:bg-rose-900 text-white text-[11px] font-black transition flex items-center justify-center touch-btn shrink-0"
+                                                    title="Reduzir decréscimo de trabalho em 0,5">
+                                                -
+                                            </button>
+                                            <button @click.stop="alterarPontosTrabalho(aluno.id, 'negativo', 0.5)"
+                                                    class="h-full px-1.5 text-[11px] font-bold transition flex items-center justify-center gap-0.5 touch-btn whitespace-nowrap hover:bg-rose-600 hover:text-white"
+                                                    :title="'Decréscimo no Trabalho: -' + ((getRegistro(aluno.id).pontoNegativoTrabalho || 0).toFixed(1)) + ' pt. Clique para somar -0,5'">
+                                                <i class="fa-solid fa-minus text-[9px]"></i>
+                                                <span>{{ (getRegistro(aluno.id).pontoNegativoTrabalho || 0) > 0 ? '-' + (getRegistro(aluno.id).pontoNegativoTrabalho).toFixed(1) : '-0,5' }}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- GRUPO 2: PONTUAÇÃO EXTRA (+/-) -->
@@ -726,7 +765,7 @@
                                     <button @click="alterarPontos(aluno.id, 'positivo', 0.5)" 
                                             :aria-label="'Somar 0,5 ponto positivo para ' + aluno.nome"
                                             :class="['h-full px-2 text-xs font-bold transition flex items-center justify-center gap-1 touch-btn whitespace-nowrap', (getRegistro(aluno.id).pontoPositivo || 0) > 0 ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'hover:bg-emerald-100 text-emerald-800']" 
-                                            :title="'Ponto Positivo: ' + ((getRegistro(aluno.id).pontoPositivo || 0) > 0 ? '+' + (getRegistro(aluno.id).pontoPositivo).toFixed(1) + ' pts. ' : '') + 'Clique para somar +0,5 (sem limite)'">
+                                            :title="'Ponto Extra (Vistos): ' + ((getRegistro(aluno.id).pontoPositivo || 0) > 0 ? '+' + (getRegistro(aluno.id).pontoPositivo).toFixed(1) + ' pts. ' : '') + 'Clique para somar +0,5 (sem limite)'">
                                         <i class="fa-solid fa-circle-plus text-[11px]"></i>
                                         <span>{{ (getRegistro(aluno.id).pontoPositivo || 0) > 0 ? '+' + (getRegistro(aluno.id).pontoPositivo).toFixed(1) : '+0,5' }}</span>
                                     </button>
@@ -745,7 +784,7 @@
                                     <button @click="alterarPontos(aluno.id, 'negativo', 0.5)" 
                                             :aria-label="'Aplicar desconto de 0,5 ponto para ' + aluno.nome"
                                             :class="['h-full px-2 text-xs font-bold transition flex items-center justify-center gap-1 touch-btn whitespace-nowrap', (getRegistro(aluno.id).pontoNegativo || 0) > 0 ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'hover:bg-rose-100 text-rose-800']" 
-                                            :title="'Ponto Negativo: ' + ((getRegistro(aluno.id).pontoNegativo || 0) > 0 ? '-' + (getRegistro(aluno.id).pontoNegativo).toFixed(1) + ' pts. ' : '') + 'Clique para somar -0,5 (sem limite)'">
+                                            :title="'Ponto Negativo (Vistos): ' + ((getRegistro(aluno.id).pontoNegativo || 0) > 0 ? '-' + (getRegistro(aluno.id).pontoNegativo).toFixed(1) + ' pts. ' : '') + 'Clique para somar -0,5 (sem limite)'">
                                         <i class="fa-solid fa-circle-minus text-[11px]"></i>
                                         <span>{{ (getRegistro(aluno.id).pontoNegativo || 0) > 0 ? '-' + (getRegistro(aluno.id).pontoNegativo).toFixed(1) : '-0,5' }}</span>
                                     </button>
@@ -976,10 +1015,11 @@
                             </th>
                             <th class="p-2.5 text-center"><i class="fa-solid fa-book-bookmark text-amber-600"></i> Cad.</th>
                             <th class="p-2.5 text-center"><i class="fa-solid fa-layer-group text-sky-600"></i> Liv.</th>
-                            <th class="p-2.5 text-center text-emerald-700"><i class="fa-solid fa-circle-plus"></i> Ext.</th>
+                            <th class="p-2.5 text-center text-emerald-700"><i class="fa-solid fa-circle-plus"></i> Ext. Vistos</th>
                             <th class="p-2.5 text-center text-rose-600"><i class="fa-solid fa-circle-minus"></i> Desc. Vistos</th>
                             <th class="p-2.5 text-center bg-indigo-50/70 text-indigo-900 border-x border-indigo-200/80 font-black">Nota Vistos</th>
                             <th class="p-2.5 text-center"><i class="fa-solid fa-file-lines text-emerald-600"></i> Trab./Ativ.</th>
+                            <th class="p-2.5 text-center text-emerald-700"><i class="fa-solid fa-circle-plus"></i> Ext. Trab.</th>
                             <th class="p-2.5 text-center text-rose-600"><i class="fa-solid fa-circle-minus"></i> Desc. Trab.</th>
                             <th class="p-2.5 text-center bg-emerald-50/70 text-emerald-900 border-x border-emerald-200/80 font-black">Nota Trab.</th>
                             <th class="p-2.5 text-center bg-slate-200/70 font-black text-slate-800">Média Final</th>
@@ -996,7 +1036,7 @@
                             <td class="p-2 text-center font-bold text-amber-700">{{ fechamentoAlunosResumo[aluno.id]?.caderno ?? 0 }}</td>
                             <td class="p-2 text-center font-bold text-sky-700">{{ fechamentoAlunosResumo[aluno.id]?.livro ?? 0 }}</td>
                             <td class="p-2 text-center font-bold text-emerald-700">
-                                {{ fechamentoAlunosResumo[aluno.id]?.pontoPositivoStr ?? '+0.0' }}
+                                {{ fechamentoAlunosResumo[aluno.id]?.acrescimoVistosStr ?? '+0.0 pt' }}
                             </td>
                             <td class="p-2 text-center font-bold text-rose-600">
                                 {{ fechamentoAlunosResumo[aluno.id]?.descontosVistosStr ?? '-0.0 pt' }}
@@ -1009,6 +1049,9 @@
                             </td>
                             <!-- TRABALHOS / ATIVIDADES -->
                             <td class="p-2 text-center font-bold text-emerald-700">{{ fechamentoAlunosResumo[aluno.id]?.atividade ?? 0 }}</td>
+                            <td class="p-2 text-center font-bold text-emerald-700">
+                                {{ fechamentoAlunosResumo[aluno.id]?.acrescimoTrabalhoStr ?? '+0.0 pt' }}
+                            </td>
                             <td class="p-2 text-center font-bold text-rose-600">
                                 {{ fechamentoAlunosResumo[aluno.id]?.descontosTrabalhoStr ?? '-0.0 pt' }}
                             </td>
@@ -1937,7 +1980,7 @@
                         <span class="text-[10px] text-slate-400">Marque a turma e selecione ou digite as disciplinas</span>
                     </div>
                     <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
-                        <div v-for="tc in TODAS_TURMAS_PADRAO" :key="tc" class="p-2.5 rounded-xl border transition" :class="modalProfessor.turmasDisciplinas && modalProfessor.turmasDisciplinas[tc] ? 'bg-indigo-50/70 border-indigo-300' : 'bg-slate-50 border-slate-200'">
+                        <div v-for="tc in turmasParaAtribuicaoProfessor" :key="tc" class="p-2.5 rounded-xl border transition" :class="modalProfessor.turmasDisciplinas && modalProfessor.turmasDisciplinas[tc] ? 'bg-indigo-50/70 border-indigo-300' : 'bg-slate-50 border-slate-200'">
                             <div class="flex items-center justify-between gap-2 mb-1.5">
                                 <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-slate-800">
                                     <input type="checkbox" :checked="!!(modalProfessor.turmasDisciplinas && modalProfessor.turmasDisciplinas[tc])" @change="toggleTurmaProfessorModal(tc)" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
@@ -2368,8 +2411,8 @@
                             <div class="grid grid-cols-2 gap-1.5 text-[11px] pt-2">
                                 <div><span class="text-slate-500 font-medium">Caderno:</span> <strong class="text-amber-800">{{ currentFichaPreview.totais.caderno }}</strong></div>
                                 <div><span class="text-slate-500 font-medium">Livro:</span> <strong class="text-sky-800">{{ currentFichaPreview.totais.livro }}</strong></div>
-                                <div><span class="text-slate-500 font-medium">Extras (+):</span> <strong class="text-emerald-700">+{{ currentFichaPreview.totais.pontoPositivo.toFixed(1) }}</strong></div>
-                                <div><span class="text-slate-500 font-medium">Desc. Vistos:</span> <strong class="text-rose-700">-{{ currentFichaPreview.totais.descontosVistos.toFixed(1) }}</strong></div>
+                                <div><span class="text-slate-500 font-medium">Extras Vistos (+):</span> <strong class="text-emerald-700">+{{ (currentFichaPreview.totais.pontoPositivoVistos || 0).toFixed(1) }} pt</strong></div>
+                                <div><span class="text-slate-500 font-medium">Desc. Vistos (-):</span> <strong class="text-rose-700">-{{ (currentFichaPreview.totais.descontosVistos || 0).toFixed(1) }} pt</strong></div>
                             </div>
                         </div>
 
@@ -2385,9 +2428,11 @@
                             </div>
                             <div class="grid grid-cols-2 gap-1.5 text-[11px] pt-2">
                                 <div><span class="text-slate-500 font-medium">Entregues:</span> <strong class="text-emerald-800">{{ currentFichaPreview.totais.atividade }}</strong></div>
-                                <div><span class="text-slate-500 font-medium">Desc. Trab.:</span> <strong class="text-rose-700">-{{ currentFichaPreview.totais.descontosTrabalho.toFixed(1) }} pt</strong></div>
+                                <div><span class="text-slate-500 font-medium">Avaliação:</span> <strong class="text-emerald-900">{{ currentFichaPreview.totais.notaTrabalho !== null ? (currentFichaPreview.totais.notaTrabalho || 0).toFixed(1) : '-' }}</strong></div>
+                                <div><span class="text-slate-500 font-medium">Extras Trab. (+):</span> <strong class="text-emerald-700">+{{ (currentFichaPreview.totais.acrescimoTrabalho || 0).toFixed(1) }} pt</strong></div>
+                                <div><span class="text-slate-500 font-medium">Desc. Trab. (-):</span> <strong class="text-rose-700">-{{ (currentFichaPreview.totais.descontosTrabalho || 0).toFixed(1) }} pt</strong></div>
                                 <div class="col-span-2 text-[10px] text-slate-500 mt-0.5">
-                                    <span>Base na entrega de trabalhos avaliativos com descontos.</span>
+                                    <span>Base na entrega de trabalhos com acréscimos (+) e descontos (-).</span>
                                 </div>
                             </div>
                         </div>
@@ -2655,7 +2700,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '5.9';
+        const APP_VERSION = '6.0';
 
         // --- CONTROLE DE ATUALIZAÇÃO DO PWA ---
         const novaVersaoDisponivel = ref(false);
@@ -3106,7 +3151,7 @@ createApp({
             adminVerTodasTurmas.value = !adminVerTodasTurmas.value;
         }
 
-        const TODAS_TURMAS_PADRAO = ['1A', '1C', '1D', '1E', '2C', '2D', '2ADM', '2AGRO', '3A', '3B', '3ADM', '3AGRO'];
+        const TODAS_TURMAS_PADRAO = ['1A', '1C', '1D', '1E', '2C', '2D', '2E', '2ADM', '2AGRO', '3A', '3B', '3C', '3D', '3ADM', '3AGRO'];
 
         // --- CATÁLOGO DINÂMICO DE DISCIPLINAS ---
         const DISCIPLINAS_PADRAO = [
@@ -3969,7 +4014,8 @@ createApp({
         // Objeto imutável padrão para leitura ultra-rápida sem alocações no loop de render
         const REGISTRO_PADRAO_VAZIO = Object.freeze({
             caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false,
-            pontoPositivo: 0, pontoNegativo: 0
+            pontoPositivo: 0, pontoNegativo: 0,
+            pontoPositivoTrabalho: 0, pontoNegativoTrabalho: 0
         });
 
         function initDataStructure() {
@@ -4008,13 +4054,16 @@ createApp({
                 } else {
                     registros.value[chave][selectedDate.value][studentId] = {
                         caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false,
-                        pontoPositivo: 0, pontoNegativo: 0
+                        pontoPositivo: 0, pontoNegativo: 0,
+                        pontoPositivoTrabalho: 0, pontoNegativoTrabalho: 0
                     };
                 }
             }
             const reg = registros.value[chave][selectedDate.value][studentId];
             if (reg.pontoPositivo === undefined) reg.pontoPositivo = 0;
             if (reg.pontoNegativo === undefined) reg.pontoNegativo = 0;
+            if (reg.pontoPositivoTrabalho === undefined) reg.pontoPositivoTrabalho = 0;
+            if (reg.pontoNegativoTrabalho === undefined) reg.pontoNegativoTrabalho = 0;
             return reg;
         }
 
@@ -4026,6 +4075,17 @@ createApp({
             } else if (tipo === 'negativo') {
                 const atual = typeof reg.pontoNegativo === 'number' ? reg.pontoNegativo : 0;
                 reg.pontoNegativo = Math.max(0, Math.round((atual + delta) * 10) / 10);
+            }
+        }
+
+        function alterarPontosTrabalho(studentId, tipo, delta) {
+            const reg = getRegistroParaEdicao(studentId);
+            if (tipo === 'positivo') {
+                const atual = typeof reg.pontoPositivoTrabalho === 'number' ? reg.pontoPositivoTrabalho : 0;
+                reg.pontoPositivoTrabalho = Math.max(0, Math.round((atual + delta) * 10) / 10);
+            } else if (tipo === 'negativo') {
+                const atual = typeof reg.pontoNegativoTrabalho === 'number' ? reg.pontoNegativoTrabalho : 0;
+                reg.pontoNegativoTrabalho = Math.max(0, Math.round((atual + delta) * 10) / 10);
             }
         }
 
@@ -4101,6 +4161,8 @@ createApp({
                 reg.dormiu = false;
                 reg.pontoPositivo = 0;
                 reg.pontoNegativo = 0;
+                reg.pontoPositivoTrabalho = 0;
+                reg.pontoNegativoTrabalho = 0;
             });
             dispararToastUndo(`Todos os registros do dia foram desmarcados.`, snapshot, chave, selectedDate.value);
         }
@@ -4134,7 +4196,7 @@ createApp({
             let avaliados = 0;
             ativos.forEach(aluno => {
                 const r = diaData[aluno.id];
-                if (r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu || (r.pontoPositivo > 0) || (r.pontoNegativo > 0))) {
+                if (r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu || (r.pontoPositivo > 0) || (r.pontoNegativo > 0) || (r.pontoPositivoTrabalho > 0) || (r.pontoNegativoTrabalho > 0))) {
                     avaliados++;
                 }
             });
@@ -4173,17 +4235,34 @@ createApp({
 
                     const pp = Number(item.pontoPositivo) || 0;
                     const pn = Number(item.pontoNegativo) || 0;
-                    pontoPositivo += pp;
-                    pontoNegativo += pn;
+                    const ppt = Number(item.pontoPositivoTrabalho) || 0;
+                    const pnt = Number(item.pontoNegativoTrabalho) || 0;
+
+                    pontoPositivo += (pp + ppt);
+                    pontoNegativo += (pn + pnt);
+                    pontoPositivoTrabalho += ppt;
+                    pontoNegativoTrabalho += pnt;
 
                     // Identifica se a data d teve entrega de Trabalho / Ativ. para este aluno ou turma
                     const alunoTeveTrabalhoHoje = item.atividade === true || (typeof item.atividade === 'number' && item.atividade > 0);
                     const turmaTeveTrabalhoHoje = Object.values(diaRegs).some(r => r && (r.atividade === true || (typeof r.atividade === 'number' && r.atividade > 0)));
+                    const alunoTeveCadernoOuLivro = !!(item.caderno || item.livro);
+                    const diaTemCadernoOuLivro = Object.values(diaRegs).some(r => r && (r.caderno || r.livro));
 
-                    if (alunoTeveTrabalhoHoje || turmaTeveTrabalhoHoje) {
-                        pontoNegativoTrabalho += pn;
-                        pontoPositivoTrabalho += pp;
+                    // Atribuição de pontos genéricos (legados ou lançados pelo controle central de pontos):
+                    if (ppt === 0 && pnt === 0) {
+                        if (alunoTeveTrabalhoHoje && !alunoTeveCadernoOuLivro) {
+                            pontoNegativoTrabalho += pn;
+                            pontoPositivoTrabalho += pp;
+                        } else if (!alunoTeveCadernoOuLivro && !diaTemCadernoOuLivro && turmaTeveTrabalhoHoje) {
+                            pontoNegativoTrabalho += pn;
+                            pontoPositivoTrabalho += pp;
+                        } else {
+                            pontoNegativoVistos += pn;
+                            pontoPositivoVistos += pp;
+                        }
                     } else {
+                        // Se já foram lançados pontos explícitos de trabalho, os pontos genéricos pp/pn pertencem aos vistos
                         pontoNegativoVistos += pn;
                         pontoPositivoVistos += pp;
                     }
@@ -4197,10 +4276,11 @@ createApp({
             pontoPositivoVistos = Math.round(pontoPositivoVistos * 10) / 10;
             pontoPositivoTrabalho = Math.round(pontoPositivoTrabalho * 10) / 10;
 
+            const acrescimoTrabalho = pontoPositivoTrabalho;
+            const descontosTrabalho = pontoNegativoTrabalho;
+
             // Descontos de rotina (Caderno/Livro/Sala)
             const descontosVistos = Math.round(((dormiu * 0.5) + (incompleto * 0.3) + (copiou * 0.2) + pontoNegativoVistos) * 10) / 10;
-            // Descontos específicos aplicados nos trabalhos
-            const descontosTrabalho = pontoNegativoTrabalho;
             const descontos = Math.round((descontosVistos + descontosTrabalho) * 10) / 10;
 
             const pontosBrutosVistos = Math.round(((caderno * 1.0) + (livro * 1.0) + pontoPositivoVistos) * 10) / 10;
@@ -4214,7 +4294,8 @@ createApp({
                 pontoPositivo, pontoNegativo,
                 pontoPositivoVistos, pontoNegativoVistos,
                 pontoPositivoTrabalho, pontoNegativoTrabalho,
-                descontosVistos, descontosTrabalho, descontos,
+                acrescimoTrabalho, descontosTrabalho,
+                descontosVistos, descontos,
                 pontosBrutosVistos, pontosLiquidosVistos,
                 pontosBrutos, pontosLiquidos
             };
@@ -4257,12 +4338,13 @@ createApp({
                     notaVistos = Math.min(10, Math.max(0, (t.pontosLiquidosVistos / maxPtsVistos) * 10));
                 }
 
-                // 2. Nota de Trabalhos (0 a 10) com desconto específico de trabalho
+                // 2. Nota de Trabalhos (0 a 10) com acréscimo e desconto específicos de trabalho
                 let notaTrabalho = null;
                 if (maxTrabalhos > 0) {
                     const baseTrab = (t.atividade / maxTrabalhos) * 10;
-                    // Desconto no trabalho deduz diretamente na nota da escala 0 a 10
-                    notaTrabalho = Math.min(10, Math.max(0, baseTrab - (t.descontosTrabalho || 0)));
+                    // Acréscimo (+) e Desconto (-) no trabalho aplicados diretamente na escala 0 a 10
+                    const pontuacaoAjustada = baseTrab + (t.acrescimoTrabalho || 0) - (t.descontosTrabalho || 0);
+                    notaTrabalho = Math.min(10, Math.max(0, Math.round(pontuacaoAjustada * 10) / 10));
                 }
 
                 // 3. Nota Final Sugerida (Opção C: média Vistos + Trabalhos se houver trabalhos)
@@ -4278,10 +4360,14 @@ createApp({
                     caderno: t.caderno || 0,
                     livro: t.livro || 0,
                     atividade: t.atividade || 0,
+                    acrescimoTrabalho: t.acrescimoTrabalho || 0,
+                    descontosTrabalho: t.descontosTrabalho || 0,
                     pontoPositivoStr: `+${(t.pontoPositivo || 0).toFixed(1)}`,
                     descontosStr: `-${(t.descontos || 0).toFixed(1)} pt`,
                     descontosVistosStr: `-${(t.descontosVistos || 0).toFixed(1)} pt`,
                     descontosTrabalhoStr: `-${(t.descontosTrabalho || 0).toFixed(1)} pt`,
+                    acrescimoTrabalhoStr: `+${(t.acrescimoTrabalho || 0).toFixed(1)} pt`,
+                    acrescimoVistosStr: `+${(t.pontoPositivoVistos || 0).toFixed(1)} pt`,
                     pontosLiquidosStr: (t.pontosLiquidos || 0).toFixed(1),
                     pontosLiquidosVistosStr: (t.pontosLiquidosVistos || 0).toFixed(1),
 
@@ -4991,6 +5077,22 @@ createApp({
             senha: '',
             turmasDisciplinas: {}
         });
+
+        const turmasParaAtribuicaoProfessor = computed(() => {
+            const setTurmas = new Set(TODAS_TURMAS_PADRAO);
+            Object.keys(turmas.value || {}).forEach(t => {
+                const cod = getCodigoTurmaCurto(t);
+                if (cod) setTurmas.add(cod);
+            });
+            if (modalProfessor.value && modalProfessor.value.turmasDisciplinas) {
+                Object.keys(modalProfessor.value.turmasDisciplinas).forEach(t => {
+                    const cod = getCodigoTurmaCurto(t);
+                    if (cod) setTurmas.add(cod);
+                });
+            }
+            return Array.from(setTurmas).sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+        });
+
         const mostrarSenhasAdmin = ref({});
 
         function toggleMostrarSenhaAdmin(nome) {
@@ -5285,6 +5387,8 @@ createApp({
                     atividade: a,
                     pontoPositivo: 0,
                     pontoNegativo: 0,
+                    pontoPositivoTrabalho: 0,
+                    pontoNegativoTrabalho: 0,
                     copiou: false,
                     incompleto: false,
                     dormiu: false
@@ -5670,11 +5774,12 @@ createApp({
                     "Bimestre": bimLabel,
                     "Vistos Caderno": t.caderno,
                     "Vistos Livro": t.livro,
-                    "Extras Vistos (+)": t.pontoPositivo.toFixed(1),
-                    "Descontos Vistos (-)": t.descontosVistos.toFixed(1),
+                    "Extras Vistos (+)": (t.pontoPositivoVistos || 0).toFixed(1),
+                    "Descontos Vistos (-)": (t.descontosVistos || 0).toFixed(1),
                     "Nota Vistos (0-10)": res?.notaVistosFormatada || '0.0',
                     "Trabalhos Entregues": t.atividade,
-                    "Descontos Trabalhos (-)": t.descontosTrabalho.toFixed(1),
+                    "Extras Trabalhos (+)": (t.acrescimoTrabalho || 0).toFixed(1),
+                    "Descontos Trabalhos (-)": (t.descontosTrabalho || 0).toFixed(1),
                     "Nota Trabalhos (0-10)": res?.notaTrabalhoFormatada || '-',
                     "Média Final (0-10)": res?.notaFinalFormatada || calcularNota(aluno.id, bimFiltro).toFixed(1),
                     "Professor": currentUser.value
@@ -5784,6 +5889,15 @@ createApp({
             const nota = (f.nota !== undefined ? f.nota : 0).toFixed(1);
             const maxPts = maxPontuacaoTurma.value ? maxPontuacaoTurma.value.toFixed(1) : '10.0';
 
+            let resumoTrabStr = '';
+            if (totais.notaTrabalho !== null) {
+                resumoTrabStr = `\n📄 *TRABALHOS / AVALIAÇÕES:*\n` +
+                    `• Entregues: *${totais.atividade || 0}*\n` +
+                    `• Extras Trab.: *+${(totais.acrescimoTrabalho || 0).toFixed(1)} pts*\n` +
+                    `• Desc. Trab.: *-${(totais.descontosTrabalho || 0).toFixed(1)} pts*\n` +
+                    `• Nota Trabalhos: *${(totais.notaTrabalho || 0).toFixed(1)} / 10,0*\n`;
+            }
+
             return `*E.E. JOSÉ MARCELINO DE ALMEIDA* 🏫\n` +
                    `*Acompanhamento de Vistos e Atividades*\n\n` +
                    `👤 *Estudante:* ${aluno.nome}\n` +
@@ -5791,14 +5905,14 @@ createApp({
                    `📚 *Turma:* ${turma} | *Disciplina:* ${disc}\n` +
                    `🗓️ *Período:* ${bim}\n` +
                    `👨‍🏫 *Professor(a):* ${prof}\n\n` +
-                   `📊 *RESUMO DE ATIVIDADES:*\n` +
-                   `• Caderno em dia: *${totais.caderno || 0}*\n` +
-                   `• Livro didático: *${totais.livro || 0}*\n` +
-                   `• Atividades em sala: *${totais.atividade || 0}*\n` +
-                   `• Pontuação Extra: *+${(totais.pontoPositivo || 0).toFixed(1)} pts*\n` +
-                   `• Ocorrências/Descontos: *-${(totais.descontos || 0).toFixed(1)} pts*\n\n` +
-                   `⭐ *Total de Vistos Líquidos:* *${(totais.pontosLiquidos || 0).toFixed(1)} pts* (Máximo da turma: ${maxPts} pts)\n` +
-                   `🎯 *Nota Proporcional:* *${nota} / 10,0*\n\n` +
+                   `📊 *VISTOS CONTÍNUOS:*\n` +
+                   `• Caderno: *${totais.caderno || 0}*\n` +
+                   `• Livro: *${totais.livro || 0}*\n` +
+                   `• Extras Vistos: *+${(totais.pontoPositivoVistos || 0).toFixed(1)} pts*\n` +
+                   `• Descontos Vistos: *-${(totais.descontosVistos || 0).toFixed(1)} pts*\n` +
+                   `• Nota Vistos: *${(totais.notaVistos || 0).toFixed(1)} / 10,0*\n` +
+                   resumoTrabStr + `\n` +
+                   `🎯 *MÉDIA FINAL:* *${nota} / 10,0*\n\n` +
                    `_Mensagem emitida pelo Diário Digital de Vistos._`;
         }
 
@@ -5931,7 +6045,8 @@ createApp({
                     t.livro, 
                     res?.notaVistosFormatada || '0.0',
                     t.atividade, 
-                    `-${t.descontosTrabalho.toFixed(1)} pt`,
+                    `+${(t.acrescimoTrabalho || 0).toFixed(1)}`,
+                    `-${(t.descontosTrabalho || 0).toFixed(1)}`,
                     res?.notaTrabalhoFormatada || '-',
                     res?.notaFinalFormatada || calcularNota(a.id, bimFiltro).toFixed(1)
                 ];
@@ -5939,7 +6054,7 @@ createApp({
 
             doc.autoTable({
                 startY: 28,
-                head: [['Nº', 'Nome do Aluno', 'RA', 'Cad.', 'Liv.', 'Nota Vistos', 'Trab.', 'Desc. Trab.', 'Nota Trab.', 'Média Final']],
+                head: [['Nº', 'Nome do Aluno', 'RA', 'Cad.', 'Liv.', 'Nota Vistos', 'Trab.', 'Ext. Trab.', 'Desc. Trab.', 'Nota Trab.', 'Média Final']],
                 body: tableData,
                 theme: 'striped',
                 headStyles: { fillColor: [30, 58, 138] }
@@ -6036,6 +6151,8 @@ createApp({
 
                 const obs = [];
                 if (isContagemDia) obs.push('Contagem Bimestral');
+                if (r.pontoPositivoTrabalho > 0) obs.push(`+${r.pontoPositivoTrabalho.toFixed(1)} pt (Trab)`);
+                if (r.pontoNegativoTrabalho > 0) obs.push(`-${r.pontoNegativoTrabalho.toFixed(1)} pt (Trab)`);
                 if (r.pontoPositivo > 0) obs.push(`+${r.pontoPositivo.toFixed(1)} pt`);
                 if (r.pontoNegativo > 0) obs.push(`-${r.pontoNegativo.toFixed(1)} pt`);
                 if (r.copiou) obs.push('Copiou (-0.2)');
@@ -6096,20 +6213,22 @@ createApp({
             // Totais e Notas Discriminadas (Vistos vs Trabalhos vs Final)
             doc.autoTable({
                 startY: 63,
-                head: [['Caderno', 'Livro', 'Desc. Vistos', 'Nota Vistos', 'Trab./Ativ.', 'Desc. Trab.', 'Nota Trab.', 'Média Final']],
+                head: [['Caderno', 'Livro', 'Ext. Vistos', 'Desc. Vistos', 'Nota Vistos', 'Trab./Ativ.', 'Ext. Trab.', 'Desc. Trab.', 'Nota Trab.', 'Média Final']],
                 body: [[
                     `${totais.caderno}`,
                     `${totais.livro}`,
+                    `+${(totais.pontoPositivoVistos || 0).toFixed(1)} pt`,
                     `-${(totais.descontosVistos || 0).toFixed(1)} pt`,
                     `${(totais.notaVistos || 0).toFixed(1)}`,
                     `${totais.atividade}`,
+                    `+${(totais.acrescimoTrabalho || 0).toFixed(1)} pt`,
                     `-${(totais.descontosTrabalho || 0).toFixed(1)} pt`,
                     `${totais.notaTrabalho !== null ? (totais.notaTrabalho || 0).toFixed(1) : 'Sem Trab.'}`,
                     `${nota.toFixed(1)} / 10,0`
                 ]],
                 theme: 'grid',
-                headStyles: { fillColor: [49, 46, 129], textColor: [255, 255, 255], halign: 'center', fontSize: 7.5, fontStyle: 'bold' },
-                bodyStyles: { halign: 'center', fontSize: 8, fontStyle: 'bold', textColor: [30, 41, 59] },
+                headStyles: { fillColor: [49, 46, 129], textColor: [255, 255, 255], halign: 'center', fontSize: 7, fontStyle: 'bold' },
+                bodyStyles: { halign: 'center', fontSize: 7.5, fontStyle: 'bold', textColor: [30, 41, 59] },
                 margin: { left: 14, right: 14 }
             });
 
@@ -6479,7 +6598,7 @@ createApp({
             
             // Turmas e Alunos
             turmas, turmasOrdenadas, selectedClass, selectedDisciplina, disciplinasDisponiveis, turmasDisponiveis,
-            adminVerTodasTurmas, toggleAdminVerTodasTurmas, TODAS_TURMAS_PADRAO, DISCIPLINAS_SUGERIDAS, formatarTurmasDisciplinasResumo,
+            adminVerTodasTurmas, toggleAdminVerTodasTurmas, TODAS_TURMAS_PADRAO, turmasParaAtribuicaoProfessor, DISCIPLINAS_SUGERIDAS, formatarTurmasDisciplinasResumo,
             toggleTurmaProfessorModal, getDisciplinasStringModal, setDisciplinasStringModal, toggleDisciplinaModal,
             selectedDate, selectedBimestre, isBimestreAuto, onBimestreManualChange, restaurarBimestreAuto,
             CALENDARIO_BIMESTRES_2026, bimestreCorrente, fechamentoBimestre, getQtdAulasBimestre,
@@ -6487,7 +6606,7 @@ createApp({
             filtroSemVistos, alternarFiltroSemVistos, alunoFocadoIndex, focarAlunoCard, getSituacaoBadge,
             buscaAlunoChamada, buscaAlunoFechamento, inputBuscaChamadaRef, inputBuscaFechamentoRef,
             progressoChamadaDia, fechamentoAlunosResumo,
-            conteudoDia, currentStudentList, maxPontuacaoTurma, getRegistro, toggleItem, alterarPontos,
+            conteudoDia, currentStudentList, maxPontuacaoTurma, getRegistro, toggleItem, alterarPontos, alterarPontosTrabalho,
             marcarTodosFizeram, marcarTodosCaderno, marcarTodosLivro, marcarTodosAtividade, desmarcarTudo, marcarTodosVistos,
             toastUndo, desfazerAcaoEmLote, fecharToastUndo,
             getTotaisAluno, calcularNota, getNotaClass, formatData,
