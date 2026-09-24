@@ -682,10 +682,28 @@
                             </div>
                         </div>
 
-                        <!-- CONTROLES ADAPTATIVOS: VISTOS + EXTRAS + DESCONTOS -->
+                        <!-- CONTROLES ADAPTATIVOS: VISTOS + TRABALHOS + OCORRÊNCIAS -->
                         <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 w-full xl:w-auto grow justify-start xl:justify-end">
-                            <!-- GRUPO 1: VISTOS PRINCIPAIS (+1,0) -->
+                            <!-- BLOCO 1: VISTOS DE SALA (DECRÉSCIMO À ESQUERDA, CADERNO/LIVRO NO CENTRO, ACRÉSCIMO À DIREITA) -->
                             <div class="inline-flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200 shrink-0">
+                                <!-- DECRÉSCIMO VISTOS (-0,5) -->
+                                <div class="inline-flex items-center rounded-lg border overflow-hidden shadow-2xs transition h-8"
+                                     :class="(getRegistro(aluno.id).pontoNegativo || 0) > 0 ? 'border-rose-600 bg-rose-600 text-white' : 'border-slate-200 bg-white text-rose-700 hover:bg-rose-50/70'">
+                                    <button v-if="(getRegistro(aluno.id).pontoNegativo || 0) > 0"
+                                            @click.stop="alterarPontos(aluno.id, 'negativo', -0.5)"
+                                            class="w-5 h-full bg-rose-700 hover:bg-rose-800 text-white text-[11px] font-black transition flex items-center justify-center touch-btn shrink-0"
+                                            title="Reduzir penalidade de vistos em 0,5">
+                                        -
+                                    </button>
+                                    <button @click.stop="alterarPontos(aluno.id, 'negativo', 0.5)"
+                                            class="h-full px-2 text-xs font-bold transition flex items-center justify-center gap-1 touch-btn whitespace-nowrap"
+                                            :title="'Penalidade Vistos: -' + ((getRegistro(aluno.id).pontoNegativo || 0).toFixed(1)) + ' pt. Clique para somar -0,5'">
+                                        <i class="fa-solid fa-circle-minus text-[10px]"></i>
+                                        <span>{{ (getRegistro(aluno.id).pontoNegativo || 0) > 0 ? '-' + (getRegistro(aluno.id).pontoNegativo).toFixed(1) : '-0,5' }}</span>
+                                    </button>
+                                </div>
+
+                                <!-- CADERNO -->
                                 <button @click="toggleItem(aluno.id, 'caderno')" 
                                         :aria-label="'Marcar visto de caderno para ' + aluno.nome"
                                         :class="['h-8 px-2.5 sm:px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 touch-btn', 
@@ -694,6 +712,7 @@
                                     <span>Caderno</span>
                                 </button>
 
+                                <!-- LIVRO -->
                                 <button @click="toggleItem(aluno.id, 'livro')" 
                                         :aria-label="'Marcar visto de livro para ' + aluno.nome"
                                         :class="['h-8 px-2.5 sm:px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 touch-btn', 
@@ -702,91 +721,66 @@
                                     <span>Livro</span>
                                 </button>
 
-                                <div class="inline-flex items-center gap-1">
-                                    <button @click="toggleItem(aluno.id, 'atividade')" 
-                                            :aria-label="'Marcar visto de trabalho / atividade para ' + aluno.nome"
-                                            :class="['h-8 px-2.5 sm:px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 touch-btn', 
-                                                    getRegistro(aluno.id).atividade ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900']">
-                                        <i class="fa-solid fa-file-lines text-xs" :class="getRegistro(aluno.id).atividade ? 'text-white' : 'text-emerald-600'"></i>
-                                        <span>Trabalho / Ativ.</span>
-                                    </button>
-
-                                    <!-- AJUSTES DE TRABALHO: ACRÉSCIMO (+0,5) E DECRÉSCIMO (-0,5) -->
-                                    <div v-if="getRegistro(aluno.id).atividade" class="inline-flex items-center gap-1">
-                                        <!-- Acréscimo (+) -->
-                                        <div class="inline-flex items-center rounded-lg border overflow-hidden shadow-2xs transition h-8"
-                                             :class="(getRegistro(aluno.id).pontoPositivoTrabalho || 0) > 0 ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-emerald-300 bg-emerald-50 text-emerald-800'">
-                                            <button v-if="(getRegistro(aluno.id).pontoPositivoTrabalho || 0) > 0"
-                                                    @click.stop="alterarPontosTrabalho(aluno.id, 'positivo', -0.5)"
-                                                    class="w-5 h-full bg-emerald-800 hover:bg-emerald-900 text-white text-[11px] font-black transition flex items-center justify-center touch-btn shrink-0"
-                                                    title="Reduzir acréscimo de trabalho em 0,5">
-                                                -
-                                            </button>
-                                            <button @click.stop="alterarPontosTrabalho(aluno.id, 'positivo', 0.5)"
-                                                    class="h-full px-1.5 text-[11px] font-bold transition flex items-center justify-center gap-0.5 touch-btn whitespace-nowrap hover:bg-emerald-600 hover:text-white"
-                                                    :title="'Acréscimo no Trabalho: +' + ((getRegistro(aluno.id).pontoPositivoTrabalho || 0).toFixed(1)) + ' pt. Clique para somar +0,5'">
-                                                <i class="fa-solid fa-plus text-[9px]"></i>
-                                                <span>{{ (getRegistro(aluno.id).pontoPositivoTrabalho || 0) > 0 ? '+' + (getRegistro(aluno.id).pontoPositivoTrabalho).toFixed(1) : '+0,5' }}</span>
-                                            </button>
-                                        </div>
-
-                                        <!-- Decréscimo (-) -->
-                                        <div class="inline-flex items-center rounded-lg border overflow-hidden shadow-2xs transition h-8"
-                                             :class="(getRegistro(aluno.id).pontoNegativoTrabalho || 0) > 0 ? 'border-rose-700 bg-rose-700 text-white' : 'border-rose-300 bg-rose-50 text-rose-800'">
-                                            <button v-if="(getRegistro(aluno.id).pontoNegativoTrabalho || 0) > 0"
-                                                    @click.stop="alterarPontosTrabalho(aluno.id, 'negativo', -0.5)"
-                                                    class="w-5 h-full bg-rose-800 hover:bg-rose-900 text-white text-[11px] font-black transition flex items-center justify-center touch-btn shrink-0"
-                                                    title="Reduzir decréscimo de trabalho em 0,5">
-                                                -
-                                            </button>
-                                            <button @click.stop="alterarPontosTrabalho(aluno.id, 'negativo', 0.5)"
-                                                    class="h-full px-1.5 text-[11px] font-bold transition flex items-center justify-center gap-0.5 touch-btn whitespace-nowrap hover:bg-rose-600 hover:text-white"
-                                                    :title="'Decréscimo no Trabalho: -' + ((getRegistro(aluno.id).pontoNegativoTrabalho || 0).toFixed(1)) + ' pt. Clique para somar -0,5'">
-                                                <i class="fa-solid fa-minus text-[9px]"></i>
-                                                <span>{{ (getRegistro(aluno.id).pontoNegativoTrabalho || 0) > 0 ? '-' + (getRegistro(aluno.id).pontoNegativoTrabalho).toFixed(1) : '-0,5' }}</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- GRUPO 2: PONTUAÇÃO EXTRA (+/-) -->
-                            <div class="inline-flex items-center gap-1.5 shrink-0">
-                                <!-- PONTO POSITIVO INCREMENTAL (+0,5 SEM LIMITE) -->
-                                <div class="inline-flex items-center rounded-lg border overflow-hidden shadow-2xs transition h-8" 
-                                     :class="(getRegistro(aluno.id).pontoPositivo || 0) > 0 ? 'border-emerald-600 bg-emerald-600' : 'border-emerald-200 bg-emerald-50/70'">
-                                    <button v-if="(getRegistro(aluno.id).pontoPositivo || 0) > 0" 
-                                            @click.stop="alterarPontos(aluno.id, 'positivo', -0.5)" 
-                                            :aria-label="'Reduzir 0,5 ponto positivo de ' + aluno.nome"
-                                            class="w-6 h-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-black transition flex items-center justify-center touch-btn shrink-0" 
-                                            title="Reduzir 0,5 ponto positivo">
+                                <!-- ACRÉSCIMO VISTOS (+0,5) -->
+                                <div class="inline-flex items-center rounded-lg border overflow-hidden shadow-2xs transition h-8"
+                                     :class="(getRegistro(aluno.id).pontoPositivo || 0) > 0 ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-200 bg-white text-emerald-700 hover:bg-emerald-50/70'">
+                                    <button v-if="(getRegistro(aluno.id).pontoPositivo || 0) > 0"
+                                            @click.stop="alterarPontos(aluno.id, 'positivo', -0.5)"
+                                            class="w-5 h-full bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-black transition flex items-center justify-center touch-btn shrink-0"
+                                            title="Reduzir acréscimo de vistos em 0,5">
                                         -
                                     </button>
-                                    <button @click="alterarPontos(aluno.id, 'positivo', 0.5)" 
-                                            :aria-label="'Somar 0,5 ponto positivo para ' + aluno.nome"
-                                            :class="['h-full px-2 text-xs font-bold transition flex items-center justify-center gap-1 touch-btn whitespace-nowrap', (getRegistro(aluno.id).pontoPositivo || 0) > 0 ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'hover:bg-emerald-100 text-emerald-800']" 
-                                            :title="'Ponto Extra (Vistos): ' + ((getRegistro(aluno.id).pontoPositivo || 0) > 0 ? '+' + (getRegistro(aluno.id).pontoPositivo).toFixed(1) + ' pts. ' : '') + 'Clique para somar +0,5 (sem limite)'">
-                                        <i class="fa-solid fa-circle-plus text-[11px]"></i>
+                                    <button @click.stop="alterarPontos(aluno.id, 'positivo', 0.5)"
+                                            class="h-full px-2 text-xs font-bold transition flex items-center justify-center gap-1 touch-btn whitespace-nowrap"
+                                            :title="'Acréscimo Vistos: +' + ((getRegistro(aluno.id).pontoPositivo || 0).toFixed(1)) + ' pt. Clique para somar +0,5'">
+                                        <i class="fa-solid fa-circle-plus text-[10px]"></i>
                                         <span>{{ (getRegistro(aluno.id).pontoPositivo || 0) > 0 ? '+' + (getRegistro(aluno.id).pontoPositivo).toFixed(1) : '+0,5' }}</span>
                                     </button>
                                 </div>
+                            </div>
 
-                                <!-- PONTO NEGATIVO INCREMENTAL (-0,5 SEM LIMITE) -->
-                                <div class="inline-flex items-center rounded-lg border overflow-hidden shadow-2xs transition h-8" 
-                                     :class="(getRegistro(aluno.id).pontoNegativo || 0) > 0 ? 'border-rose-600 bg-rose-600' : 'border-rose-200 bg-rose-50/70'">
-                                    <button v-if="(getRegistro(aluno.id).pontoNegativo || 0) > 0" 
-                                            @click.stop="alterarPontos(aluno.id, 'negativo', -0.5)" 
-                                            :aria-label="'Reduzir penalidade de 0,5 ponto para ' + aluno.nome"
-                                            class="w-6 h-full bg-rose-700 hover:bg-rose-800 text-white text-xs font-black transition flex items-center justify-center touch-btn shrink-0" 
-                                            title="Reduzir penalidade em 0,5 ponto">
+                            <!-- BLOCO 2: TRABALHO AVALIATIVO (EXPANDE COM -0,5 E +0,5 SÓ QUANDO SELECIONADO) -->
+                            <div class="inline-flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200 shrink-0">
+                                <!-- DECRÉSCIMO TRABALHO (-0,5) -->
+                                <div v-if="getRegistro(aluno.id).atividade" class="inline-flex items-center rounded-lg border overflow-hidden shadow-2xs transition h-8"
+                                     :class="(getRegistro(aluno.id).pontoNegativoTrabalho || 0) > 0 ? 'border-rose-600 bg-rose-600 text-white' : 'border-rose-300 bg-rose-50 text-rose-800 hover:bg-rose-100'">
+                                    <button v-if="(getRegistro(aluno.id).pontoNegativoTrabalho || 0) > 0"
+                                            @click.stop="alterarPontosTrabalho(aluno.id, 'negativo', -0.5)"
+                                            class="w-5 h-full bg-rose-700 hover:bg-rose-800 text-white text-[11px] font-black transition flex items-center justify-center touch-btn shrink-0"
+                                            title="Reduzir penalidade de trabalho em 0,5">
                                         -
                                     </button>
-                                    <button @click="alterarPontos(aluno.id, 'negativo', 0.5)" 
-                                            :aria-label="'Aplicar desconto de 0,5 ponto para ' + aluno.nome"
-                                            :class="['h-full px-2 text-xs font-bold transition flex items-center justify-center gap-1 touch-btn whitespace-nowrap', (getRegistro(aluno.id).pontoNegativo || 0) > 0 ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'hover:bg-rose-100 text-rose-800']" 
-                                            :title="'Ponto Negativo (Vistos): ' + ((getRegistro(aluno.id).pontoNegativo || 0) > 0 ? '-' + (getRegistro(aluno.id).pontoNegativo).toFixed(1) + ' pts. ' : '') + 'Clique para somar -0,5 (sem limite)'">
-                                        <i class="fa-solid fa-circle-minus text-[11px]"></i>
-                                        <span>{{ (getRegistro(aluno.id).pontoNegativo || 0) > 0 ? '-' + (getRegistro(aluno.id).pontoNegativo).toFixed(1) : '-0,5' }}</span>
+                                    <button @click.stop="alterarPontosTrabalho(aluno.id, 'negativo', 0.5)"
+                                            class="h-full px-2 text-xs font-bold transition flex items-center justify-center gap-1 touch-btn whitespace-nowrap"
+                                            :title="'Decréscimo Trabalho: -' + ((getRegistro(aluno.id).pontoNegativoTrabalho || 0).toFixed(1)) + ' pt. Clique para somar -0,5'">
+                                        <i class="fa-solid fa-circle-minus text-[10px]"></i>
+                                        <span>{{ (getRegistro(aluno.id).pontoNegativoTrabalho || 0) > 0 ? '-' + (getRegistro(aluno.id).pontoNegativoTrabalho).toFixed(1) : '-0,5' }}</span>
+                                    </button>
+                                </div>
+
+                                <!-- TRABALHO / ATIV. -->
+                                <button @click="toggleItem(aluno.id, 'atividade')" 
+                                        :aria-label="'Marcar visto de trabalho / atividade para ' + aluno.nome"
+                                        :class="['h-8 px-2.5 sm:px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 touch-btn', 
+                                                getRegistro(aluno.id).atividade ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900']">
+                                    <i class="fa-solid fa-file-lines text-xs" :class="getRegistro(aluno.id).atividade ? 'text-white' : 'text-emerald-600'"></i>
+                                    <span>Trabalho / Ativ.</span>
+                                </button>
+
+                                <!-- ACRÉSCIMO TRABALHO (+0,5) -->
+                                <div v-if="getRegistro(aluno.id).atividade" class="inline-flex items-center rounded-lg border overflow-hidden shadow-2xs transition h-8"
+                                     :class="(getRegistro(aluno.id).pontoPositivoTrabalho || 0) > 0 ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'">
+                                    <button v-if="(getRegistro(aluno.id).pontoPositivoTrabalho || 0) > 0"
+                                            @click.stop="alterarPontosTrabalho(aluno.id, 'positivo', -0.5)"
+                                            class="w-5 h-full bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-black transition flex items-center justify-center touch-btn shrink-0"
+                                            title="Reduzir acréscimo de trabalho em 0,5">
+                                        -
+                                    </button>
+                                    <button @click.stop="alterarPontosTrabalho(aluno.id, 'positivo', 0.5)"
+                                            class="h-full px-2 text-xs font-bold transition flex items-center justify-center gap-1 touch-btn whitespace-nowrap"
+                                            :title="'Acréscimo Trabalho: +' + ((getRegistro(aluno.id).pontoPositivoTrabalho || 0).toFixed(1)) + ' pt. Clique para somar +0,5'">
+                                        <i class="fa-solid fa-circle-plus text-[10px]"></i>
+                                        <span>{{ (getRegistro(aluno.id).pontoPositivoTrabalho || 0) > 0 ? '+' + (getRegistro(aluno.id).pontoPositivoTrabalho).toFixed(1) : '+0,5' }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -2464,7 +2458,7 @@
                             <h4 class="font-black text-xs text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
                                 <i class="fa-solid fa-calendar-days text-indigo-700"></i> Detalhamento das Aulas e Registros do Período ({{ currentFichaPreview.bimLabel }}):
                             </h4>
-                            <span class="text-[10px] text-slate-400 font-semibold">{{ currentFichaPreview.linhasDias.length }} dias com atividade</span>
+                            <span class="text-[10px] text-slate-400 font-semibold">{{ currentFichaPreview.linhasDias.length }} datas registradas</span>
                         </div>
                         <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-xs max-h-96">
                             <table class="w-full text-left border-collapse text-xs">
@@ -2700,7 +2694,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '6.0';
+        const APP_VERSION = '6.1';
 
         // --- CONTROLE DE ATUALIZAÇÃO DO PWA ---
         const novaVersaoDisponivel = ref(false);
@@ -4210,6 +4204,7 @@ createApp({
             let pontoPositivo = 0, pontoNegativo = 0;
             let pontoNegativoVistos = 0, pontoNegativoTrabalho = 0;
             let pontoPositivoVistos = 0, pontoPositivoTrabalho = 0;
+            let descRotinaVistos = 0, descRotinaTrabalho = 0;
             const tData = getRegistrosEfetivosTurma();
             
             Object.keys(tData).forEach(d => {
@@ -4266,6 +4261,24 @@ createApp({
                         pontoNegativoVistos += pn;
                         pontoPositivoVistos += pp;
                     }
+
+                    // RATEIO DINÂMICO DE DESCONTOS DE ROTINA (Copiou, Incompleto, Dormiu):
+                    // Regra: Contam para o que está selecionado no dia.
+                    // Se for Caderno e/ou Livro -> contam para vistos.
+                    // Se for Trabalho -> contam para trabalho.
+                    // Se forem ambos -> contam para os dois!
+                    // Se nenhum selecionado -> padrão vistos.
+                    const descDia = (item.dormiu ? 0.5 : 0) + (item.incompleto ? 0.3 : 0) + (item.copiou ? 0.2 : 0);
+                    if (descDia > 0) {
+                        if (alunoTeveCadernoOuLivro && alunoTeveTrabalhoHoje) {
+                            descRotinaVistos += descDia;
+                            descRotinaTrabalho += descDia;
+                        } else if (alunoTeveTrabalhoHoje) {
+                            descRotinaTrabalho += descDia;
+                        } else {
+                            descRotinaVistos += descDia;
+                        }
+                    }
                 }
             });
 
@@ -4277,10 +4290,10 @@ createApp({
             pontoPositivoTrabalho = Math.round(pontoPositivoTrabalho * 10) / 10;
 
             const acrescimoTrabalho = pontoPositivoTrabalho;
-            const descontosTrabalho = pontoNegativoTrabalho;
+            const descontosTrabalho = Math.round((descRotinaTrabalho + pontoNegativoTrabalho) * 10) / 10;
 
-            // Descontos de rotina (Caderno/Livro/Sala)
-            const descontosVistos = Math.round(((dormiu * 0.5) + (incompleto * 0.3) + (copiou * 0.2) + pontoNegativoVistos) * 10) / 10;
+            // Descontos de rotina e específicos de Vistos
+            const descontosVistos = Math.round((descRotinaVistos + pontoNegativoVistos) * 10) / 10;
             const descontos = Math.round((descontosVistos + descontosTrabalho) * 10) / 10;
 
             const pontosBrutosVistos = Math.round(((caderno * 1.0) + (livro * 1.0) + pontoPositivoVistos) * 10) / 10;
@@ -6092,18 +6105,19 @@ createApp({
                 ? datasRegistradas
                 : datasRegistradas.filter(d => getBimestrePorData(d) === String(bimFiltro));
 
-            // REGRA PEDAGÓGICA: Registra como dia com atividade apenas aquela data em que alguém da turma tem ponto ou desconto
+            // REGRA: Na ficha do aluno, exibe de forma simples apenas as datas onde o aluno teve visto entregue, trabalho entregue ou ocorrência registrada
             datasFiltradas = datasFiltradas.filter(d => {
                 const diaObj = turmaReg[d] || {};
-                return Object.values(diaObj).some(r => {
-                    if (!r) return false;
-                    const c = typeof r.caderno === 'number' ? r.caderno : (r.caderno ? 1 : 0);
-                    const l = typeof r.livro === 'number' ? r.livro : (r.livro ? 1 : 0);
-                    const a = typeof r.atividade === 'number' ? r.atividade : (r.atividade ? 1 : 0);
-                    const pp = Number(r.pontoPositivo || 0);
-                    const pn = Number(r.pontoNegativo || 0);
-                    return c > 0 || l > 0 || a > 0 || pp > 0 || pn > 0 || r.copiou || r.incompleto || r.dormiu || r.isContagem;
-                });
+                const r = diaObj[aluno.id];
+                if (!r) return false;
+                const c = typeof r.caderno === 'number' ? r.caderno : (r.caderno ? 1 : 0);
+                const l = typeof r.livro === 'number' ? r.livro : (r.livro ? 1 : 0);
+                const a = typeof r.atividade === 'number' ? r.atividade : (r.atividade ? 1 : 0);
+                const pp = Number(r.pontoPositivo || 0);
+                const pn = Number(r.pontoNegativo || 0);
+                const ppt = Number(r.pontoPositivoTrabalho || 0);
+                const pnt = Number(r.pontoNegativoTrabalho || 0);
+                return c > 0 || l > 0 || a > 0 || pp > 0 || pn > 0 || ppt > 0 || pnt > 0 || r.copiou || r.incompleto || r.dormiu || r.isContagem;
             });
 
             const linhasDias = datasFiltradas.map(d => {
