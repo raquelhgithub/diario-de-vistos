@@ -33,11 +33,9 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Bibliotecas pesadas (XLSX, jsPDF, AutoTable) carregadas sob demanda (Lazy Loading) -->
     
-    <!-- Firebase CDN: App, Firestore e Auth (autenticação segura LGPD) -->
+    <!-- Firebase Firestore CDN para persistência online gratuita -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
     
     <style>
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
@@ -516,9 +514,9 @@
                         <i class="fa-solid fa-layer-group text-sky-100"></i>
                         <span class="truncate">Todos Livro</span>
                     </button>
-                    <button @click="marcarTodosAtividade" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition flex items-center justify-center gap-1.5 shadow-xs touch-btn w-full" title="Marcar visto de Atividade (+1,0) para todos os alunos ativos">
-                        <i class="fa-solid fa-clipboard-list text-emerald-100"></i>
-                        <span class="truncate">Todos Atividade</span>
+                    <button @click="marcarTodosAtividade" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition flex items-center justify-center gap-1.5 shadow-xs touch-btn w-full" title="Marcar visto de Trabalho / Ativ. para todos os alunos ativos">
+                        <i class="fa-solid fa-file-lines text-emerald-100"></i>
+                        <span class="truncate">Todos Trab./Ativ.</span>
                     </button>
                     <button @click="desmarcarTudo" class="bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 border border-rose-200 text-xs font-bold py-2 px-2.5 rounded-lg transition flex items-center justify-center gap-1.5 touch-btn w-full" title="Desmarcar todos os vistos e registros de hoje">
                         <i class="fa-solid fa-eraser text-rose-500"></i>
@@ -705,11 +703,11 @@
                                 </button>
 
                                 <button @click="toggleItem(aluno.id, 'atividade')" 
-                                        :aria-label="'Marcar visto de atividade para ' + aluno.nome"
+                                        :aria-label="'Marcar visto de trabalho / atividade para ' + aluno.nome"
                                         :class="['h-8 px-2.5 sm:px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 touch-btn', 
                                                 getRegistro(aluno.id).atividade ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900']">
-                                    <i class="fa-solid fa-clipboard-list text-xs" :class="getRegistro(aluno.id).atividade ? 'text-white' : 'text-emerald-600'"></i>
-                                    <span>Atividade</span>
+                                    <i class="fa-solid fa-file-lines text-xs" :class="getRegistro(aluno.id).atividade ? 'text-white' : 'text-emerald-600'"></i>
+                                    <span>Trabalho / Ativ.</span>
                                 </button>
                             </div>
 
@@ -976,38 +974,55 @@
                             <th class="p-3 cursor-pointer select-none hover:bg-slate-200 transition" @click="setOrdenacao('nome')" title="Clique para ordenar por Nome Alfabético (A-Z)">
                                 Aluno <i v-if="ordenacaoAlunos === 'nome'" class="fa-solid fa-arrow-down-a-z text-indigo-700 text-xs ml-1"></i>
                             </th>
-                            <th class="p-3 text-center"><i class="fa-solid fa-book-bookmark text-amber-600"></i> Caderno</th>
-                            <th class="p-3 text-center"><i class="fa-solid fa-layer-group text-sky-600"></i> Livro</th>
-                            <th class="p-3 text-center"><i class="fa-solid fa-clipboard-list text-emerald-600"></i> Atividade</th>
-                            <th class="p-3 text-center text-emerald-700"><i class="fa-solid fa-circle-plus"></i> Extras (+)</th>
-                            <th class="p-3 text-center text-rose-600"><i class="fa-solid fa-circle-minus"></i> Descontos (-)</th>
-                            <th class="p-3 text-center">Pontos Líquidos</th>
-                            <th class="p-3 text-center">Nota Final (0 a 10)</th>
-                            <th class="p-3 text-center">Ficha (Pais)</th>
+                            <th class="p-2.5 text-center"><i class="fa-solid fa-book-bookmark text-amber-600"></i> Cad.</th>
+                            <th class="p-2.5 text-center"><i class="fa-solid fa-layer-group text-sky-600"></i> Liv.</th>
+                            <th class="p-2.5 text-center text-emerald-700"><i class="fa-solid fa-circle-plus"></i> Ext.</th>
+                            <th class="p-2.5 text-center text-rose-600"><i class="fa-solid fa-circle-minus"></i> Desc. Vistos</th>
+                            <th class="p-2.5 text-center bg-indigo-50/70 text-indigo-900 border-x border-indigo-200/80 font-black">Nota Vistos</th>
+                            <th class="p-2.5 text-center"><i class="fa-solid fa-file-lines text-emerald-600"></i> Trab./Ativ.</th>
+                            <th class="p-2.5 text-center text-rose-600"><i class="fa-solid fa-circle-minus"></i> Desc. Trab.</th>
+                            <th class="p-2.5 text-center bg-emerald-50/70 text-emerald-900 border-x border-emerald-200/80 font-black">Nota Trab.</th>
+                            <th class="p-2.5 text-center bg-slate-200/70 font-black text-slate-800">Média Final</th>
+                            <th class="p-2.5 text-center">Ficha (Pais)</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 text-sm">
-                        <tr v-for="aluno in listaAlunosFechamento" :key="aluno.id" class="hover:bg-slate-50">
-                            <td class="p-3 font-bold text-indigo-800">{{ aluno.numero }}</td>
-                            <td class="p-3">
-                                <div class="font-bold text-slate-800">{{ aluno.nome }}</div>
+                    <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
+                        <tr v-for="aluno in listaAlunosFechamento" :key="aluno.id" class="hover:bg-slate-50 transition">
+                            <td class="p-2.5 font-bold text-indigo-800 text-center">{{ aluno.numero }}</td>
+                            <td class="p-2.5">
+                                <div class="font-bold text-slate-800 leading-tight">{{ aluno.nome }}</div>
                                 <div class="text-[10px] text-slate-400">RA: {{ aluno.ra }}</div>
                             </td>
-                            <td class="p-3 text-center font-bold text-amber-700">{{ fechamentoAlunosResumo[aluno.id]?.caderno ?? 0 }}</td>
-                            <td class="p-3 text-center font-bold text-sky-700">{{ fechamentoAlunosResumo[aluno.id]?.livro ?? 0 }}</td>
-                            <td class="p-3 text-center font-bold text-emerald-700">{{ fechamentoAlunosResumo[aluno.id]?.atividade ?? 0 }}</td>
-                            <td class="p-3 text-center font-bold text-emerald-700">
+                            <td class="p-2 text-center font-bold text-amber-700">{{ fechamentoAlunosResumo[aluno.id]?.caderno ?? 0 }}</td>
+                            <td class="p-2 text-center font-bold text-sky-700">{{ fechamentoAlunosResumo[aluno.id]?.livro ?? 0 }}</td>
+                            <td class="p-2 text-center font-bold text-emerald-700">
                                 {{ fechamentoAlunosResumo[aluno.id]?.pontoPositivoStr ?? '+0.0' }}
                             </td>
-                            <td class="p-3 text-center font-bold text-rose-600">
-                                {{ fechamentoAlunosResumo[aluno.id]?.descontosStr ?? '-0.0 pt' }}
+                            <td class="p-2 text-center font-bold text-rose-600">
+                                {{ fechamentoAlunosResumo[aluno.id]?.descontosVistosStr ?? '-0.0 pt' }}
                             </td>
-                            <td class="p-3 text-center font-black text-slate-800">
-                                {{ fechamentoAlunosResumo[aluno.id]?.pontosLiquidosStr ?? '0.0' }}
+                            <!-- NOTA VISTOS (0 A 10) -->
+                            <td class="p-2 text-center bg-indigo-50/40 border-x border-indigo-100">
+                                <span :class="['px-2.5 py-1 rounded-full font-black text-xs shadow-2xs inline-block', fechamentoAlunosResumo[aluno.id]?.notaVistosClass]">
+                                    {{ fechamentoAlunosResumo[aluno.id]?.notaVistosFormatada ?? '0.0' }}
+                                </span>
                             </td>
-                            <td class="p-3 text-center">
-                                <span :class="['px-3 py-1 rounded-full font-black text-sm shadow-sm', fechamentoAlunosResumo[aluno.id]?.notaClass ?? getNotaClass(0)]">
-                                    {{ fechamentoAlunosResumo[aluno.id]?.notaFormatada ?? '0.0' }}
+                            <!-- TRABALHOS / ATIVIDADES -->
+                            <td class="p-2 text-center font-bold text-emerald-700">{{ fechamentoAlunosResumo[aluno.id]?.atividade ?? 0 }}</td>
+                            <td class="p-2 text-center font-bold text-rose-600">
+                                {{ fechamentoAlunosResumo[aluno.id]?.descontosTrabalhoStr ?? '-0.0 pt' }}
+                            </td>
+                            <!-- NOTA TRABALHOS (0 A 10) -->
+                            <td class="p-2 text-center bg-emerald-50/40 border-x border-emerald-100">
+                                <span v-if="fechamentoAlunosResumo[aluno.id]?.notaTrabalho !== null" :class="['px-2.5 py-1 rounded-full font-black text-xs shadow-2xs inline-block', fechamentoAlunosResumo[aluno.id]?.notaTrabalhoClass]">
+                                    {{ fechamentoAlunosResumo[aluno.id]?.notaTrabalhoFormatada }}
+                                </span>
+                                <span v-else class="text-xs font-semibold text-slate-400 italic">Sem Trab.</span>
+                            </td>
+                            <!-- MÉDIA FINAL (0 A 10) -->
+                            <td class="p-2.5 text-center bg-slate-100/60">
+                                <span :class="['px-3 py-1 rounded-full font-black text-xs sm:text-sm shadow-sm inline-block', fechamentoAlunosResumo[aluno.id]?.notaFinalClass ?? getNotaClass(0)]">
+                                    {{ fechamentoAlunosResumo[aluno.id]?.notaFinalFormatada ?? '0.0' }}
                                 </span>
                             </td>
                             <td class="p-3 text-center">
@@ -1578,9 +1593,6 @@
                                         <div class="inline-flex items-center gap-1.5">
                                             <button @click="abrirModalEditarProfessor(prof)" class="text-indigo-700 hover:bg-indigo-50 font-bold px-2 py-1 rounded-lg text-xs transition" title="Editar dados e senha">
                                                 <i class="fa-solid fa-pen"></i> Editar
-                                            </button>
-                                            <button @click="provisionarContaFirebaseAuth(prof.nome)" class="text-emerald-700 hover:bg-emerald-50 font-bold px-2 py-1 rounded-lg text-xs transition" title="Criar conta de autenticação segura Firebase Auth (LGPD)">
-                                                <i class="fa-solid fa-shield-halved"></i> Auth
                                             </button>
                                             <button v-if="prof.nome !== currentUser" @click="confirmarExcluirProfessor(prof)" class="text-rose-600 hover:bg-rose-50 font-bold px-2 py-1 rounded-lg text-xs transition" title="Excluir professor">
                                                 <i class="fa-solid fa-trash-can"></i>
@@ -2159,7 +2171,7 @@
                                     <th class="p-2.5">Nome do Aluno</th>
                                     <th class="p-2.5 text-center text-amber-700 bg-amber-50/50">Caderno</th>
                                     <th class="p-2.5 text-center text-sky-700 bg-sky-50/50">Livro</th>
-                                    <th class="p-2.5 text-center text-emerald-700 bg-emerald-50/50">Atividade</th>
+                                    <th class="p-2.5 text-center text-emerald-700 bg-emerald-50/50">Trabalho / Ativ.</th>
                                     <th class="p-2.5 text-center text-purple-900 bg-purple-50/50">Total Vistos</th>
                                 </tr>
                             </thead>
@@ -2341,32 +2353,64 @@
                         </div>
                     </div>
 
-                    <!-- Tabela de Totais e Nota Proporcional -->
-                    <div class="mt-3 overflow-x-auto rounded-xl border border-indigo-950 shadow-xs">
-                        <table class="w-full text-center border-collapse text-xs">
-                            <thead class="bg-indigo-950 text-white font-bold text-[10px] sm:text-xs uppercase">
-                                <tr>
-                                    <th class="p-2 border-r border-indigo-900">Caderno</th>
-                                    <th class="p-2 border-r border-indigo-900">Livro</th>
-                                    <th class="p-2 border-r border-indigo-900">Atividade</th>
-                                    <th class="p-2 border-r border-indigo-900">Extras (+)</th>
-                                    <th class="p-2 border-r border-indigo-900">Descontos (-)</th>
-                                    <th class="p-2 border-r border-indigo-900">Pontos Líquidos</th>
-                                    <th class="p-2 bg-indigo-900">Nota Proporcional</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white font-extrabold text-slate-800">
-                                <tr>
-                                    <td class="p-2.5 border-r border-slate-200">{{ currentFichaPreview.totais.caderno }}</td>
-                                    <td class="p-2.5 border-r border-slate-200">{{ currentFichaPreview.totais.livro }}</td>
-                                    <td class="p-2.5 border-r border-slate-200">{{ currentFichaPreview.totais.atividade }}</td>
-                                    <td class="p-2.5 border-r border-slate-200 text-emerald-700">+{{ currentFichaPreview.totais.pontoPositivo.toFixed(1) }} pts</td>
-                                    <td class="p-2.5 border-r border-slate-200 text-rose-700">-{{ currentFichaPreview.totais.descontos.toFixed(1) }} pts</td>
-                                    <td class="p-2.5 border-r border-slate-200 text-indigo-950">{{ currentFichaPreview.totais.pontosLiquidos.toFixed(1) }} pts</td>
-                                    <td class="p-2.5 bg-indigo-50/50 text-indigo-950 text-sm font-black">{{ currentFichaPreview.nota.toFixed(1) }} / 10,0</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- Painel de Desempenho e Notas Separadas (Opção C) -->
+                    <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                        <!-- Bloco 1: Vistos Diários -->
+                        <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3 flex flex-col justify-between">
+                            <div class="flex items-center justify-between pb-1.5 border-b border-indigo-200/80">
+                                <span class="text-xs font-black text-indigo-950 uppercase flex items-center gap-1.5">
+                                    <i class="fa-solid fa-book-bookmark text-amber-600"></i> Vistos Contínuos
+                                </span>
+                                <span class="text-xs font-black px-2 py-0.5 rounded-full bg-indigo-900 text-white shadow-2xs">
+                                    {{ (currentFichaPreview.totais.notaVistos || 0).toFixed(1) }} / 10,0
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1.5 text-[11px] pt-2">
+                                <div><span class="text-slate-500 font-medium">Caderno:</span> <strong class="text-amber-800">{{ currentFichaPreview.totais.caderno }}</strong></div>
+                                <div><span class="text-slate-500 font-medium">Livro:</span> <strong class="text-sky-800">{{ currentFichaPreview.totais.livro }}</strong></div>
+                                <div><span class="text-slate-500 font-medium">Extras (+):</span> <strong class="text-emerald-700">+{{ currentFichaPreview.totais.pontoPositivo.toFixed(1) }}</strong></div>
+                                <div><span class="text-slate-500 font-medium">Desc. Vistos:</span> <strong class="text-rose-700">-{{ currentFichaPreview.totais.descontosVistos.toFixed(1) }}</strong></div>
+                            </div>
+                        </div>
+
+                        <!-- Bloco 2: Trabalhos Avaliativos -->
+                        <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3 flex flex-col justify-between">
+                            <div class="flex items-center justify-between pb-1.5 border-b border-emerald-200/80">
+                                <span class="text-xs font-black text-emerald-950 uppercase flex items-center gap-1.5">
+                                    <i class="fa-solid fa-file-lines text-emerald-600"></i> Trabalhos / Ativ.
+                                </span>
+                                <span class="text-xs font-black px-2 py-0.5 rounded-full" :class="currentFichaPreview.totais.notaTrabalho !== null ? 'bg-emerald-800 text-white shadow-2xs' : 'bg-slate-200 text-slate-500'">
+                                    {{ currentFichaPreview.totais.notaTrabalho !== null ? (currentFichaPreview.totais.notaTrabalho || 0).toFixed(1) + ' / 10,0' : 'Sem Trab.' }}
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1.5 text-[11px] pt-2">
+                                <div><span class="text-slate-500 font-medium">Entregues:</span> <strong class="text-emerald-800">{{ currentFichaPreview.totais.atividade }}</strong></div>
+                                <div><span class="text-slate-500 font-medium">Desc. Trab.:</span> <strong class="text-rose-700">-{{ currentFichaPreview.totais.descontosTrabalho.toFixed(1) }} pt</strong></div>
+                                <div class="col-span-2 text-[10px] text-slate-500 mt-0.5">
+                                    <span>Base na entrega de trabalhos avaliativos com descontos.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bloco 3: Média Bimestral Sugerida -->
+                        <div class="bg-slate-900 text-white rounded-xl p-3 flex flex-col justify-between shadow-xs">
+                            <div class="flex items-center justify-between pb-1.5 border-b border-slate-700">
+                                <span class="text-xs font-black uppercase text-amber-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-star"></i> Média Geral
+                                </span>
+                                <span class="text-sm font-black text-amber-300">
+                                    {{ currentFichaPreview.nota.toFixed(1) }} / 10,0
+                                </span>
+                            </div>
+                            <div class="text-[11px] text-slate-300 pt-2 flex flex-col justify-center">
+                                <p v-if="currentFichaPreview.totais.notaTrabalho !== null">
+                                    Média calculada entre Vistos ({{ (currentFichaPreview.totais.notaVistos || 0).toFixed(1) }}) e Trabalhos ({{ (currentFichaPreview.totais.notaTrabalho || 0).toFixed(1) }}).
+                                </p>
+                                <p v-else>
+                                    Nota calculada 100% sobre os vistos contínuos do bimestre.
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Tabela do Histórico Diário Detalhado -->
@@ -2385,7 +2429,7 @@
                                         <th class="p-2">Conteúdo Trabalhado em Sala</th>
                                         <th class="p-2 text-center w-20">Caderno</th>
                                         <th class="p-2 text-center w-20">Livro</th>
-                                        <th class="p-2 text-center w-20">Atividade</th>
+                                        <th class="p-2 text-center w-24">Trabalho / Ativ.</th>
                                         <th class="p-2 text-center w-36">Ocorrências</th>
                                     </tr>
                                 </thead>
@@ -2603,71 +2647,12 @@ async function assegurarJsPDF() {
     }
 }
 
-// --- CAMADA IndexedDB (substitui localStorage para dados volumosos do professor) ---
-// Suporta centenas de MB, é assíncrona e nunca bloqueia a thread principal
-const DiarioDB = (() => {
-    const DB_NAME = 'DiarioVistosDB';
-    const DB_VERSION = 1;
-    const STORE = 'professor_data';
-    let _db = null;
-
-    function openDB() {
-        if (_db) return Promise.resolve(_db);
-        return new Promise((resolve, reject) => {
-            const req = indexedDB.open(DB_NAME, DB_VERSION);
-            req.onupgradeneeded = (e) => {
-                e.target.result.createObjectStore(STORE);
-            };
-            req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };
-            req.onerror = (e) => { console.error('IndexedDB erro ao abrir:', e); reject(e.target.error); };
-        });
-    }
-
-    async function getItem(key) {
-        try {
-            const db = await openDB();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction(STORE, 'readonly');
-                const req = tx.objectStore(STORE).get(key);
-                req.onsuccess = () => resolve(req.result ?? null);
-                req.onerror = () => reject(req.error);
-            });
-        } catch (e) { return null; }
-    }
-
-    async function setItem(key, value) {
-        try {
-            const db = await openDB();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction(STORE, 'readwrite');
-                tx.objectStore(STORE).put(value, key);
-                tx.oncomplete = resolve;
-                tx.onerror = () => reject(tx.error);
-            });
-        } catch (e) { console.warn('IndexedDB setItem falhou, usando localStorage como fallback:', e); }
-    }
-
-    async function removeItem(key) {
-        try {
-            const db = await openDB();
-            return new Promise((resolve) => {
-                const tx = db.transaction(STORE, 'readwrite');
-                tx.objectStore(STORE).delete(key);
-                tx.oncomplete = resolve;
-            });
-        } catch (e) { /* silencioso */ }
-    }
-
-    return { getItem, setItem, removeItem };
-})();
-
 const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        // Fase 3: +1.0 por mudança arquitetural (Firestore particionado, Auth, IndexedDB, LGPD)
-        const APP_VERSION = '6.0';
+        const APP_VERSION = '5.8';
 
         // --- CONTROLE DE ATUALIZAÇÃO DO PWA ---
         const novaVersaoDisponivel = ref(false);
@@ -3084,30 +3069,9 @@ createApp({
             loginForm.value.senha = '';
             carregarDadosProfessor();
             sincronizarComNuvem();
-
-            // --- AUTENTICAÇÃO FIREBASE AUTH (LGPD - sem quebrar UX offline) ---
-            // Autentica em background usando e-mail virtual @jma.diario.escola
-            // senhaDigitada já está disponível no escopo (capturada antes do login local)
-            if (window.firebase && firebase.auth) {
-                const nomeNorm = normalizarNomeUsuario(currentUser.value);
-                const emailVirtual = `${nomeNorm}@jma.diario.escola`;
-                firebase.auth().signInWithEmailAndPassword(emailVirtual, senhaDigitada).catch(async (authErr) => {
-                    if (authErr.code === 'auth/user-not-found' || authErr.code === 'auth/invalid-credential') {
-                        // Cria a conta Firebase Auth automaticamente (primeira vez)
-                        await firebase.auth().createUserWithEmailAndPassword(emailVirtual, senhaDigitada).catch(e => {
-                            console.warn('[Auth] Não foi possível criar conta Firebase Auth (modo offline ou erro):', e.code);
-                        });
-                    } else if (authErr.code !== 'auth/network-request-failed') {
-                        console.warn('[Auth] Falha silenciosa no Auth Firebase:', authErr.code);
-                    }
-                });
-            }
         }
 
-        async function fazerLogout() {
-            if (window.firebase && firebase.auth) {
-                await firebase.auth().signOut().catch(() => {});
-            }
+        function fazerLogout() {
             currentUser.value = '';
             loginForm.value = { usuario: '', senha: '' };
         }
@@ -3686,35 +3650,10 @@ createApp({
             return `diario_conteudos_user_${currentUser.value || 'anonimo'}`;
         }
 
-        async function carregarDadosProfessor() {
+        function carregarDadosProfessor() {
             if (!currentUser.value) return;
-            // Primário: IndexedDB (assíncrono, capacidade ilimitada)
-            const regIDB = await DiarioDB.getItem(getChaveStorageRegistros());
-            const contIDB = await DiarioDB.getItem(getChaveStorageConteudos());
-
-            if (regIDB !== null) {
-                registros.value = regIDB;
-            } else {
-                // Fallback: migrar dados existentes do localStorage para IndexedDB (única vez)
-                const regLS = localStorage.getItem(getChaveStorageRegistros());
-                registros.value = regLS ? JSON.parse(regLS) : {};
-                if (regLS) {
-                    await DiarioDB.setItem(getChaveStorageRegistros(), registros.value);
-                    localStorage.removeItem(getChaveStorageRegistros()); // libera espaço
-                }
-            }
-
-            if (contIDB !== null) {
-                conteudos.value = contIDB;
-            } else {
-                const contLS = localStorage.getItem(getChaveStorageConteudos());
-                conteudos.value = contLS ? JSON.parse(contLS) : {};
-                if (contLS) {
-                    await DiarioDB.setItem(getChaveStorageConteudos(), conteudos.value);
-                    localStorage.removeItem(getChaveStorageConteudos());
-                }
-            }
-
+            registros.value = JSON.parse(localStorage.getItem(getChaveStorageRegistros()) || '{}');
+            conteudos.value = JSON.parse(localStorage.getItem(getChaveStorageConteudos()) || '{}');
             if (turmasDisponiveis.value.length > 0 && (!selectedClass.value || !turmasDisponiveis.value.includes(selectedClass.value))) {
                 selectedClass.value = turmasDisponiveis.value[0];
             }
@@ -3724,16 +3663,16 @@ createApp({
             migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
         }
 
-        watch(registros, async (newVal) => {
+        watch(registros, (newVal) => {
             if (currentUser.value) {
-                await DiarioDB.setItem(getChaveStorageRegistros(), newVal);
+                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(newVal));
                 salvarNuvemProfessor(currentUser.value, newVal, conteudos.value);
             }
         }, { deep: true });
 
-        watch(conteudos, async (newVal) => {
+        watch(conteudos, (newVal) => {
             if (currentUser.value) {
-                await DiarioDB.setItem(getChaveStorageConteudos(), newVal);
+                localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(newVal));
                 salvarNuvemProfessor(currentUser.value, registros.value, newVal);
             }
         }, { deep: true });
@@ -4204,6 +4143,8 @@ createApp({
         function getTotaisAluno(studentId, bimestre = fechamentoBimestre.value) {
             let caderno = 0, livro = 0, atividade = 0, copiou = 0, incompleto = 0, dormiu = 0;
             let pontoPositivo = 0, pontoNegativo = 0;
+            let pontoNegativoVistos = 0, pontoNegativoTrabalho = 0;
+            let pontoPositivoVistos = 0, pontoPositivoTrabalho = 0;
             const tData = getRegistrosEfetivosTurma();
             
             Object.keys(tData).forEach(d => {
@@ -4211,7 +4152,8 @@ createApp({
                 if (bimestre && bimestre !== 'todos' && getBimestrePorData(d) !== String(bimestre)) {
                     return;
                 }
-                const item = tData[d][studentId];
+                const diaRegs = tData[d] || {};
+                const item = diaRegs[studentId];
                 if (item) {
                     if (item.caderno) {
                         caderno += typeof item.caderno === 'number' ? item.caderno : (item.caderno ? 1 : 0);
@@ -4225,20 +4167,53 @@ createApp({
                     if (item.copiou) copiou++;
                     if (item.incompleto) incompleto++;
                     if (item.dormiu) dormiu++;
-                    if (item.pontoPositivo) pontoPositivo += Number(item.pontoPositivo) || 0;
-                    if (item.pontoNegativo) pontoNegativo += Number(item.pontoNegativo) || 0;
+
+                    const pp = Number(item.pontoPositivo) || 0;
+                    const pn = Number(item.pontoNegativo) || 0;
+                    pontoPositivo += pp;
+                    pontoNegativo += pn;
+
+                    // Identifica se a data d teve entrega de Trabalho / Ativ. para este aluno ou turma
+                    const alunoTeveTrabalhoHoje = item.atividade === true || (typeof item.atividade === 'number' && item.atividade > 0);
+                    const turmaTeveTrabalhoHoje = Object.values(diaRegs).some(r => r && (r.atividade === true || (typeof r.atividade === 'number' && r.atividade > 0)));
+
+                    if (alunoTeveTrabalhoHoje || turmaTeveTrabalhoHoje) {
+                        pontoNegativoTrabalho += pn;
+                        pontoPositivoTrabalho += pp;
+                    } else {
+                        pontoNegativoVistos += pn;
+                        pontoPositivoVistos += pp;
+                    }
                 }
             });
 
             pontoPositivo = Math.round(pontoPositivo * 10) / 10;
             pontoNegativo = Math.round(pontoNegativo * 10) / 10;
+            pontoNegativoVistos = Math.round(pontoNegativoVistos * 10) / 10;
+            pontoNegativoTrabalho = Math.round(pontoNegativoTrabalho * 10) / 10;
+            pontoPositivoVistos = Math.round(pontoPositivoVistos * 10) / 10;
+            pontoPositivoTrabalho = Math.round(pontoPositivoTrabalho * 10) / 10;
 
-            const descontos = Math.round(((dormiu * 0.5) + (incompleto * 0.3) + (copiou * 0.2) + pontoNegativo) * 10) / 10;
+            // Descontos de rotina (Caderno/Livro/Sala)
+            const descontosVistos = Math.round(((dormiu * 0.5) + (incompleto * 0.3) + (copiou * 0.2) + pontoNegativoVistos) * 10) / 10;
+            // Descontos específicos aplicados nos trabalhos
+            const descontosTrabalho = pontoNegativoTrabalho;
+            const descontos = Math.round((descontosVistos + descontosTrabalho) * 10) / 10;
+
+            const pontosBrutosVistos = Math.round(((caderno * 1.0) + (livro * 1.0) + pontoPositivoVistos) * 10) / 10;
+            const pontosLiquidosVistos = Math.max(0, Math.round((pontosBrutosVistos - descontosVistos) * 10) / 10);
+
             const pontosBrutos = Math.round(((caderno * 1.0) + (livro * 1.0) + (atividade * 1.0) + pontoPositivo) * 10) / 10;
             const pontosLiquidos = Math.max(0, Math.round((pontosBrutos - descontos) * 10) / 10);
 
             return {
-                caderno, livro, atividade, copiou, incompleto, dormiu, pontoPositivo, pontoNegativo, descontos, pontosBrutos, pontosLiquidos
+                caderno, livro, atividade, copiou, incompleto, dormiu,
+                pontoPositivo, pontoNegativo,
+                pontoPositivoVistos, pontoNegativoVistos,
+                pontoPositivoTrabalho, pontoNegativoTrabalho,
+                descontosVistos, descontosTrabalho, descontos,
+                pontosBrutosVistos, pontosLiquidosVistos,
+                pontosBrutos, pontosLiquidos
             };
         }
 
@@ -4247,13 +4222,21 @@ createApp({
             const bim = fechamentoBimestre.value;
             const todosAlunos = (selectedClass.value && turmas.value[selectedClass.value]) ? turmas.value[selectedClass.value] : [];
             const totaisMap = {};
-            let maxPts = 0;
+            let maxPtsVistos = 0;
+            let maxTrabalhos = 0;
+            let maxPtsTotal = 0;
 
             todosAlunos.forEach(aluno => {
                 const t = getTotaisAluno(aluno.id, bim);
                 totaisMap[aluno.id] = t;
-                if (t.pontosLiquidos > maxPts) {
-                    maxPts = t.pontosLiquidos;
+                if (t.pontosLiquidosVistos > maxPtsVistos) {
+                    maxPtsVistos = t.pontosLiquidosVistos;
+                }
+                if (t.atividade > maxTrabalhos) {
+                    maxTrabalhos = t.atividade;
+                }
+                if (t.pontosLiquidos > maxPtsTotal) {
+                    maxPtsTotal = t.pontosLiquidos;
                 }
             });
 
@@ -4261,12 +4244,32 @@ createApp({
             todosAlunos.forEach(aluno => {
                 const t = totaisMap[aluno.id] || {
                     caderno: 0, livro: 0, atividade: 0, copiou: 0, incompleto: 0, dormiu: 0,
-                    pontoPositivo: 0, pontoNegativo: 0, descontos: 0, pontosBrutos: 0, pontosLiquidos: 0
+                    pontoPositivo: 0, pontoNegativo: 0, descontosVistos: 0, descontosTrabalho: 0, descontos: 0,
+                    pontosBrutosVistos: 0, pontosLiquidosVistos: 0, pontosBrutos: 0, pontosLiquidos: 0
                 };
-                let nota = 0;
-                if (maxPts > 0) {
-                    nota = Math.min(10, Math.max(0, (t.pontosLiquidos / maxPts) * 10));
+
+                // 1. Nota de Vistos (0 a 10)
+                let notaVistos = 0;
+                if (maxPtsVistos > 0) {
+                    notaVistos = Math.min(10, Math.max(0, (t.pontosLiquidosVistos / maxPtsVistos) * 10));
                 }
+
+                // 2. Nota de Trabalhos (0 a 10) com desconto específico de trabalho
+                let notaTrabalho = null;
+                if (maxTrabalhos > 0) {
+                    const baseTrab = (t.atividade / maxTrabalhos) * 10;
+                    // Desconto no trabalho deduz diretamente na nota da escala 0 a 10
+                    notaTrabalho = Math.min(10, Math.max(0, baseTrab - (t.descontosTrabalho || 0)));
+                }
+
+                // 3. Nota Final Sugerida (Opção C: média Vistos + Trabalhos se houver trabalhos)
+                let notaFinal = 0;
+                if (notaTrabalho !== null) {
+                    notaFinal = Math.round(((notaVistos + notaTrabalho) / 2) * 10) / 10;
+                } else {
+                    notaFinal = Math.round(notaVistos * 10) / 10;
+                }
+
                 mapa[aluno.id] = {
                     ...t,
                     caderno: t.caderno || 0,
@@ -4274,10 +4277,28 @@ createApp({
                     atividade: t.atividade || 0,
                     pontoPositivoStr: `+${(t.pontoPositivo || 0).toFixed(1)}`,
                     descontosStr: `-${(t.descontos || 0).toFixed(1)} pt`,
+                    descontosVistosStr: `-${(t.descontosVistos || 0).toFixed(1)} pt`,
+                    descontosTrabalhoStr: `-${(t.descontosTrabalho || 0).toFixed(1)} pt`,
                     pontosLiquidosStr: (t.pontosLiquidos || 0).toFixed(1),
-                    nota: nota,
-                    notaFormatada: nota.toFixed(1),
-                    notaClass: getNotaClass(nota)
+                    pontosLiquidosVistosStr: (t.pontosLiquidosVistos || 0).toFixed(1),
+
+                    // Notas discriminadas (Opção C)
+                    notaVistos: notaVistos,
+                    notaVistosFormatada: notaVistos.toFixed(1),
+                    notaVistosClass: getNotaClass(notaVistos),
+
+                    notaTrabalho: notaTrabalho,
+                    notaTrabalhoFormatada: notaTrabalho !== null ? notaTrabalho.toFixed(1) : '-',
+                    notaTrabalhoClass: notaTrabalho !== null ? getNotaClass(notaTrabalho) : '',
+
+                    notaFinal: notaFinal,
+                    notaFinalFormatada: notaFinal.toFixed(1),
+                    notaFinalClass: getNotaClass(notaFinal),
+
+                    // Retrocompatibilidade
+                    nota: notaFinal,
+                    notaFormatada: notaFinal.toFixed(1),
+                    notaClass: getNotaClass(notaFinal)
                 };
             });
 
@@ -4295,13 +4316,13 @@ createApp({
 
         function calcularNota(studentId, bimestre = fechamentoBimestre.value) {
             if (bimestre === fechamentoBimestre.value && fechamentoAlunosResumo.value[studentId]) {
-                return fechamentoAlunosResumo.value[studentId].nota;
+                return fechamentoAlunosResumo.value[studentId].notaFinal;
             }
-            const maxTurma = maxPontuacaoTurma.value;
-            if (maxTurma === 0) return 0;
+            if (fechamentoAlunosResumo.value && fechamentoAlunosResumo.value[studentId]) {
+                return fechamentoAlunosResumo.value[studentId].notaFinal;
+            }
             const t = getTotaisAluno(studentId, bimestre);
-            const notaCalculada = (t.pontosLiquidos / maxTurma) * 10;
-            return Math.min(10, Math.max(0, notaCalculada));
+            return t ? t.pontosLiquidos : 0;
         }
 
         function getNotaClass(nota) {
@@ -5635,6 +5656,7 @@ createApp({
             const bimLabel = bimFiltro === 'todos' ? 'Todos os Bimestres (Anual)' : `${bimFiltro}º Bimestre`;
             const dataToExport = currentStudentList.value.map(aluno => {
                 const t = getTotaisAluno(aluno.id, bimFiltro);
+                const res = fechamentoAlunosResumo.value[aluno.id];
                 return {
                     "Nº": aluno.numero,
                     "Nome": aluno.nome,
@@ -5645,11 +5667,13 @@ createApp({
                     "Bimestre": bimLabel,
                     "Vistos Caderno": t.caderno,
                     "Vistos Livro": t.livro,
-                    "Vistos Atividade": t.atividade,
-                    "Pontos Extras (+)": t.pontoPositivo.toFixed(1),
-                    "Descontos / Penalidades (-)": t.descontos.toFixed(1),
-                    "Pontos Líquidos": t.pontosLiquidos.toFixed(1),
-                    "Nota Final Proporcional (0-10)": calcularNota(aluno.id, bimFiltro).toFixed(2),
+                    "Extras Vistos (+)": t.pontoPositivo.toFixed(1),
+                    "Descontos Vistos (-)": t.descontosVistos.toFixed(1),
+                    "Nota Vistos (0-10)": res?.notaVistosFormatada || '0.0',
+                    "Trabalhos Entregues": t.atividade,
+                    "Descontos Trabalhos (-)": t.descontosTrabalho.toFixed(1),
+                    "Nota Trabalhos (0-10)": res?.notaTrabalhoFormatada || '-',
+                    "Média Final (0-10)": res?.notaFinalFormatada || calcularNota(aluno.id, bimFiltro).toFixed(1),
                     "Professor": currentUser.value
                 };
             });
@@ -5893,25 +5917,26 @@ createApp({
             doc.setFontSize(14);
             doc.text("E.E. José Marcelino de Almeida - Barretos/SP", 14, 15);
             doc.setFontSize(10);
-            doc.text(`Relatório de Vistos - Turma: ${selectedClass.value} | Disciplina: ${selectedDisciplina.value || 'Geral'} | Fechamento: ${bimLabel} | Professor(a): ${currentUser.value}`, 14, 22);
+            doc.text(`Relatório de Vistos e Trabalhos - Turma: ${selectedClass.value} | Disciplina: ${selectedDisciplina.value || 'Geral'} | Fechamento: ${bimLabel} | Prof(a). ${currentUser.value}`, 14, 22);
 
             const tableData = currentStudentList.value.map(a => {
                 const t = getTotaisAluno(a.id, bimFiltro);
+                const res = fechamentoAlunosResumo.value[a.id];
                 return [
                     a.numero, a.nome, a.ra, 
                     t.caderno, 
                     t.livro, 
+                    res?.notaVistosFormatada || '0.0',
                     t.atividade, 
-                    `+${t.pontoPositivo.toFixed(1)}`,
-                    `-${t.descontos.toFixed(1)}`,
-                    t.pontosLiquidos.toFixed(1),
-                    calcularNota(a.id, bimFiltro).toFixed(1)
+                    `-${t.descontosTrabalho.toFixed(1)} pt`,
+                    res?.notaTrabalhoFormatada || '-',
+                    res?.notaFinalFormatada || calcularNota(a.id, bimFiltro).toFixed(1)
                 ];
             });
 
             doc.autoTable({
                 startY: 28,
-                head: [['Nº', 'Nome do Aluno', 'RA', 'Caderno', 'Livro', 'Atividade', 'Extras (+)', 'Desc. (-)', 'Pts Líq.', 'Nota']],
+                head: [['Nº', 'Nome do Aluno', 'RA', 'Cad.', 'Liv.', 'Nota Vistos', 'Trab.', 'Desc. Trab.', 'Nota Trab.', 'Média Final']],
                 body: tableData,
                 theme: 'striped',
                 headStyles: { fillColor: [30, 58, 138] }
@@ -5934,7 +5959,13 @@ createApp({
         function extrairDadosFichaAluno(aluno, bimFiltro = fechamentoBimestre.value) {
             const bimLabel = bimFiltro === 'todos' ? 'Todos os Bimestres (Anual)' : `${bimFiltro}º Bimestre`;
             const t = getTotaisAluno(aluno.id, bimFiltro);
-            const nota = calcularNota(aluno.id, bimFiltro);
+            const resAluno = fechamentoAlunosResumo.value[aluno.id];
+            const notaVistos = resAluno ? resAluno.notaVistos : 0;
+            const notaTrabalho = resAluno ? resAluno.notaTrabalho : null;
+            const nota = resAluno ? resAluno.notaFinal : calcularNota(aluno.id, bimFiltro);
+
+            t.notaVistos = notaVistos;
+            t.notaTrabalho = notaTrabalho;
 
             const turmaReg = getRegistrosEfetivosTurma();
             const turmaCont = getConteudosEfetivosTurma();
@@ -6059,22 +6090,23 @@ createApp({
             doc.text(`Nº Chamada: ${aluno.numero || '-'}    |    RA: ${aluno.ra || '-'}    |    Situação: ${aluno.situacao || 'Ativo'}`, 18, 50);
             doc.text(`Turma: ${turma}    |    Disciplina: ${dFicha.disciplina || 'Geral'}    |    Bimestre: ${bimLabel}    |    Professor(a): ${professor}`, 18, 55);
 
-            // Totais e Nota
+            // Totais e Notas Discriminadas (Vistos vs Trabalhos vs Final)
             doc.autoTable({
                 startY: 63,
-                head: [['Caderno', 'Livro', 'Atividade', 'Extras (+)', 'Descontos (-)', 'Pontos Líquidos', 'Nota Proporcional']],
+                head: [['Caderno', 'Livro', 'Desc. Vistos', 'Nota Vistos', 'Trab./Ativ.', 'Desc. Trab.', 'Nota Trab.', 'Média Final']],
                 body: [[
                     `${totais.caderno}`,
                     `${totais.livro}`,
+                    `-${(totais.descontosVistos || 0).toFixed(1)} pt`,
+                    `${(totais.notaVistos || 0).toFixed(1)}`,
                     `${totais.atividade}`,
-                    `+${totais.pontoPositivo.toFixed(1)} pts`,
-                    `-${totais.descontos.toFixed(1)} pts`,
-                    `${totais.pontosLiquidos.toFixed(1)} pts`,
+                    `-${(totais.descontosTrabalho || 0).toFixed(1)} pt`,
+                    `${totais.notaTrabalho !== null ? (totais.notaTrabalho || 0).toFixed(1) : 'Sem Trab.'}`,
                     `${nota.toFixed(1)} / 10,0`
                 ]],
                 theme: 'grid',
-                headStyles: { fillColor: [49, 46, 129], textColor: [255, 255, 255], halign: 'center', fontSize: 8, fontStyle: 'bold' },
-                bodyStyles: { halign: 'center', fontSize: 8.5, fontStyle: 'bold', textColor: [30, 41, 59] },
+                headStyles: { fillColor: [49, 46, 129], textColor: [255, 255, 255], halign: 'center', fontSize: 7.5, fontStyle: 'bold' },
+                bodyStyles: { halign: 'center', fontSize: 8, fontStyle: 'bold', textColor: [30, 41, 59] },
                 margin: { left: 14, right: 14 }
             });
 
@@ -6091,7 +6123,7 @@ createApp({
 
             doc.autoTable({
                 startY: startY2,
-                head: [['Data', 'Conteúdo Trabalhado em Sala', 'Caderno', 'Livro', 'Atividade', 'Ocorrências']],
+                head: [['Data', 'Conteúdo Trabalhado em Sala', 'Caderno', 'Livro', 'Trabalho / Ativ.', 'Ocorrências']],
                 body: bodyLinhas,
                 theme: 'striped',
                 headStyles: { fillColor: [71, 85, 105], fontSize: 8, halign: 'center' },
@@ -6278,105 +6310,29 @@ createApp({
             }
         }
 
-        // --- CHAVE DE BIMESTRE PARA O FIRESTORE PARTICIONADO ---
-        function getChaveBimestreFirestore(bim) {
-            const ano = new Date().getFullYear();
-            return `${ano}_${bim}B`;
-        }
-
-        // --- MIGRAÇÃO TRANSPARENTE PARA A ARQUITETURA PARTICIONADA (v6.0) ---
-        // Executada uma única vez. Zero data-loss: lê o documento monolítico antigo e redistribui.
-        async function migrarParaArquiteturaParticionada() {
-            if (!db || !currentUser.value) return;
-            const flagKey = `diario_migrado_v6_${currentUser.value}`;
-            if (localStorage.getItem(flagKey) === 'true') return;
-
-            try {
-                // 1. Verifica o documento monolítico antigo do professor
-                const docAntigo = await db.collection('diario_professores').doc(currentUser.value).get();
-                if (docAntigo.exists) {
-                    const data = docAntigo.data();
-                    if (data && (data.registros || data.conteudos)) {
-                        console.log('[v6.0] Migrando documento monolítico para subcoleções de bimestres...');
-                        await _salvarNuvemProfessorParticionado(currentUser.value, data.registros || {}, data.conteudos || {});
-                    }
-                }
-
-                // 2. Migra turmas do documento único 'geral' para documentos individuais por turma
-                const docTurmasGeral = await db.collection('diario_turmas').doc('geral').get();
-                if (docTurmasGeral.exists && docTurmasGeral.data()?.turmas) {
-                    const tObj = docTurmasGeral.data().turmas;
-                    const batchTurmas = db.batch();
-                    for (const [nomeTurma, alunos] of Object.entries(tObj)) {
-                        if (nomeTurma && Array.isArray(alunos)) {
-                            const ref = db.collection('diario_turmas').doc(nomeTurma);
-                            batchTurmas.set(ref, {
-                                alunos: alunos,
-                                migradoDeGeral: true,
-                                atualizadoEm: new Date().toISOString()
-                            }, { merge: true });
-                        }
-                    }
-                    await batchTurmas.commit();
-                    console.log('[v6.0] Turmas migradas para documentos individuais.');
-                }
-
-                localStorage.setItem(flagKey, 'true');
-                console.log('[v6.0] Migração para arquitetura particionada concluída com sucesso.');
-            } catch (err) {
-                console.error('[v6.0] Erro na migração (será tentado novamente na próxima sessão):', err);
-            }
-        }
-
-        // --- LOG DE AUDITORIA ESCOLAR (LGPD / Rastreabilidade para Conselho de Classe) ---
-        async function registrarAuditoria(acao, detalhes = {}) {
-            if (!db || !currentUser.value) return;
-            try {
-                await db.collection('diario_auditoria').add({
-                    acao,
-                    professor: currentUser.value,
-                    turma: selectedClass.value || null,
-                    disciplina: selectedDisciplina.value || null,
-                    data: selectedDate.value || null,
-                    detalhes,
-                    timestamp: new Date().toISOString(),
-                    versaoApp: APP_VERSION
-                });
-            } catch (err) {
-                console.warn('[Auditoria] Registro não-crítico falhou:', err);
-            }
-        }
-
-        // --- SINCRONIZAÇÃO COM NUVEM (NOVA ARQUITETURA PARTICIONADA) ---
         async function sincronizarComNuvem() {
             if (!db) return;
             try {
-                // 1. Migração transparente (executada apenas uma vez)
-                await migrarParaArquiteturaParticionada();
-
-                // 2. Lê turmas por documentos individuais (nova arquitetura)
-                const todasTurmas = Object.keys(turmas.value);
-                const novasTurmasObj = { ...turmas.value };
-                if (todasTurmas.length > 0) {
-                    // Lê em paralelo (max 10 por limitação Firestore 'in', então faz manualmente)
-                    await Promise.all(todasTurmas.map(async (nomeTurma) => {
-                        const docTurma = await db.collection('diario_turmas').doc(nomeTurma).get().catch(() => null);
-                        if (docTurma && docTurma.exists && Array.isArray(docTurma.data()?.alunos)) {
-                            novasTurmasObj[nomeTurma] = docTurma.data().alunos;
-                        }
-                    }));
-                    turmas.value = novasTurmasObj;
-                    corrigirSituacoesCorrompidas();
-                } else {
-                    // Fallback: tenta documento monolítico legado 'geral' se não houver turmas locais
-                    const docTurmasGeral = await db.collection('diario_turmas').doc('geral').get();
-                    if (docTurmasGeral.exists && docTurmasGeral.data()?.turmas) {
-                        turmas.value = docTurmasGeral.data().turmas;
+                // Sincronizar turmas
+                const docTurmas = await db.collection('diario_turmas').doc('geral').get();
+                if (docTurmas.exists) {
+                    const data = docTurmas.data();
+                    if (data && data.turmas) {
+                        const tNuvem = { ...data.turmas };
+                        ['1A', '1C', '1D', '1E', '2C', '2D', '2E', '2ADM', '2AGRO', '3A', '3B', '3C', '3D', '3ADM', '3AGRO'].forEach(cod => {
+                            const real = encontrarTurmaReal(cod);
+                            if (!tNuvem[real] && !tNuvem[`Alunos ${cod}`] && !tNuvem[cod]) {
+                                tNuvem[`Alunos ${cod}`] = [];
+                            }
+                        });
+                        turmas.value = tNuvem;
                         corrigirSituacoesCorrompidas();
                     }
+                } else {
+                    await db.collection('diario_turmas').doc('geral').set({ turmas: turmas.value });
                 }
 
-                // 3. Sincronizar usuários e senhas
+                // Sincronizar usuários e senhas
                 const docUsuarios = await db.collection('diario_config').doc('usuarios').get();
                 if (docUsuarios.exists) {
                     const data = docUsuarios.data();
@@ -6413,7 +6369,7 @@ createApp({
                     }
                 }
 
-                // 4. Sincronizar catálogo de disciplinas
+                // Sincronizar catálogo de disciplinas
                 const docDisciplinas = await db.collection('diario_config').doc('disciplinas').get();
                 if (docDisciplinas.exists) {
                     const data = docDisciplinas.data();
@@ -6428,36 +6384,29 @@ createApp({
                     });
                 }
 
-                // 5. Sincronizar registros do professor via subcoleção de bimestres
+                // Sincronizar dados do professor atual
                 if (currentUser.value) {
-                    const ano = new Date().getFullYear();
-                    const bimestresRef = db.collection('diario_professores')
-                                           .doc(currentUser.value)
-                                           .collection('bimestres');
-                    const docIds = [`${ano}_1B`, `${ano}_2B`, `${ano}_3B`, `${ano}_4B`];
-                    const snapshots = await Promise.all(
-                        docIds.map(id => bimestresRef.doc(id).get().catch(() => null))
-                    );
-
-                    const regMerged = {};
-                    const contMerged = {};
-                    snapshots.forEach(snap => {
-                        if (snap && snap.exists) {
-                            const d = snap.data();
-                            if (d.registros) Object.assign(regMerged, d.registros);
-                            if (d.conteudos) Object.assign(contMerged, d.conteudos);
+                    const docProf = await db.collection('diario_professores').doc(currentUser.value).get();
+                    if (docProf.exists) {
+                        const data = docProf.data();
+                        if (data) {
+                            if (data.registros) {
+                                registros.value = data.registros;
+                                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                            }
+                            if (data.conteudos) {
+                                conteudos.value = data.conteudos;
+                                localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
+                            }
+                            migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
                         }
-                    });
-
-                    if (Object.keys(regMerged).length > 0) {
-                        registros.value = regMerged;
-                        await DiarioDB.setItem(getChaveStorageRegistros(), regMerged);
+                    } else {
+                        await db.collection('diario_professores').doc(currentUser.value).set({
+                            registros: registros.value,
+                            conteudos: conteudos.value,
+                            atualizadoEm: new Date().toISOString()
+                        });
                     }
-                    if (Object.keys(contMerged).length > 0) {
-                        conteudos.value = contMerged;
-                        await DiarioDB.setItem(getChaveStorageConteudos(), contMerged);
-                    }
-                    migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
                 }
             } catch (err) {
                 console.error("Erro na sincronização:", err);
@@ -6468,89 +6417,40 @@ createApp({
             sincronizarComNuvem().then(() => alert('✅ Sincronização concluída!')).catch(() => alert('⚠️ Não foi possível sincronizar no momento.'));
         }
 
-        // --- SALVAR PROFESSOR: PARTICIONADO POR BIMESTRE (SUPERA O LIMITE DE 1 MB) ---
         let debounceNuvem = null;
-
-        async function _salvarNuvemProfessorParticionado(user, reg, cont) {
-            // Agrupa os dados de registros/conteudos por bimestre
-            const porBimestre = {};
-            for (const chave of Object.keys(reg || {})) {
-                for (const data of Object.keys(reg[chave] || {})) {
-                    const bim = getBimestrePorData(data);
-                    const docId = getChaveBimestreFirestore(bim);
-                    if (!porBimestre[docId]) porBimestre[docId] = { registros: {}, conteudos: {} };
-                    if (!porBimestre[docId].registros[chave]) porBimestre[docId].registros[chave] = {};
-                    porBimestre[docId].registros[chave][data] = reg[chave][data];
-                }
-            }
-            for (const chave of Object.keys(cont || {})) {
-                for (const data of Object.keys(cont[chave] || {})) {
-                    const bim = getBimestrePorData(data);
-                    const docId = getChaveBimestreFirestore(bim);
-                    if (!porBimestre[docId]) porBimestre[docId] = { registros: {}, conteudos: {} };
-                    if (!porBimestre[docId].conteudos[chave]) porBimestre[docId].conteudos[chave] = {};
-                    porBimestre[docId].conteudos[chave][data] = cont[chave][data];
-                }
-            }
-
-            if (Object.keys(porBimestre).length === 0) return;
-
-            const batch = db.batch();
-            for (const [docId, dados] of Object.entries(porBimestre)) {
-                const ref = db.collection('diario_professores')
-                              .doc(user)
-                              .collection('bimestres')
-                              .doc(docId);
-                batch.set(ref, {
-                    ...dados,
-                    atualizadoPor: user,
-                    atualizadoEm: new Date().toISOString(),
-                    versaoApp: APP_VERSION
-                }, { merge: true });
-            }
-            await batch.commit();
-        }
-
         function salvarNuvemProfessor(user, reg, cont) {
             if (!db || !user) return;
             if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
             clearTimeout(debounceNuvem);
             debounceNuvem = setTimeout(() => {
-                _salvarNuvemProfessorParticionado(user, reg, cont).then(() => {
+                db.collection('diario_professores').doc(user).set({
+                    registros: reg,
+                    conteudos: cont,
+                    atualizadoEm: new Date().toISOString()
+                }, { merge: true }).then(() => {
                     if (statusConexao.value !== 'offline') statusConexao.value = 'online';
                 }).catch(err => {
-                    console.warn("Erro ao salvar prof na nuvem (particionado):", err);
+                    console.warn("Erro ao salvar prof na nuvem:", err);
                     if (!navigator.onLine) statusConexao.value = 'offline';
-                    else statusConexao.value = 'online';
                 });
             }, 1000);
         }
 
-        // --- SALVAR TURMA: DOCUMENTO ISOLADO POR TURMA (SEM RACE CONDITION ENTRE ADMINS) ---
         let debounceTurmas = null;
         function salvarNuvemTurmas(novasTurmas) {
             if (!db) return;
             if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
             clearTimeout(debounceTurmas);
-            debounceTurmas = setTimeout(async () => {
-                try {
-                    // Cada turma em documento próprio → edições simultâneas nunca colidem
-                    const batch = db.batch();
-                    for (const [nomeTurma, alunos] of Object.entries(novasTurmas)) {
-                        if (nomeTurma && Array.isArray(alunos)) {
-                            const ref = db.collection('diario_turmas').doc(nomeTurma);
-                            batch.set(ref, {
-                                alunos: alunos,
-                                atualizadoEm: new Date().toISOString()
-                            }, { merge: true });
-                        }
-                    }
-                    await batch.commit();
+            debounceTurmas = setTimeout(() => {
+                db.collection('diario_turmas').doc('geral').set({
+                    turmas: novasTurmas,
+                    atualizadoEm: new Date().toISOString()
+                }, { merge: true }).then(() => {
                     if (statusConexao.value !== 'offline') statusConexao.value = 'online';
-                } catch (err) {
+                }).catch(err => {
                     console.warn("Erro ao salvar turmas na nuvem:", err);
                     if (!navigator.onLine) statusConexao.value = 'offline';
-                }
+                });
             }, 800);
         }
 
@@ -6567,35 +6467,6 @@ createApp({
             db.collection('diario_config').doc('senhas').set({
                 senhas: novasSenhas
             }, { merge: true }).catch(err => console.warn("Erro ao salvar senhas na nuvem:", err));
-        }
-
-        // --- PAINEL ADM: PROVISIONAR CONTA FIREBASE AUTH POR PROFESSOR ---
-        // Cria a conta de autenticação real para o professor selecionado.
-        // Necessário ser chamado uma vez por professor (admins Raquel/Marcelo).
-        async function provisionarContaFirebaseAuth(professorNome) {
-            if (!window.firebase || !firebase.auth) {
-                alert('⚠️ Firebase Auth não disponível. Verifique a conexão com a internet.');
-                return;
-            }
-            const nomeNorm = normalizarNomeUsuario(professorNome);
-            const emailVirtual = `${nomeNorm}@jma.diario.escola`;
-            const senhaAtual = getSenhaUsuario(professorNome);
-            if (!senhaAtual) {
-                alert(`⚠️ Professor "${professorNome}" não possui senha cadastrada.`);
-                return;
-            }
-            try {
-                await firebase.auth().createUserWithEmailAndPassword(emailVirtual, senhaAtual);
-                await registrarAuditoria('CONTA_AUTH_PROVISIONADA', { professor: professorNome, email: emailVirtual });
-                alert(`✅ Conta Firebase Auth criada com sucesso para ${professorNome}!\nE-mail virtual: ${emailVirtual}`);
-            } catch (err) {
-                if (err.code === 'auth/email-already-in-use') {
-                    alert(`ℹ️ A conta Firebase Auth para ${professorNome} já existe. Nenhuma ação necessária.`);
-                } else {
-                    console.error('[Auth] Erro ao provisionar conta:', err);
-                    alert(`⚠️ Erro ao criar conta: ${err.message}`);
-                }
-            }
         }
 
         return {
@@ -6627,7 +6498,6 @@ createApp({
             modalRenomearTurma, abrirModalRenomearTurma, confirmarRenomearTurma, confirmarExcluirTurma,
             modalProfessor, mostrarSenhasAdmin, toggleMostrarSenhaAdmin, abrirModalNovoProfessor, abrirModalEditarProfessor, salvarProfessorModal, confirmarExcluirProfessor, getSenhaUsuario,
             disciplinasCadastradas, modalDisciplina, abrirModalNovaDisciplina, abrirModalEditarDisciplina, salvarDisciplinaModal, confirmarExcluirDisciplina, getUsoDisciplinaCount,
-            provisionarContaFirebaseAuth,
             
             // Ferramentas Mover/Copiar e Contagem Bimestral
             ferramentaIndividual, ferramentaLote, ferramentaDisciplina,
