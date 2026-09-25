@@ -2686,12 +2686,12 @@
             </span>
             <div class="flex-1 min-w-0">
                 <p class="text-xs font-black leading-tight text-amber-300">Nova versão disponível!</p>
-                <p class="text-[10px] text-indigo-200 mt-0.5">Atualização v{{ APP_VERSION }} instalada no dispositivo.</p>
+                <p class="text-[10px] text-indigo-200 mt-0.5">Versão v{{ versaoMaisRecente || 'mais recente' }} disponível (sua: v{{ APP_VERSION }}).</p>
             </div>
             <button @click="aplicarAtualizacaoApp" class="bg-amber-400 hover:bg-amber-300 active:scale-95 text-indigo-950 font-black text-xs px-3 py-1.5 rounded-xl border border-amber-200 shadow-md transition flex items-center gap-1.5 shrink-0 touch-btn">
                 <i class="fa-solid fa-cloud-arrow-down"></i> Atualizar
             </button>
-            <button @click="novaVersaoDisponivel = false" class="text-indigo-300 hover:text-white p-1 rounded-lg transition hover:bg-white/10 shrink-0 text-sm ml-0.5" title="Fechar notificação">
+            <button @click="fecharNotificacaoVersao" class="text-indigo-300 hover:text-white p-1 rounded-lg transition hover:bg-white/10 shrink-0 text-sm ml-0.5" title="Fechar notificação">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -2756,7 +2756,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '6.3';
+        const APP_VERSION = '6.4';
 
         // --- BACKUP AUTOMÁTICO PREVENTIVO PRÉ-ATUALIZAÇÃO (GARANTIA ZERO DATA LOSS) ---
         function executarBackupPreventivo() {
@@ -2796,10 +2796,68 @@ createApp({
             return limpo;
         }
 
-        // --- CONTROLE DE ATUALIZAÇÃO DO PWA ---
+        // --- CONTROLE DE ATUALIZAÇÃO SEMÂNTICA DO PWA (APENAS PARA VERSÃO DEFASADA) ---
         const novaVersaoDisponivel = ref(false);
+        const versaoMaisRecente = ref('');
+        let swWaitingWorker = null;
+
+        function compararVersoes(vAtual, vNova) {
+            if (!vNova || !vAtual) return false;
+            const partesAtual = String(vAtual).replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+            const partesNova = String(vNova).replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+            const maxLen = Math.max(partesAtual.length, partesNova.length);
+            for (let i = 0; i < maxLen; i++) {
+                const a = partesAtual[i] || 0;
+                const b = partesNova[i] || 0;
+                if (b > a) return true;
+                if (b < a) return false;
+            }
+            return false;
+        }
+
+        async function verificarVersaoMaisRecente() {
+            try {
+                const res = await fetch(`/version.json?_t=${Date.now()}`, { cache: 'no-store' });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data && data.version) {
+                    versaoMaisRecente.value = String(data.version);
+                    const isDesatualizado = compararVersoes(APP_VERSION, data.version);
+                    const dispensada = sessionStorage.getItem('diario_versao_dispensada');
+                    if (isDesatualizado && dispensada !== data.version) {
+                        novaVersaoDisponivel.value = true;
+                    } else {
+                        novaVersaoDisponivel.value = false;
+                        if (swWaitingWorker) {
+                            swWaitingWorker.postMessage({ action: 'skipWaiting' });
+                        }
+                    }
+                }
+            } catch (err) {
+                // Em caso de offline ou falha de rede, não gera falso alarme
+                novaVersaoDisponivel.value = false;
+            }
+        }
+
+        function fecharNotificacaoVersao() {
+            novaVersaoDisponivel.value = false;
+            if (versaoMaisRecente.value) {
+                sessionStorage.setItem('diario_versao_dispensada', versaoMaisRecente.value);
+            }
+        }
+
         function aplicarAtualizacaoApp() {
-            window.location.reload();
+            if (swWaitingWorker) {
+                swWaitingWorker.postMessage({ action: 'skipWaiting' });
+            }
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    window.location.reload();
+                });
+            }
+            setTimeout(() => {
+                window.location.reload();
+            }, 600);
         }
 
         // --- CALENDÁRIO OFICIAL DE BIMESTRES 2026 ---
@@ -3688,9 +3746,9 @@ createApp({
                 navigator.serviceWorker.register('/sw.js').then((reg) => {
                     console.log('PWA Service Worker ativo:', reg.scope);
                     
-                    // Se já existir um worker esperando para assumir o controle, avisa o usuário
                     if (reg.waiting) {
-                        novaVersaoDisponivel.value = true;
+                        swWaitingWorker = reg.waiting;
+                        verificarVersaoMaisRecente();
                     }
                     
                     reg.addEventListener('updatefound', () => {
@@ -3698,7 +3756,8 @@ createApp({
                         if (newWorker) {
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    novaVersaoDisponivel.value = true;
+                                    swWaitingWorker = newWorker;
+                                    verificarVersaoMaisRecente();
                                 }
                             });
                         }
@@ -3707,6 +3766,14 @@ createApp({
                     console.warn('Service Worker não suportado ou erro:', err);
                 });
             }
+
+            // Checagem proativa inicial e ao retornar à aba/app
+            verificarVersaoMaisRecente();
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    verificarVersaoMaisRecente();
+                }
+            });
 
             // Capturar evento de instalação PWA do navegador
             window.addEventListener('beforeinstallprompt', (e) => {
@@ -6812,7 +6879,7 @@ createApp({
             // Nuvem, Conectividade e PWA
             modalNuvem, nuvemConectada, statusConexao, abrirModalNuvem, salvarConfigNuvem, sincronizarAgora,
             pwaPrompt, mostrarBotaoInstalar, instalarAppPWA,
-            novaVersaoDisponivel, aplicarAtualizacaoApp
+            novaVersaoDisponivel, versaoMaisRecente, fecharNotificacaoVersao, aplicarAtualizacaoApp
         };
     }
 }).mount('#app');

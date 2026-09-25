@@ -1,5 +1,11 @@
 // Service Worker para Diário Digital de Vistos
-const CACHE_NAME = 'diario-vistos-v6.3';
+const CACHE_NAME = 'diario-vistos-v6.4';
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
 
 const STATIC_ASSETS = [
   '/',
@@ -47,6 +53,14 @@ self.addEventListener('fetch', (event) => {
   const url = event.request.url;
   // Ignora chamadas de API Firestore/Firebase online
   if (url.includes('firestore.googleapis.com') || url.includes('identitytoolkit') || url.includes('securetoken')) {
+    return;
+  }
+
+  // Sempre busca live do servidor para version.json (sem cache)
+  if (url.includes('version.json')) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' }).catch(() => caches.match(event.request))
+    );
     return;
   }
 
