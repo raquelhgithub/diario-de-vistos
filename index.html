@@ -254,6 +254,38 @@
         html.dark ::-webkit-scrollbar-thumb { background: #263854; border-radius: 4px; }
         html.dark ::-webkit-scrollbar-thumb:hover { background: #3b5074; }
 
+        /* ============================================================ */
+        /* TABELA DE FECHAMENTO COM COLUNAS FIXAS (STICKY COLUMNS)      */
+        /* ============================================================ */
+        .sticky-col-num {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+        }
+        .sticky-col-aluno {
+            position: sticky;
+            left: 48px;
+            z-index: 10;
+        }
+        thead th.sticky-col-num,
+        thead th.sticky-col-aluno {
+            z-index: 25;
+        }
+        html.dark thead th.sticky-col-num,
+        html.dark thead th.sticky-col-aluno {
+            background-color: #1a273f !important;
+            border-color: #263654 !important;
+        }
+        html.dark tbody td.sticky-col-num,
+        html.dark tbody td.sticky-col-aluno {
+            background-color: #141e30 !important;
+            border-color: #22314d !important;
+        }
+        html.dark tbody tr:hover td.sticky-col-num,
+        html.dark tbody tr:hover td.sticky-col-aluno {
+            background-color: #18243a !important;
+        }
+
         @media print {
             body * { visibility: hidden; }
             #secaoPreviaFicha, #secaoPreviaFicha * { visibility: visible; }
@@ -997,14 +1029,14 @@
                 <span class="font-bold text-slate-500">{{ listaAlunosFechamento.length }} alunos</span>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto relative">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-100 text-slate-600 text-xs font-black uppercase border-b border-slate-200">
-                            <th class="p-3 cursor-pointer select-none hover:bg-slate-200 transition" @click="setOrdenacao('numero')" title="Clique para ordenar por Número de Chamada">
+                        <tr class="bg-slate-100 text-slate-600 text-xs font-black uppercase border-b border-slate-200 sticky top-0 z-20">
+                            <th class="p-3 cursor-pointer select-none hover:bg-slate-200 transition sticky-col-num bg-slate-100 text-center min-w-[48px] border-r border-slate-200" @click="setOrdenacao('numero')" title="Clique para ordenar por Número de Chamada">
                                 Nº <i v-if="ordenacaoAlunos === 'numero'" class="fa-solid fa-arrow-down-1-9 text-indigo-700 text-xs ml-1"></i>
                             </th>
-                            <th class="p-3 cursor-pointer select-none hover:bg-slate-200 transition" @click="setOrdenacao('nome')" title="Clique para ordenar por Nome Alfabético (A-Z)">
+                            <th class="p-3 cursor-pointer select-none hover:bg-slate-200 transition sticky-col-aluno bg-slate-100 min-w-[170px] border-r-2 border-slate-300 dark:border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]" @click="setOrdenacao('nome')" title="Clique para ordenar por Nome Alfabético (A-Z)">
                                 Aluno <i v-if="ordenacaoAlunos === 'nome'" class="fa-solid fa-arrow-down-a-z text-indigo-700 text-xs ml-1"></i>
                             </th>
                             <th class="p-2.5 text-center"><i class="fa-solid fa-book-bookmark text-amber-600"></i> Cad.</th>
@@ -1022,8 +1054,8 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
                         <tr v-for="aluno in listaAlunosFechamento" :key="aluno.id" class="hover:bg-slate-50 transition">
-                            <td class="p-2.5 font-bold text-indigo-800 text-center">{{ aluno.numero }}</td>
-                            <td class="p-2.5">
+                            <td class="p-2.5 font-bold text-indigo-800 text-center sticky-col-num bg-white border-r border-slate-100">{{ aluno.numero }}</td>
+                            <td class="p-2.5 sticky-col-aluno bg-white border-r-2 border-slate-300 dark:border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]">
                                 <div class="font-bold text-slate-800 leading-tight">{{ aluno.nome }}</div>
                                 <div class="text-[10px] text-slate-400">RA: {{ aluno.ra }}</div>
                             </td>
@@ -2724,7 +2756,45 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '6.2';
+        const APP_VERSION = '6.3';
+
+        // --- BACKUP AUTOMÁTICO PREVENTIVO PRÉ-ATUALIZAÇÃO (GARANTIA ZERO DATA LOSS) ---
+        function executarBackupPreventivo() {
+            try {
+                const versaoGravada = localStorage.getItem('diario_versao_instalada');
+                if (versaoGravada !== APP_VERSION) {
+                    const turmasExistente = localStorage.getItem('diario_turmas_db');
+                    if (turmasExistente) {
+                        const snapshot = {
+                            versaoAnterior: versaoGravada || 'pre-6.3',
+                            novaVersao: APP_VERSION,
+                            dataHora: new Date().toISOString(),
+                            turmas: turmasExistente,
+                            usuarios: localStorage.getItem('diario_usuarios_db'),
+                            senhas: localStorage.getItem('diario_senhas_db'),
+                            disciplinas: localStorage.getItem('diario_disciplinas_db')
+                        };
+                        localStorage.setItem(`diario_backup_auto_${versaoGravada || 'v6.2'}`, JSON.stringify(snapshot));
+                    }
+                    localStorage.setItem('diario_versao_instalada', APP_VERSION);
+                }
+            } catch (e) {
+                console.warn('Backup preventivo local:', e);
+            }
+        }
+        executarBackupPreventivo();
+
+        // --- UTILITÁRIO DE SANITIZAÇÃO DE TEXTO (PROTEÇÃO XSS / INJEÇÃO DE CÓDIGO) ---
+        function sanitizarTexto(str, maxLen = 300) {
+            if (str === null || str === undefined) return '';
+            let limpo = String(str).trim();
+            limpo = limpo.replace(/<[^>]*>?/gm, '');
+            limpo = limpo.replace(/[\u0000-\u0008\u000B-\u000C\u000E-\u001F\u007F]/g, '');
+            if (limpo.length > maxLen) {
+                limpo = limpo.substring(0, maxLen);
+            }
+            return limpo;
+        }
 
         // --- CONTROLE DE ATUALIZAÇÃO DO PWA ---
         const novaVersaoDisponivel = ref(false);
@@ -3758,7 +3828,7 @@ createApp({
                 const chave = getChaveAtual();
                 if (!chave || !currentUser.value) return;
                 if (!conteudos.value[chave]) conteudos.value[chave] = {};
-                conteudos.value[chave][selectedDate.value] = val;
+                conteudos.value[chave][selectedDate.value] = sanitizarTexto(val, 500);
             }
         });
 
@@ -4502,7 +4572,12 @@ createApp({
         }
 
         function salvarAlunoModal() {
-            if (!modalAluno.value.dados.nome.trim()) {
+            modalAluno.value.dados.nome = sanitizarTexto(modalAluno.value.dados.nome, 120);
+            modalAluno.value.dados.ra = sanitizarTexto(modalAluno.value.dados.ra, 40);
+            modalAluno.value.dados.numero = sanitizarTexto(modalAluno.value.dados.numero, 10);
+            modalAluno.value.dados.situacao = sanitizarTexto(modalAluno.value.dados.situacao, 30);
+
+            if (!modalAluno.value.dados.nome) {
                 alert('Por favor, informe o nome do aluno.');
                 return;
             }
@@ -4535,7 +4610,7 @@ createApp({
             modalNovaTurma.value = { aberto: true, nome: '' };
         }
         function criarNovaTurma() {
-            const nome = modalNovaTurma.value.nome.trim();
+            const nome = sanitizarTexto(modalNovaTurma.value.nome, 40);
             if (!nome) return;
             if (turmas.value[nome]) {
                 alert('Essa turma já existe!');
@@ -4978,10 +5053,10 @@ createApp({
                 }
 
                 alunos.push({
-                    numero: num,
-                    nome: nome,
-                    ra: raFinal,
-                    situacao: sitFinal
+                    numero: sanitizarTexto(num, 10),
+                    nome: sanitizarTexto(nome, 120),
+                    ra: sanitizarTexto(raFinal, 40),
+                    situacao: sanitizarTexto(sitFinal, 30)
                 });
             }
 
