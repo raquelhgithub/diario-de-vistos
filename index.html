@@ -1647,7 +1647,7 @@
                                     <th class="p-3">Nível de Acesso</th>
                                     <th class="p-3">Turmas e Disciplinas</th>
                                     <th class="p-3 text-center">Vistos Sincronizados</th>
-                                    <th class="p-3">Senha de Acesso</th>
+                                    <th class="p-3">Segurança</th>
                                     <th class="p-3 text-right">Ações</th>
                                 </tr>
                             </thead>
@@ -1675,10 +1675,10 @@
                                         </span>
                                     </td>
                                     <td class="p-3 whitespace-nowrap">
-                                        <div class="flex items-center gap-2 font-mono">
-                                            <span class="font-bold text-slate-700 select-all tracking-wide">{{ mostrarSenhasAdmin[prof.nome] ? getSenhaUsuario(prof.nome) : '••••' }}</span>
-                                            <button @click="toggleMostrarSenhaAdmin(prof.nome)" class="text-slate-400 hover:text-indigo-600 text-xs p-1 rounded-md transition" title="Exibir/Ocultar Senha Descriptografada">
-                                                <i :class="['fa-solid', mostrarSenhasAdmin[prof.nome] ? 'fa-eye-slash text-indigo-600' : 'fa-eye']"></i>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-mono text-slate-400 select-none tracking-widest text-xs">••••••••</span>
+                                            <button @click="redefinirSenhaParaPadrao(prof.nome)" class="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-1 rounded-lg text-xs transition inline-flex items-center gap-1 shadow-xs touch-btn" title="Redefinir senha deste professor para o padrão escolar (0000)">
+                                                <i class="fa-solid fa-rotate-left text-amber-600"></i> Redefinir (0000)
                                             </button>
                                         </div>
                                     </td>
@@ -2016,9 +2016,13 @@
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Senha de Acesso</label>
-                    <input type="text" v-model="modalProfessor.senha" placeholder="Senha do professor (mínimo 3 caracteres)" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
-                    <span class="text-[10px] text-slate-400">Padrão sugerido inicial: 0000</span>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                        Senha de Acesso {{ modalProfessor.modo === 'editar' ? '(Opcional)' : '' }}
+                    </label>
+                    <input type="text" v-model="modalProfessor.senha" :placeholder="modalProfessor.modo === 'editar' ? 'Deixe em branco para manter a senha atual' : 'Senha inicial (mínimo 3 caracteres)'" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                    <span class="text-[10px] text-slate-400">
+                        {{ modalProfessor.modo === 'editar' ? 'Preencha apenas para alterar, ou use o botão "Redefinir (0000)" na tabela.' : 'Padrão sugerido inicial: 0000' }}
+                    </span>
                 </div>
 
                 <!-- SEÇÃO: TURMAS E DISCIPLINAS ATRIBUÍDAS -->
@@ -2137,78 +2141,135 @@
     </div>
 
     <!-- MODAL: SINCRONIZAÇÃO NUVEM ONLINE -->
-    <div v-if="modalNuvem.aberto" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white max-w-lg w-full rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-            <div class="bg-indigo-900 text-white p-4 flex justify-between items-center border-b-2 border-amber-400">
-                <h3 class="font-bold text-sm flex items-center gap-2">
+    <div v-if="modalNuvem.aberto" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-white max-w-lg w-full rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[95vh] flex flex-col">
+            <!-- Cabeçalho -->
+            <div class="bg-indigo-950 text-white p-4 flex justify-between items-center border-b-2 border-amber-400 shrink-0">
+                <h3 class="font-bold text-sm sm:text-base flex items-center gap-2">
                     <i class="fa-solid fa-cloud text-amber-400"></i> Persistência & Sincronização Online
                 </h3>
-                <button @click="modalNuvem.aberto = false" class="text-indigo-200 hover:text-white p-1">
+                <button @click="modalNuvem.aberto = false" class="text-indigo-200 hover:text-white p-1 rounded-lg hover:bg-indigo-900 transition" title="Fechar">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <div class="p-5 space-y-4 text-xs text-slate-600">
-                <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3">
-                    <i class="fa-solid fa-circle-check text-emerald-600 text-base mt-0.5"></i>
-                    <div>
-                        <strong class="text-emerald-900 block font-bold text-sm">Armazenamento Local Instantâneo Ativo</strong>
-                        <p class="text-[11px] text-emerald-700 mt-0.5">
-                            Todas as alterações de notas, vistos e alunos são salvas imediatamente no seu navegador. Cada professor tem seu perfil 100% isolado.
+
+            <!-- Corpo com rolagem -->
+            <div class="p-4 sm:p-5 space-y-4 text-xs text-slate-600 overflow-y-auto">
+                <!-- Status do Armazenamento Local e Conexão -->
+                <div class="p-3.5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl flex items-start gap-3">
+                    <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-300">
+                        <i class="fa-solid fa-shield-halved text-base"></i>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <strong class="text-emerald-950 font-bold text-xs">Armazenamento Local Seguro Ativo</strong>
+                            <span :class="['text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider', nuvemConectada ? 'bg-emerald-200 text-emerald-900' : 'bg-slate-200 text-slate-700']">
+                                {{ nuvemConectada ? 'Nuvem Conectada' : 'Modo Offline' }}
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-emerald-800 mt-1">
+                            Notas, vistos e alunos são gravados instantaneamente no navegador deste aparelho.
                         </p>
                     </div>
                 </div>
 
-                <!-- Status e Forçar Envio do Professor Ativo -->
-                <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl space-y-2">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                        <div>
-                            <strong class="text-indigo-950 block font-bold text-xs">Professor(a) Ativo: {{ currentUser || 'Anônimo' }}</strong>
-                            <span class="text-[11px] text-indigo-700">Vistos deste perfil gravados neste dispositivo: <b>{{ contarTotalVistosDoProfessor(currentUser) }}</b></span>
-                        </div>
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                            <button @click="forcarEnvioVistosParaNuvem" class="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-indigo-700 hover:bg-indigo-800 shadow flex items-center gap-1.5 transition">
-                                <i class="fa-solid fa-cloud-arrow-up"></i> Enviar Meus Vistos
-                            </button>
-                            <button @click="acionarVarreduraManual" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 flex items-center gap-1 transition shadow-xs" title="Procurar em backups do dispositivo caso tenha perdido vistos">
-                                <i class="fa-solid fa-magnifying-glass"></i> Resgatar Backups
+                <!-- Resumo do Professor Ativo -->
+                <div class="p-3.5 bg-indigo-50/80 border border-indigo-200 rounded-xl flex items-center justify-between gap-3">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-indigo-500 tracking-wider block">Perfil em Uso</span>
+                        <strong class="text-indigo-950 font-extrabold text-sm block">{{ currentUser || 'Geral' }}</strong>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] uppercase font-bold text-indigo-500 tracking-wider block">Vistos Gravados Aqui</span>
+                        <span class="inline-flex items-center gap-1 text-sm font-extrabold text-indigo-900">
+                            <i class="fa-solid fa-stamp text-indigo-600"></i>
+                            {{ contarTotalVistosDoProfessor(currentUser) }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Ações Principais de Salvamento (Sem Duplicações) -->
+                <div class="space-y-2">
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                        Ações de Sincronização
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <button @click="forcarEnvioVistosParaNuvem" class="p-3 rounded-xl bg-indigo-900 hover:bg-indigo-800 active:scale-[0.98] text-white font-bold text-xs flex flex-col items-start gap-1 shadow transition touch-btn text-left group">
+                            <div class="flex items-center gap-2 text-amber-300 font-extrabold">
+                                <i class="fa-solid fa-cloud-arrow-up text-base group-hover:-translate-y-0.5 transition-transform"></i>
+                                <span>Enviar Meus Vistos</span>
+                            </div>
+                            <span class="text-[10px] text-indigo-200 font-normal leading-tight">
+                                Publica os vistos deste celular para que os outros professores vejam.
+                            </span>
+                        </button>
+
+                        <button @click="sincronizarAgora" class="p-3 rounded-xl bg-white hover:bg-slate-50 active:scale-[0.98] border border-indigo-300 text-indigo-950 font-bold text-xs flex flex-col items-start gap-1 shadow-xs transition touch-btn text-left group">
+                            <div class="flex items-center gap-2 text-indigo-800 font-extrabold">
+                                <i class="fa-solid fa-arrows-rotate text-base group-hover:rotate-180 transition-transform duration-500"></i>
+                                <span>Atualizar da Nuvem</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-normal leading-tight">
+                                Baixa novas turmas, disciplinas e vistos postados por colegas.
+                            </span>
+                        </button>
+                    </div>
+
+                    <!-- Botão de Resgate de Emergência -->
+                    <button @click="acionarVarreduraManual" class="w-full p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 font-bold text-xs flex items-center justify-between gap-2 transition shadow-xs touch-btn">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass text-amber-700"></i>
+                            <span>Resgatar Vistos de Backups Antigos</span>
+                        </span>
+                        <span class="text-[10px] text-amber-700 font-normal hidden sm:inline">Caso algum visto tenha sumido do aparelho</span>
+                    </button>
+                </div>
+
+                <!-- Caixa de Instruções Opcional / Retrátil (Caso o usuário queira) -->
+                <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                    <button @click="mostrarInstrucoesNuvem = !mostrarInstrucoesNuvem" type="button" class="w-full p-3 flex justify-between items-center text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-question text-indigo-600"></i>
+                            <span>Instruções de Uso & Como Funciona</span>
+                        </span>
+                        <i :class="['fa-solid transition-transform duration-200', mostrarInstrucoesNuvem ? 'fa-chevron-up text-indigo-600' : 'fa-chevron-down text-slate-400']"></i>
+                    </button>
+                    <div v-show="mostrarInstrucoesNuvem" class="p-3.5 pt-1 text-[11px] text-slate-600 space-y-2 border-t border-slate-200 bg-white leading-relaxed">
+                        <p><strong>1. Sincronização Automática:</strong> Sempre que você lança vistos conectado à internet, o sistema salva automaticamente sem você precisar apertar nenhum botão.</p>
+                        <p><strong>2. Modo Sala de Aula (Offline):</strong> Você pode usar o app normalmente sem internet. Ao chegar em local com Wi-Fi, toque em <em>"Enviar Meus Vistos"</em> para publicar suas alterações na nuvem da escola.</p>
+                        <p><strong>3. Ver Dados de Outros Professores:</strong> Toque em <em>"Atualizar da Nuvem"</em> para puxar qualquer atribuição nova de turma ou vistos lançados por outros professores.</p>
+                        <p><strong>4. Resgate de Backups:</strong> Se você limpou o histórico do navegador ou trocou de aparelho e sente falta de vistos anteriores, essa ferramenta faz uma varredura profunda na memória do dispositivo para recuperá-los.</p>
+                    </div>
+                </div>
+
+                <!-- Configuração Avançada do Firebase (Opcional) -->
+                <details class="group border border-slate-200 rounded-xl p-3 bg-slate-50">
+                    <summary class="cursor-pointer text-xs font-bold text-slate-600 hover:text-slate-800 flex items-center justify-between select-none">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-gear text-slate-500"></i>
+                            <span>Configuração do Firebase (Avançado)</span>
+                        </span>
+                        <i class="fa-solid fa-chevron-down group-open:rotate-180 transition-transform text-slate-400"></i>
+                    </summary>
+                    <div class="mt-3 space-y-2.5">
+                        <p class="text-[11px] text-slate-500 leading-tight">
+                            Cole o JSON de credenciais do Firebase Firestore para conectar a uma nova base de dados:
+                        </p>
+                        <textarea v-model="modalNuvem.configJson" rows="3" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full bg-white border border-slate-300 rounded-lg p-2 font-mono text-[11px] focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <div class="flex justify-end">
+                            <button @click="salvarConfigNuvem" class="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-indigo-900 hover:bg-indigo-800 shadow transition">
+                                Salvar Credenciais
                             </button>
                         </div>
                     </div>
-                    <p class="text-[10px] text-indigo-600 leading-tight">
-                        Toque em <strong>"Enviar Meus Vistos"</strong> para publicar os vistos do celular na nuvem. Se algum visto sumiu, toque em <strong>"Resgatar Backups"</strong> para fazer a busca profunda nos backups locais deste aparelho.
-                    </p>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="block text-[11px] font-bold text-slate-700 uppercase">
-                        Sincronização em Nuvem Gratuita (Firebase Firestore)
-                    </label>
-                    <p class="text-[11px] text-slate-500">
-                        Para sincronizar automaticamente entre diferentes computadores ou celulares através do link da Vercel, você pode colar a configuração do seu projeto Firebase gratuito abaixo:
-                    </p>
-                    <textarea v-model="modalNuvem.configJson" rows="3" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono text-[11px] focus:ring-2 focus:ring-indigo-500"></textarea>
-                </div>
+                </details>
             </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap gap-2 justify-between items-center">
-                <div class="flex gap-2 flex-wrap">
-                    <button @click="sincronizarAgora" class="px-3 py-2 rounded-lg text-xs font-bold text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 flex items-center gap-1.5">
-                        <i class="fa-solid fa-arrows-rotate"></i> Atualizar da Nuvem
-                    </button>
-                    <button @click="forcarEnvioVistosParaNuvem" class="px-3 py-2 rounded-lg text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-600 border border-emerald-600 flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Enviar Meus Vistos
-                    </button>
-                    <button @click="acionarVarreduraManual" class="px-3 py-2 rounded-lg text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 flex items-center gap-1.5 shadow-sm" title="Procurar em backups locais">
-                        <i class="fa-solid fa-magnifying-glass"></i> Resgatar Vistos
-                    </button>
-                </div>
-                <div class="flex gap-2">
-                    <button @click="modalNuvem.aberto = false" class="px-3 py-2 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-100">
-                        Fechar
-                    </button>
-                    <button @click="salvarConfigNuvem" class="px-3 py-2 rounded-lg text-xs font-bold text-white bg-indigo-900 hover:bg-indigo-800 shadow">
-                        Salvar Config
-                    </button>
-                </div>
+
+            <!-- Rodapé Limpo: Apenas Botão Fechar -->
+            <div class="p-3 bg-slate-100 border-t border-slate-200 flex justify-end shrink-0">
+                <button @click="modalNuvem.aberto = false" class="w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 shadow-xs transition touch-btn">
+                    Fechar
+                </button>
             </div>
         </div>
     </div>
@@ -3274,63 +3335,7 @@ createApp({
             return u ? !!u.admin : false;
         });
 
-        // --- CRIPTOGRAFIA SIMÉTRICA REVERSÍVEL COM CHAVE DE SEGURANÇA ---
-        const CRYPTO_SALT_SENHAS = '_jma_diario_secret_salt_2026_@eejma!';
-
-        function criptografarSenha(texto) {
-            if (!texto) return '';
-            const str = encodeURIComponent(String(texto).trim());
-            if (str.startsWith('enc:v2:')) return str;
-            try {
-                const key = CRYPTO_SALT_SENHAS;
-                let resultado = '';
-                for (let i = 0; i < str.length; i++) {
-                    const charCode = str.charCodeAt(i);
-                    const keyChar = key.charCodeAt(i % key.length);
-                    const encChar = charCode ^ keyChar;
-                    resultado += encChar.toString(16).padStart(4, '0');
-                }
-                return 'enc:v2:' + resultado;
-            } catch (e) {
-                return str;
-            }
-        }
-
-        function descriptografarSenha(textoCriptografado) {
-            if (!textoCriptografado) return '';
-            const str = String(textoCriptografado).trim();
-            if (!str.startsWith('enc:v2:')) {
-                // Caso seja um hash SHA-256 legado irreversível
-                if (/^[a-f0-9]{64}$/i.test(str)) {
-                    return '•••• (redefinir)';
-                }
-                return str; // Senha legada em texto plano
-            }
-            try {
-                const hex = str.slice(7);
-                const key = CRYPTO_SALT_SENHAS;
-                let decStr = '';
-                let keyIdx = 0;
-                for (let i = 0; i < hex.length; i += 4) {
-                    const encChar = parseInt(hex.substr(i, 4), 16);
-                    const keyChar = key.charCodeAt(keyIdx % key.length);
-                    keyIdx++;
-                    decStr += String.fromCharCode(encChar ^ keyChar);
-                }
-                return decodeURIComponent(decStr);
-            } catch (e) {
-                return str;
-            }
-        }
-
-        function getSenhaUsuario(nome) {
-            const raw = senhas.value[nome] || '0000';
-            if (isAdmin.value) {
-                return descriptografarSenha(raw);
-            }
-            return '••••';
-        }
-
+        // --- SEGURANÇA E HASH DE SENHAS (SHA-256) ---
         async function hashSenha(senha) {
             if (!senha) return '';
             const str = String(senha).trim();
@@ -3346,6 +3351,72 @@ createApp({
             }
         }
 
+        // Função legada de decodificação apenas para compatibilidade transitória com testes anteriores
+        function decodificarLegadoV2(str) {
+            if (!str || !str.startsWith('enc:v2:')) return str;
+            try {
+                const hex = str.slice(7);
+                const key = '_jma_diario_secret_salt_2026_@eejma!';
+                let decStr = '';
+                let keyIdx = 0;
+                for (let i = 0; i < hex.length; i += 4) {
+                    const encChar = parseInt(hex.substr(i, 4), 16);
+                    const keyChar = key.charCodeAt(keyIdx % key.length);
+                    keyIdx++;
+                    decStr += String.fromCharCode(encChar ^ keyChar);
+                }
+                return decodeURIComponent(decStr);
+            } catch (e) {
+                return str;
+            }
+        }
+
+        // Garante que todas as senhas locais e da nuvem estejam no formato de hash SHA-256
+        async function sanitizarSenhasParaHash() {
+            try {
+                let alterou = false;
+                const novasSenhas = { ...senhas.value };
+                for (const [usr, s] of Object.entries(novasSenhas)) {
+                    if (typeof s === 'string' && s.trim()) {
+                        const str = s.trim();
+                        if (str.startsWith('enc:v2:')) {
+                            const dec = decodificarLegadoV2(str);
+                            novasSenhas[usr] = await hashSenha(dec || '0000');
+                            alterou = true;
+                        } else if (!/^[a-f0-9]{64}$/i.test(str)) {
+                            novasSenhas[usr] = await hashSenha(str);
+                            alterou = true;
+                        }
+                    }
+                }
+                if (alterou) {
+                    senhas.value = novasSenhas;
+                    localStorage.setItem('diario_senhas_db', JSON.stringify(senhas.value));
+                    salvarNuvemSenhas(senhas.value);
+                }
+            } catch(e) {
+                console.warn('Erro ao sanitizar senhas para hash:', e);
+            }
+        }
+
+        // Redefine a senha de qualquer professor para o padrão escolar 0000 (com confirmação e sincronização)
+        async function redefinirSenhaParaPadrao(nome) {
+            if (!nome) return;
+            const confirma = confirm(`Deseja realmente redefinir a senha do professor(a) "${nome}" para o padrão escolar (0000)?\n\nO professor poderá alterar sua senha depois através do perfil.`);
+            if (!confirma) return;
+
+            try {
+                const hashPadrao = await hashSenha('0000');
+                senhas.value = { ...senhas.value, [nome]: hashPadrao };
+                localStorage.setItem('diario_senhas_db', JSON.stringify(senhas.value));
+                await salvarNuvemSenhas(senhas.value);
+                alert(`✅ Senha do professor(a) "${nome}" foi redefinida para o padrão escolar (0000).`);
+            } catch(e) {
+                console.error('Erro ao redefinir senha:', e);
+                alert('Erro ao salvar redefinição de senha na nuvem.');
+            }
+        }
+
         async function fazerLogin() {
             loginError.value = '';
             if (!loginForm.value.usuario) {
@@ -3353,19 +3424,21 @@ createApp({
                 return;
             }
             const senhaDigitada = String(loginForm.value.senha || '').trim();
-            const senhaArmazenada = senhas.value[loginForm.value.usuario] || '0000';
+            const senhaArmazenada = String(senhas.value[loginForm.value.usuario] || '0000').trim();
 
             let isValida = false;
-            // 1. Validação via senha descriptografada reversível
-            const senhaReal = descriptografarSenha(senhaArmazenada);
-            if (senhaReal === senhaDigitada) {
+            const hashDigitada = await hashSenha(senhaDigitada);
+
+            // 1. Comparação direta por hash SHA-256 (Padrão Oficial)
+            if (senhaArmazenada === hashDigitada) {
                 isValida = true;
             } else if (senhaArmazenada === senhaDigitada) {
                 isValida = true;
-            } else {
-                // 2. Validação legada por hash SHA-256
-                const hashDigitada = await hashSenha(senhaDigitada);
-                if (senhaArmazenada === hashDigitada) {
+            } else if (!senhaArmazenada && senhaDigitada === '0000') {
+                isValida = true;
+            } else if (senhaArmazenada.startsWith('enc:v2:')) {
+                const dec = decodificarLegadoV2(senhaArmazenada);
+                if (dec === senhaDigitada) {
                     isValida = true;
                 }
             }
@@ -3375,10 +3448,9 @@ createApp({
                 return;
             }
 
-            // Atualiza para o novo padrão seguro criptografado e descriptografável pelo admin
-            if (!senhaArmazenada.startsWith('enc:v2:')) {
-                const enc = criptografarSenha(senhaDigitada);
-                senhas.value = { ...senhas.value, [loginForm.value.usuario]: enc };
+            // Se ainda não estava em hash SHA-256, migra defensivamente no ato do login
+            if (!/^[a-f0-9]{64}$/i.test(senhaArmazenada)) {
+                senhas.value = { ...senhas.value, [loginForm.value.usuario]: hashDigitada };
                 localStorage.setItem('diario_senhas_db', JSON.stringify(senhas.value));
                 salvarNuvemSenhas(senhas.value);
             }
@@ -3406,9 +3478,13 @@ createApp({
         if (!turmas.value["Alunos 3ADM"] && !turmas.value["3ADM"]) turmas.value["Alunos 3ADM"] = [];
         if (!turmas.value["Alunos 3AGRO"] && !turmas.value["3AGRO"]) turmas.value["Alunos 3AGRO"] = [];
 
+        let isRecebendoNuvem = false;
+
         watch(turmas, (newVal) => {
             localStorage.setItem('diario_turmas_db', JSON.stringify(newVal));
-            salvarNuvemTurmas(newVal);
+            if (!isRecebendoNuvem) {
+                salvarNuvemTurmas(newVal);
+            }
         }, { deep: true });
 
         const turmasOrdenadas = computed(() => {
@@ -3982,6 +4058,7 @@ createApp({
 
         onMounted(() => {
             corrigirSituacoesCorrompidas();
+            sanitizarSenhasParaHash();
             const usuarioSalvo = localStorage.getItem('diario_usuario_ativo');
             if (usuarioSalvo) {
                 currentUser.value = usuarioSalvo;
@@ -4276,7 +4353,7 @@ createApp({
             if (currentUser.value) {
                 localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(newVal));
                 // Proteção contra sobrescrita vazia: nunca envia objeto vazio para a nuvem
-                if (contarTotalVistosEmRegistros(newVal) > 0) {
+                if (!isRecebendoNuvem && contarTotalVistosEmRegistros(newVal) > 0) {
                     salvarNuvemProfessor(currentUser.value, newVal, conteudos.value);
                 }
             }
@@ -4285,7 +4362,7 @@ createApp({
         watch(conteudos, (newVal) => {
             if (currentUser.value) {
                 localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(newVal));
-                if (Object.keys(newVal || {}).length > 0) {
+                if (!isRecebendoNuvem && Object.keys(newVal || {}).length > 0) {
                     salvarNuvemProfessor(currentUser.value, registros.value, newVal);
                 }
             }
@@ -5153,12 +5230,12 @@ createApp({
                 alert('A confirmação de senha não confere.');
                 return;
             }
-            const enc = criptografarSenha(modalSenha.value.novaSenha);
-            senhas.value = { ...senhas.value, [currentUser.value]: enc };
+            const h = await hashSenha(modalSenha.value.novaSenha);
+            senhas.value = { ...senhas.value, [currentUser.value]: h };
             localStorage.setItem('diario_senhas_db', JSON.stringify(senhas.value));
             salvarNuvemSenhas(senhas.value);
             modalSenha.value.aberto = false;
-            alert('✅ Senha atualizada e criptografada com sucesso!');
+            alert('✅ Senha atualizada com sucesso!');
         }
 
         // --- ÁREA DO ADMINISTRADOR: ESTADOS E FUNÇÕES ---
@@ -5729,14 +5806,6 @@ createApp({
             return Array.from(setTurmas).sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
         });
 
-        const mostrarSenhasAdmin = ref({});
-
-        function toggleMostrarSenhaAdmin(nome) {
-            mostrarSenhasAdmin.value = {
-                ...mostrarSenhasAdmin.value,
-                [nome]: !mostrarSenhasAdmin.value[nome]
-            };
-        }
 
         function toggleTurmaProfessorModal(turmaCod) {
             if (!modalProfessor.value.turmasDisciplinas) modalProfessor.value.turmasDisciplinas = {};
@@ -5786,14 +5855,13 @@ createApp({
         }
 
         function abrirModalEditarProfessor(prof) {
-            const senhaAtual = getSenhaUsuario(prof.nome);
             modalProfessor.value = {
                 aberto: true,
                 modo: 'editar',
                 id: prof.id || prof.nome,
                 nome: prof.nome,
                 admin: !!prof.admin,
-                senha: (senhaAtual && !senhaAtual.includes('redefinir')) ? senhaAtual : '',
+                senha: '',
                 turmasDisciplinas: JSON.parse(JSON.stringify(prof.turmasDisciplinas || {}))
             };
         }
@@ -5845,9 +5913,14 @@ createApp({
             localStorage.setItem('diario_usuarios_db', JSON.stringify(usuarios.value));
             await salvarNuvemUsuarios(usuarios.value);
 
-            if (p.senha && p.senha.length >= 3 && !p.senha.includes('redefinir')) {
-                const enc = criptografarSenha(p.senha);
-                senhas.value = { ...senhas.value, [nomeLimpo]: enc };
+            if (p.senha && p.senha.trim().length >= 3) {
+                const h = await hashSenha(p.senha.trim());
+                senhas.value = { ...senhas.value, [nomeLimpo]: h };
+                localStorage.setItem('diario_senhas_db', JSON.stringify(senhas.value));
+                salvarNuvemSenhas(senhas.value);
+            } else if (p.modo === 'novo') {
+                const hPadrao = await hashSenha('0000');
+                senhas.value = { ...senhas.value, [nomeLimpo]: hPadrao };
                 localStorage.setItem('diario_senhas_db', JSON.stringify(senhas.value));
                 salvarNuvemSenhas(senhas.value);
             }
@@ -7094,6 +7167,7 @@ createApp({
         let db = null;
         const nuvemConectada = ref(false);
         const modalNuvem = ref({ aberto: false, configJson: localStorage.getItem('diario_firebase_config') || '' });
+        const mostrarInstrucoesNuvem = ref(false);
 
         const DEFAULT_FIREBASE_CONFIG = {
             apiKey: "AIzaSyCTLNNVWh5YCKBD3J5AXHM3mUbtHmdRHiU",
@@ -7126,22 +7200,38 @@ createApp({
 
                     // Ouvintes em tempo real para refletir mudanças do painel administrativo instantaneamente
                     try {
-                        db.collection('diario_config').doc('usuarios').onSnapshot(snap => {
+                        db.collection('diario_config').doc('usuarios').onSnapshot({ includeMetadataChanges: true }, snap => {
+                            if (snap.metadata && snap.metadata.hasPendingWrites) return;
                             if (snap.exists) {
                                 const data = snap.data();
                                 if (data && Array.isArray(data.usuarios) && data.usuarios.length > 0) {
-                                    usuarios.value = data.usuarios;
-                                    localStorage.setItem('diario_usuarios_db', JSON.stringify(usuarios.value));
+                                    const dadosStr = JSON.stringify(data.usuarios);
+                                    if (dadosStr !== JSON.stringify(usuarios.value)) {
+                                        isRecebendoNuvem = true;
+                                        usuarios.value = data.usuarios;
+                                        localStorage.setItem('diario_usuarios_db', dadosStr);
+                                        setTimeout(() => { isRecebendoNuvem = false; }, 300);
+                                    }
                                 }
                             }
                         }, err => console.warn('Listener usuarios:', err));
 
-                        db.collection('diario_turmas').doc('geral').onSnapshot(snap => {
+                        db.collection('diario_turmas').doc('geral').onSnapshot({ includeMetadataChanges: true }, snap => {
+                            if (snap.metadata && snap.metadata.hasPendingWrites) return;
                             if (snap.exists) {
                                 const data = snap.data();
                                 if (data && data.turmas) {
-                                    turmas.value = { ...turmas.value, ...data.turmas };
-                                    localStorage.setItem('diario_turmas_db', JSON.stringify(turmas.value));
+                                    const turmasNuvemStr = JSON.stringify(data.turmas);
+                                    const turmasLocalStr = JSON.stringify(turmas.value);
+                                    if (turmasNuvemStr !== turmasLocalStr) {
+                                        isRecebendoNuvem = true;
+                                        turmas.value = { ...turmas.value, ...data.turmas };
+                                        localStorage.setItem('diario_turmas_db', JSON.stringify(turmas.value));
+                                        if (typeof ultimoHashTurmasSalvo !== 'undefined') {
+                                            ultimoHashTurmasSalvo = turmasNuvemStr;
+                                        }
+                                        setTimeout(() => { isRecebendoNuvem = false; }, 300);
+                                    }
                                 }
                             }
                         }, err => console.warn('Listener turmas:', err));
@@ -7180,6 +7270,7 @@ createApp({
 
         async function sincronizarComNuvem() {
             if (!db) return;
+            isRecebendoNuvem = true;
             try {
                 if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
 
@@ -7202,10 +7293,12 @@ createApp({
                         });
                         turmas.value = tNuvem;
                         localStorage.setItem('diario_turmas_db', JSON.stringify(turmas.value));
+                        ultimoHashTurmasSalvo = JSON.stringify(turmas.value);
                         corrigirSituacoesCorrompidas();
                     }
                 } else {
                     await db.collection('diario_turmas').doc('geral').set({ turmas: turmas.value });
+                    ultimoHashTurmasSalvo = JSON.stringify(turmas.value);
                 }
 
                 // 2. Sincronizar usuários e atribuições escolares diretamente do servidor
@@ -7251,6 +7344,7 @@ createApp({
                     if (data && data.senhas) {
                         senhas.value = { ...senhas.value, ...data.senhas };
                         localStorage.setItem('diario_senhas_db', JSON.stringify(senhas.value));
+                        await sanitizarSenhasParaHash();
                     }
                 }
 
@@ -7362,6 +7456,10 @@ createApp({
                 console.error("Erro na sincronização:", err);
                 if (!navigator.onLine) statusConexao.value = 'offline';
                 else statusConexao.value = 'online';
+            } finally {
+                setTimeout(() => {
+                    isRecebendoNuvem = false;
+                }, 500);
             }
         }
 
@@ -7422,7 +7520,7 @@ createApp({
 
         let debounceNuvem = null;
         function salvarNuvemProfessor(user, reg, cont) {
-            if (!db || !user) return;
+            if (!db || !user || isRecebendoNuvem) return;
             // Proteção contra exclusão: não envia mapa completamente vazio se nada foi preenchido
             if (contarTotalVistosEmRegistros(reg) === 0 && (!cont || Object.keys(cont).length === 0)) {
                 return;
@@ -7470,11 +7568,16 @@ createApp({
         }
 
         let debounceTurmas = null;
+        let ultimoHashTurmasSalvo = '';
         function salvarNuvemTurmas(novasTurmas, imediato = false) {
-            if (!db) return;
+            if (!db || isRecebendoNuvem) return;
+            const payloadStr = JSON.stringify(novasTurmas || {});
+            if (payloadStr === ultimoHashTurmasSalvo) return;
+
             if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
             clearTimeout(debounceTurmas);
             const enviar = () => {
+                ultimoHashTurmasSalvo = payloadStr;
                 db.collection('diario_turmas').doc('geral').set({
                     turmas: novasTurmas,
                     atualizadoEm: new Date().toISOString()
@@ -7546,7 +7649,7 @@ createApp({
             modalAluno, abrirModalNovoAluno, abrirModalEditarAluno, salvarAlunoModal, excluirAluno,
             modalNovaTurma, abrirModalNovaTurma, criarNovaTurma,
             modalRenomearTurma, abrirModalRenomearTurma, confirmarRenomearTurma, confirmarExcluirTurma,
-            modalProfessor, mostrarSenhasAdmin, toggleMostrarSenhaAdmin, abrirModalNovoProfessor, abrirModalEditarProfessor, salvarProfessorModal, confirmarExcluirProfessor, getSenhaUsuario,
+            modalProfessor, abrirModalNovoProfessor, abrirModalEditarProfessor, salvarProfessorModal, confirmarExcluirProfessor, redefinirSenhaParaPadrao,
             disciplinasCadastradas, modalDisciplina, abrirModalNovaDisciplina, abrirModalEditarDisciplina, salvarDisciplinaModal, confirmarExcluirDisciplina, getUsoDisciplinaCount,
             
             // Ferramentas Mover/Copiar e Contagem Bimestral
@@ -7571,6 +7674,7 @@ createApp({
 
             // Nuvem, Conectividade e PWA
             modalNuvem, nuvemConectada, statusConexao, abrirModalNuvem, salvarConfigNuvem, sincronizarAgora,
+            mostrarInstrucoesNuvem,
             forcarEnvioVistosParaNuvem, contarTotalVistosDoProfessor, getChavesDoProfessor, acionarVarreduraManual, executarVarreduraERecuperacaoProfunda,
             pwaPrompt, mostrarBotaoInstalar, instalarAppPWA,
             novaVersaoDisponivel, versaoMaisRecente, fecharNotificacaoVersao, aplicarAtualizacaoApp
