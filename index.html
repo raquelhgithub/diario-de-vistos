@@ -1646,6 +1646,7 @@
                                     <th class="p-3">Professor(a)</th>
                                     <th class="p-3">Nível de Acesso</th>
                                     <th class="p-3">Turmas e Disciplinas</th>
+                                    <th class="p-3 text-center">Vistos Sincronizados</th>
                                     <th class="p-3">Senha de Acesso</th>
                                     <th class="p-3 text-right">Ações</th>
                                 </tr>
@@ -1665,6 +1666,12 @@
                                     <td class="p-3 text-slate-600 max-w-xs">
                                         <span class="text-[11px] leading-tight block truncate font-medium" :title="formatarTurmasDisciplinasResumo(prof.turmasDisciplinas)">
                                             {{ formatarTurmasDisciplinasResumo(prof.turmasDisciplinas) }}
+                                        </span>
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        <span :class="['px-2 py-0.5 rounded-full font-bold text-[10px] inline-flex items-center gap-1', contarTotalVistosDoProfessor(prof.nome) > 0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-500']">
+                                            <i :class="contarTotalVistosDoProfessor(prof.nome) > 0 ? 'fa-solid fa-cloud-arrow-up text-emerald-600' : 'fa-solid fa-clock text-slate-400'"></i>
+                                            {{ contarTotalVistosDoProfessor(prof.nome) }} vistos
                                         </span>
                                     </td>
                                     <td class="p-3">
@@ -2151,6 +2158,22 @@
                     </div>
                 </div>
 
+                <!-- Status e Forçar Envio do Professor Ativo -->
+                <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl space-y-2">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <strong class="text-indigo-950 block font-bold text-xs">Professor(a) Ativo: {{ currentUser || 'Anônimo' }}</strong>
+                            <span class="text-[11px] text-indigo-700">Vistos deste perfil gravados neste dispositivo: <b>{{ contarTotalVistosDoProfessor(currentUser) }}</b></span>
+                        </div>
+                        <button @click="forcarEnvioVistosParaNuvem" class="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-indigo-700 hover:bg-indigo-800 shadow flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Enviar Meus Vistos à Nuvem
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-indigo-600 leading-tight">
+                        Toque em <strong>"Enviar Meus Vistos à Nuvem"</strong> para publicar todos os vistos gravados no seu celular para que a coordenação e colegas possam visualizá-los.
+                    </p>
+                </div>
+
                 <div class="space-y-2">
                     <label class="block text-[11px] font-bold text-slate-700 uppercase">
                         Sincronização em Nuvem Gratuita (Firebase Firestore)
@@ -2158,19 +2181,24 @@
                     <p class="text-[11px] text-slate-500">
                         Para sincronizar automaticamente entre diferentes computadores ou celulares através do link da Vercel, você pode colar a configuração do seu projeto Firebase gratuito abaixo:
                     </p>
-                    <textarea v-model="modalNuvem.configJson" rows="4" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono text-[11px] focus:ring-2 focus:ring-indigo-500"></textarea>
+                    <textarea v-model="modalNuvem.configJson" rows="3" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono text-[11px] focus:ring-2 focus:ring-indigo-500"></textarea>
                 </div>
             </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-                <button @click="sincronizarAgora" class="px-3 py-2 rounded-lg text-xs font-bold text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 flex items-center gap-1.5">
-                    <i class="fa-solid fa-arrows-rotate"></i> Forçar Sincronização
-                </button>
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap gap-2 justify-between items-center">
+                <div class="flex gap-2">
+                    <button @click="sincronizarAgora" class="px-3 py-2 rounded-lg text-xs font-bold text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrows-rotate"></i> Atualizar da Nuvem
+                    </button>
+                    <button @click="forcarEnvioVistosParaNuvem" class="px-3 py-2 rounded-lg text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-600 border border-emerald-600 flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Enviar Meus Vistos
+                    </button>
+                </div>
                 <div class="flex gap-2">
                     <button @click="modalNuvem.aberto = false" class="px-3 py-2 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-100">
                         Fechar
                     </button>
-                    <button @click="salvarConfigNuvem" class="px-4 py-2 rounded-lg text-xs font-bold text-white bg-indigo-900 hover:bg-indigo-800 shadow">
-                        Salvar Configuração
+                    <button @click="salvarConfigNuvem" class="px-3 py-2 rounded-lg text-xs font-bold text-white bg-indigo-900 hover:bg-indigo-800 shadow">
+                        Salvar Config
                     </button>
                 </div>
             </div>
@@ -2773,7 +2801,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '6.5';
+        const APP_VERSION = '6.6';
 
         // --- BACKUP AUTOMÁTICO PREVENTIVO PRÉ-ATUALIZAÇÃO (GARANTIA ZERO DATA LOSS) ---
         function executarBackupPreventivo() {
@@ -2781,7 +2809,16 @@ createApp({
                 const versaoGravada = localStorage.getItem('diario_versao_instalada');
                 if (versaoGravada !== APP_VERSION) {
                     const turmasExistente = localStorage.getItem('diario_turmas_db');
-                    if (turmasExistente) {
+                    // Coleta todos os vistos e conteúdos salvos localmente de qualquer professor
+                    const vistosLocais = {};
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (k && (k.startsWith('diario_vistos_user_') || k.startsWith('diario_conteudos_user_') || k.startsWith('diario_backup_seguro_'))) {
+                            vistosLocais[k] = localStorage.getItem(k);
+                        }
+                    }
+
+                    if (turmasExistente || Object.keys(vistosLocais).length > 0) {
                         const snapshot = {
                             versaoAnterior: versaoGravada || 'pre-6.3',
                             novaVersao: APP_VERSION,
@@ -2789,9 +2826,10 @@ createApp({
                             turmas: turmasExistente,
                             usuarios: localStorage.getItem('diario_usuarios_db'),
                             senhas: localStorage.getItem('diario_senhas_db'),
-                            disciplinas: localStorage.getItem('diario_disciplinas_db')
+                            disciplinas: localStorage.getItem('diario_disciplinas_db'),
+                            vistosPorProfessor: vistosLocais
                         };
-                        localStorage.setItem(`diario_backup_auto_${versaoGravada || 'v6.2'}`, JSON.stringify(snapshot));
+                        localStorage.setItem(`diario_backup_auto_${versaoGravada || 'v6.5'}`, JSON.stringify(snapshot));
                     }
                     localStorage.setItem('diario_versao_instalada', APP_VERSION);
                 }
@@ -3624,6 +3662,105 @@ createApp({
             return prof ? prof.nome : null;
         }
 
+        // Obtém todas as chaves canônicas de turmas/disciplinas de um professor
+        function getChavesDoProfessor(usuarioNome) {
+            if (!usuarioNome) return [];
+            const norm = normalizarNomeUsuario(usuarioNome);
+            const u = usuarios.value.find(user => normalizarNomeUsuario(user.nome) === norm);
+            if (!u || !u.turmasDisciplinas) return [];
+            const chaves = [];
+            Object.keys(u.turmasDisciplinas).forEach(turmaCod => {
+                const turmaReal = encontrarTurmaReal(turmaCod);
+                const codCurto = getCodigoTurmaCurto(turmaCod);
+                const discs = u.turmasDisciplinas[turmaCod] || [];
+                discs.forEach(d => {
+                    chaves.push(`${turmaReal}__${d}`);
+                    if (codCurto && codCurto !== turmaReal) {
+                        chaves.push(`${codCurto}__${d}`);
+                    }
+                });
+            });
+            return [...new Set(chaves)];
+        }
+
+        // Conta quantos vistos ativos ou dados válidos existem em um objeto de registros
+        function contarTotalVistosEmRegistros(regs) {
+            if (!regs || typeof regs !== 'object') return 0;
+            let total = 0;
+            for (const turmaKey of Object.keys(regs)) {
+                const dates = regs[turmaKey];
+                if (!dates || typeof dates !== 'object') continue;
+                for (const d of Object.keys(dates)) {
+                    const stMap = dates[d];
+                    if (!stMap || typeof stMap !== 'object') continue;
+                    for (const stId of Object.keys(stMap)) {
+                        const item = stMap[stId];
+                        if (!item) continue;
+                        if (typeof item === 'object') {
+                            if (item.caderno || item.livro || item.atividade || item.visto || item.isContagem || (item.pontoPositivo && item.pontoPositivo !== 0)) {
+                                total++;
+                            }
+                        } else if (item === true || item === 1) {
+                            total++;
+                        }
+                    }
+                }
+            }
+            return total;
+        }
+
+        // Conta quantos vistos existem no sistema para o perfil de um professor específico
+        function contarTotalVistosDoProfessor(usuarioNome) {
+            if (!usuarioNome) return 0;
+            const chavesProf = getChavesDoProfessor(usuarioNome);
+            let total = 0;
+            const r = registros.value || {};
+            if (chavesProf.length > 0) {
+                chavesProf.forEach(k => {
+                    if (r[k]) total += contarTotalVistosEmRegistros({ [k]: r[k] });
+                });
+            } else {
+                total = contarTotalVistosEmRegistros(r);
+            }
+            return total;
+        }
+
+        // Mesclagem profunda e não-destrutiva de dois mapas de registros (preserva sempre o que foi marcado)
+        function mesclarObjetosRegistros(local, nuvem) {
+            if (!local && !nuvem) return {};
+            if (!local) return JSON.parse(JSON.stringify(nuvem));
+            if (!nuvem) return JSON.parse(JSON.stringify(local));
+            const resultado = { ...nuvem };
+            for (const k of Object.keys(local)) {
+                if (!resultado[k]) {
+                    resultado[k] = local[k];
+                } else {
+                    resultado[k] = { ...resultado[k] };
+                    for (const d of Object.keys(local[k])) {
+                        if (!resultado[k][d]) {
+                            resultado[k][d] = local[k][d];
+                        } else {
+                            resultado[k][d] = { ...resultado[k][d] };
+                            for (const stId of Object.keys(local[k][d])) {
+                                const stLocal = local[k][d][stId];
+                                const stNuvem = resultado[k][d][stId];
+                                if (!stNuvem) {
+                                    resultado[k][d][stId] = stLocal;
+                                } else if (stLocal && typeof stLocal === 'object') {
+                                    resultado[k][d][stId] = { ...stNuvem, ...stLocal };
+                                    if (stLocal.caderno) resultado[k][d][stId].caderno = true;
+                                    if (stLocal.livro) resultado[k][d][stId].livro = true;
+                                    if (stLocal.atividade) resultado[k][d][stId].atividade = true;
+                                    if (stLocal.isContagem) resultado[k][d][stId].isContagem = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return resultado;
+        }
+
         const turmasDisponiveis = computed(() => {
             if (isAdmin.value && adminVerTodasTurmas.value) {
                 return turmasOrdenadas.value;
@@ -3917,8 +4054,23 @@ createApp({
 
         function carregarDadosProfessor() {
             if (!currentUser.value) return;
-            registros.value = JSON.parse(localStorage.getItem(getChaveStorageRegistros()) || '{}');
-            conteudos.value = JSON.parse(localStorage.getItem(getChaveStorageConteudos()) || '{}');
+            const chaveReg = getChaveStorageRegistros();
+            const chaveCont = getChaveStorageConteudos();
+            const rawReg = localStorage.getItem(chaveReg);
+            const rawCont = localStorage.getItem(chaveCont);
+
+            // Backup preventivo de segurança se houver dados válidos
+            if (rawReg && rawReg.length > 5) {
+                try {
+                    const parsed = JSON.parse(rawReg);
+                    if (contarTotalVistosEmRegistros(parsed) > 0) {
+                        localStorage.setItem(`diario_backup_seguro_${currentUser.value}`, rawReg);
+                    }
+                } catch(e) {}
+            }
+
+            registros.value = JSON.parse(rawReg || '{}');
+            conteudos.value = JSON.parse(rawCont || '{}');
             if (turmasDisponiveis.value.length > 0 && (!selectedClass.value || !turmasDisponiveis.value.includes(selectedClass.value))) {
                 selectedClass.value = turmasDisponiveis.value[0];
             }
@@ -3931,14 +4083,19 @@ createApp({
         watch(registros, (newVal) => {
             if (currentUser.value) {
                 localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(newVal));
-                salvarNuvemProfessor(currentUser.value, newVal, conteudos.value);
+                // Proteção contra sobrescrita vazia: nunca envia objeto vazio para a nuvem
+                if (contarTotalVistosEmRegistros(newVal) > 0) {
+                    salvarNuvemProfessor(currentUser.value, newVal, conteudos.value);
+                }
             }
         }, { deep: true });
 
         watch(conteudos, (newVal) => {
             if (currentUser.value) {
                 localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(newVal));
-                salvarNuvemProfessor(currentUser.value, registros.value, newVal);
+                if (Object.keys(newVal || {}).length > 0) {
+                    salvarNuvemProfessor(currentUser.value, registros.value, newVal);
+                }
             }
         }, { deep: true });
 
@@ -6018,20 +6175,49 @@ createApp({
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = async (e) => {
                 try {
                     const parsed = JSON.parse(e.target.result);
-                    if (parsed.turmas) turmas.value = parsed.turmas;
-                    if (parsed.registros) registros.value = parsed.registros;
-                    if (parsed.conteudos) conteudos.value = parsed.conteudos;
-                    if (parsed.usuarios) usuarios.value = parsed.usuarios;
-                    if (parsed.senhas) senhas.value = parsed.senhas;
-                    salvarNuvemTurmas(turmas.value);
-                    if (parsed.usuarios) salvarNuvemUsuarios(usuarios.value);
-                    if (parsed.senhas) salvarNuvemSenhas(senhas.value);
-                    alert("✅ Backup restaurado com sucesso!");
+                    if (parsed.turmas) {
+                        turmas.value = { ...turmas.value, ...parsed.turmas };
+                        salvarNuvemTurmas(turmas.value);
+                    }
+                    if (parsed.usuarios) {
+                        usuarios.value = parsed.usuarios;
+                        salvarNuvemUsuarios(usuarios.value);
+                    }
+                    if (parsed.senhas) {
+                        senhas.value = { ...senhas.value, ...parsed.senhas };
+                        salvarNuvemSenhas(senhas.value);
+                    }
+                    if (parsed.registros) {
+                        registros.value = mesclarObjetosRegistros(registros.value, parsed.registros);
+                        if (currentUser.value) {
+                            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                        }
+                    }
+                    if (parsed.conteudos) {
+                        conteudos.value = { ...conteudos.value, ...parsed.conteudos };
+                        if (currentUser.value) {
+                            localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
+                        }
+                    }
+
+                    // Se o backup foi gerado por um professor específico (ex: Raquel), salva direto no documento dele na nuvem
+                    if (parsed.geradoPor && db && parsed.registros) {
+                        await db.collection('diario_professores').doc(parsed.geradoPor).set({
+                            registros: parsed.registros,
+                            conteudos: parsed.conteudos || {},
+                            atualizadoEm: new Date().toISOString()
+                        }, { merge: true });
+                    }
+
+                    // Sincroniza tudo para consolidar
+                    await sincronizarComNuvem();
+                    alert(`✅ Backup de ${parsed.geradoPor || 'geral'} importado e sincronizado com sucesso!`);
                 } catch (err) {
-                    alert("⚠️ Arquivo JSON inválido.");
+                    console.error("Erro ao importar backup:", err);
+                    alert("⚠️ Arquivo JSON inválido ou corrompido: " + err.message);
                 }
             };
             reader.readAsText(file);
@@ -6846,28 +7032,27 @@ createApp({
 
                 // 3. Sincronizar registros de TODOS os professores cadastrados na nuvem
                 const snapshotProfs = await db.collection('diario_professores').get();
-                const unificadoReg = { ...registros.value };
-                const unificadoCont = { ...conteudos.value };
+                
+                // Lê armazenamento local atual deste dispositivo para preservar quaisquer vistos
+                let localReg = {};
+                let localCont = {};
+                try {
+                    const rawReg = localStorage.getItem(getChaveStorageRegistros());
+                    if (rawReg) localReg = JSON.parse(rawReg);
+                    const rawCont = localStorage.getItem(getChaveStorageConteudos());
+                    if (rawCont) localCont = JSON.parse(rawCont);
+                } catch(e) {}
 
+                // Inicia mesclando os registros em memória com o que está gravado localmente
+                let unificadoReg = mesclarObjetosRegistros(registros.value, localReg);
+                let unificadoCont = { ...conteudos.value, ...localCont };
+
+                // Mescla os registros de todos os professores da nuvem de forma aditiva e sem perda
                 snapshotProfs.forEach(docProf => {
                     const data = docProf.data();
                     if (data) {
                         if (data.registros) {
-                            Object.keys(data.registros).forEach(chave => {
-                                if (!unificadoReg[chave]) {
-                                    unificadoReg[chave] = data.registros[chave];
-                                } else {
-                                    const chaveObj = { ...data.registros[chave], ...unificadoReg[chave] };
-                                    Object.keys(data.registros[chave]).forEach(d => {
-                                        if (!unificadoReg[chave][d]) {
-                                            chaveObj[d] = data.registros[chave][d];
-                                        } else {
-                                            chaveObj[d] = { ...data.registros[chave][d], ...unificadoReg[chave][d] };
-                                        }
-                                    });
-                                    unificadoReg[chave] = chaveObj;
-                                }
-                            });
+                            unificadoReg = mesclarObjetosRegistros(unificadoReg, data.registros);
                         }
                         if (data.conteudos) {
                             Object.keys(data.conteudos).forEach(chave => {
@@ -6890,6 +7075,44 @@ createApp({
                     migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
                 }
 
+                // 4. AUTO-UPLOAD DE SEGURANÇA: Se o professor ativo possui vistos válidos de suas disciplinas,
+                // garante que o documento dele no Firestore seja atualizado imediatamente para os colegas verem
+                if (currentUser.value && db) {
+                    const chavesProf = getChavesDoProfessor(currentUser.value);
+                    const dadosParaSubir = {};
+                    const contParaSubir = {};
+                    let totalVistosProf = 0;
+
+                    chavesProf.forEach(k => {
+                        if (unificadoReg[k] && Object.keys(unificadoReg[k] || {}).length > 0) {
+                            dadosParaSubir[k] = unificadoReg[k];
+                            totalVistosProf += contarTotalVistosEmRegistros({ [k]: unificadoReg[k] });
+                        }
+                        if (unificadoCont[k]) {
+                            contParaSubir[k] = unificadoCont[k];
+                        }
+                    });
+
+                    // Se não tiver chaves específicas mapeadas (ex: professor geral sem grade), inclui tudo que tem visto
+                    if (totalVistosProf === 0 && !isAdmin.value) {
+                        Object.keys(unificadoReg).forEach(k => {
+                            if (Object.keys(unificadoReg[k] || {}).length > 0) {
+                                dadosParaSubir[k] = unificadoReg[k];
+                            }
+                        });
+                        totalVistosProf = contarTotalVistosEmRegistros(dadosParaSubir);
+                    }
+
+                    if (Object.keys(dadosParaSubir).length > 0 && totalVistosProf > 0) {
+                        await db.collection('diario_professores').doc(currentUser.value).set({
+                            registros: dadosParaSubir,
+                            conteudos: contParaSubir,
+                            atualizadoEm: new Date().toISOString()
+                        }, { merge: true });
+                        console.log(`[Auto-Upload Cloud] ${totalVistosProf} vistos de ${currentUser.value} enviados à nuvem.`);
+                    }
+                }
+
                 if (statusConexao.value !== 'offline') statusConexao.value = 'online';
             } catch (err) {
                 console.error("Erro na sincronização:", err);
@@ -6898,13 +7121,68 @@ createApp({
             }
         }
 
-        function sincronizarAgora() {
-            sincronizarComNuvem().then(() => alert('✅ Sincronização concluída!')).catch(() => alert('⚠️ Não foi possível sincronizar no momento.'));
+        async function sincronizarAgora() {
+            try {
+                statusConexao.value = 'sincronizando';
+                await sincronizarComNuvem();
+                const total = contarTotalVistosDoProfessor(currentUser.value);
+                alert(`✅ Sincronização concluída com sucesso!\n\nProfessor(a): ${currentUser.value || 'Geral'}\nVistos deste perfil: ${total}`);
+            } catch(e) {
+                alert('⚠️ Não foi possível sincronizar no momento. Verifique a conexão com a internet.');
+            }
+        }
+
+        async function forcarEnvioVistosParaNuvem() {
+            if (!db || !currentUser.value) {
+                alert('Conecte-se à internet para enviar dados para a nuvem.');
+                return;
+            }
+            try {
+                statusConexao.value = 'sincronizando';
+                const chavesProf = getChavesDoProfessor(currentUser.value);
+                const dadosParaSubir = {};
+                const contParaSubir = {};
+                
+                // Lê do armazenamento local direto para garantir
+                const rawReg = localStorage.getItem(getChaveStorageRegistros());
+                const regLocal = rawReg ? JSON.parse(rawReg) : {};
+                const unificado = mesclarObjetosRegistros(registros.value, regLocal);
+
+                Object.keys(unificado).forEach(k => {
+                    if (chavesProf.includes(k) || !isAdmin.value || Object.keys(unificado[k] || {}).length > 0) {
+                        dadosParaSubir[k] = unificado[k];
+                    }
+                });
+                Object.keys(conteudos.value).forEach(k => {
+                    if (dadosParaSubir[k]) contParaSubir[k] = conteudos.value[k];
+                });
+
+                const total = contarTotalVistosEmRegistros(dadosParaSubir);
+                await db.collection('diario_professores').doc(currentUser.value).set({
+                    registros: dadosParaSubir,
+                    conteudos: contParaSubir,
+                    atualizadoEm: new Date().toISOString()
+                }, { merge: true });
+
+                registros.value = unificado;
+                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                statusConexao.value = 'online';
+
+                alert(`🎉 Sucesso! ${total} vistos da Professora ${currentUser.value} foram enviados e gravados na nuvem.\n\nAgora todos os professores e a coordenação já podem visualizar seus vistos!`);
+            } catch(err) {
+                console.error("Erro no envio forçado:", err);
+                statusConexao.value = 'online';
+                alert('❌ Erro ao enviar para a nuvem: ' + (err.message || 'Verifique sua conexão.'));
+            }
         }
 
         let debounceNuvem = null;
         function salvarNuvemProfessor(user, reg, cont) {
             if (!db || !user) return;
+            // Proteção contra exclusão: não envia mapa completamente vazio se nada foi preenchido
+            if (contarTotalVistosEmRegistros(reg) === 0 && (!cont || Object.keys(cont).length === 0)) {
+                return;
+            }
             if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
             clearTimeout(debounceNuvem);
             debounceNuvem = setTimeout(() => {
@@ -6918,9 +7196,17 @@ createApp({
                     if (profResp) profDestino = profResp;
                 }
 
+                // Se salvando para outro professor, envia apenas a turma/disciplina específica para não sobrescrever dados alheios
+                let dadosEnvio = reg;
+                let contEnvio = cont;
+                if (profDestino !== user && chaveAtual) {
+                    dadosEnvio = { [chaveAtual]: reg[chaveAtual] || {} };
+                    contEnvio = cont[chaveAtual] ? { [chaveAtual]: cont[chaveAtual] } : {};
+                }
+
                 db.collection('diario_professores').doc(profDestino).set({
-                    registros: reg,
-                    conteudos: cont,
+                    registros: dadosEnvio,
+                    conteudos: contEnvio,
                     atualizadoEm: new Date().toISOString()
                 }, { merge: true }).then(() => {
                     if (statusConexao.value !== 'offline') statusConexao.value = 'online';
@@ -7024,6 +7310,7 @@ createApp({
 
             // Nuvem, Conectividade e PWA
             modalNuvem, nuvemConectada, statusConexao, abrirModalNuvem, salvarConfigNuvem, sincronizarAgora,
+            forcarEnvioVistosParaNuvem, contarTotalVistosDoProfessor, getChavesDoProfessor,
             pwaPrompt, mostrarBotaoInstalar, instalarAppPWA,
             novaVersaoDisponivel, versaoMaisRecente, fecharNotificacaoVersao, aplicarAtualizacaoApp
         };
