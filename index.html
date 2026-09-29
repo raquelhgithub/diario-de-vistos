@@ -2188,31 +2188,58 @@
                     </div>
                 </div>
 
-                <!-- Ações Principais de Salvamento (Sem Duplicações) -->
-                <div class="space-y-2">
-                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                        Ações de Sincronização
-                    </label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        <button @click="forcarEnvioVistosParaNuvem" class="p-3 rounded-xl bg-indigo-900 hover:bg-indigo-800 active:scale-[0.98] text-white font-bold text-xs flex flex-col items-start gap-1 shadow transition touch-btn text-left group">
-                            <div class="flex items-center gap-2 text-amber-300 font-extrabold">
-                                <i class="fa-solid fa-cloud-arrow-up text-base group-hover:-translate-y-0.5 transition-transform"></i>
-                                <span>Enviar Meus Vistos</span>
-                            </div>
-                            <span class="text-[10px] text-indigo-200 font-normal leading-tight">
-                                Publica os vistos deste celular para que os outros professores vejam.
-                            </span>
-                        </button>
+                <!-- Ações Principais de Salvamento e Nuvem -->
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                            <i class="fa-solid fa-cloud text-indigo-600 mr-1"></i> Sincronização Online (Nuvem)
+                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <button @click="forcarEnvioVistosParaNuvem" class="p-3 rounded-xl bg-indigo-900 hover:bg-indigo-800 active:scale-[0.98] text-white font-bold text-xs flex flex-col items-start gap-1 shadow transition touch-btn text-left group">
+                                <div class="flex items-center gap-2 text-amber-300 font-extrabold">
+                                    <i class="fa-solid fa-cloud-arrow-up text-base group-hover:-translate-y-0.5 transition-transform"></i>
+                                    <span>Enviar Meus Vistos</span>
+                                </div>
+                                <span class="text-[10px] text-indigo-200 font-normal leading-tight">
+                                    Publica os vistos deste celular para que os outros professores vejam.
+                                </span>
+                            </button>
 
-                        <button @click="sincronizarAgora" class="p-3 rounded-xl bg-white hover:bg-slate-50 active:scale-[0.98] border border-indigo-300 text-indigo-950 font-bold text-xs flex flex-col items-start gap-1 shadow-xs transition touch-btn text-left group">
-                            <div class="flex items-center gap-2 text-indigo-800 font-extrabold">
-                                <i class="fa-solid fa-arrows-rotate text-base group-hover:rotate-180 transition-transform duration-500"></i>
-                                <span>Atualizar da Nuvem</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500 font-normal leading-tight">
-                                Baixa novas turmas, disciplinas e vistos postados por colegas.
-                            </span>
-                        </button>
+                            <button @click="sincronizarAgora" class="p-3 rounded-xl bg-white hover:bg-slate-50 active:scale-[0.98] border border-indigo-300 text-indigo-950 font-bold text-xs flex flex-col items-start gap-1 shadow-xs transition touch-btn text-left group">
+                                <div class="flex items-center gap-2 text-indigo-800 font-extrabold">
+                                    <i class="fa-solid fa-arrows-rotate text-base group-hover:rotate-180 transition-transform duration-500"></i>
+                                    <span>Atualizar da Nuvem</span>
+                                </div>
+                                <span class="text-[10px] text-slate-500 font-normal leading-tight">
+                                    Baixa novas turmas, disciplinas e vistos postados por colegas.
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ARQUIVO DE VISTOS: EXPORTAR E SUBIR MANUALMENTE (SEM DUPLICATAS) -->
+                    <div class="bg-indigo-50/60 border border-indigo-200 rounded-2xl p-3.5 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[11px] font-bold text-indigo-950 uppercase tracking-wider">
+                                <i class="fa-solid fa-file-arrow-up text-indigo-600 mr-1"></i> Arquivo de Vistos (Offline & Manual)
+                            </label>
+                            <span class="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-bold">Anti-Duplicatas</span>
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-tight">
+                            Exporte seus vistos como arquivo baixável ou suba um arquivo manual. O sistema mescla inteligentemente sem duplicar nada e sincroniza na nuvem.
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                            <button @click="exportarArquivoVistos" class="p-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition touch-btn" title="Baixar arquivo JSON com todos os seus vistos">
+                                <i class="fa-solid fa-download text-sm"></i>
+                                <span>Baixar Arquivo de Vistos</span>
+                            </button>
+
+                            <button @click="acionarSubidaArquivoVistos" class="p-2.5 rounded-xl bg-white hover:bg-indigo-50 active:scale-[0.98] border border-indigo-300 text-indigo-900 font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition touch-btn" title="Subir arquivo de vistos sem duplicar dados e sincronizar com a nuvem">
+                                <i class="fa-solid fa-upload text-sm text-indigo-600"></i>
+                                <span>Subir Arquivo de Vistos</span>
+                            </button>
+                            <input type="file" ref="inputUploadVistosRef" @change="subirArquivoVistos" accept=".json" class="hidden">
+                        </div>
                     </div>
 
                     <!-- Botão de Resgate de Emergência -->
@@ -2221,7 +2248,7 @@
                             <i class="fa-solid fa-magnifying-glass text-amber-700"></i>
                             <span>Resgatar Vistos de Backups Antigos</span>
                         </span>
-                        <span class="text-[10px] text-amber-700 font-normal hidden sm:inline">Caso algum visto tenha sumido do aparelho</span>
+                        <span class="text-[10px] text-amber-700 font-normal hidden sm:inline">Varredura profunda na memória do aparelho</span>
                     </button>
                 </div>
 
@@ -2235,10 +2262,10 @@
                         <i :class="['fa-solid transition-transform duration-200', mostrarInstrucoesNuvem ? 'fa-chevron-up text-indigo-600' : 'fa-chevron-down text-slate-400']"></i>
                     </button>
                     <div v-show="mostrarInstrucoesNuvem" class="p-3.5 pt-1 text-[11px] text-slate-600 space-y-2 border-t border-slate-200 bg-white leading-relaxed">
-                        <p><strong>1. Sincronização Automática:</strong> Sempre que você lança vistos conectado à internet, o sistema salva automaticamente sem você precisar apertar nenhum botão.</p>
-                        <p><strong>2. Modo Sala de Aula (Offline):</strong> Você pode usar o app normalmente sem internet. Ao chegar em local com Wi-Fi, toque em <em>"Enviar Meus Vistos"</em> para publicar suas alterações na nuvem da escola.</p>
-                        <p><strong>3. Ver Dados de Outros Professores:</strong> Toque em <em>"Atualizar da Nuvem"</em> para puxar qualquer atribuição nova de turma ou vistos lançados por outros professores.</p>
-                        <p><strong>4. Resgate de Backups:</strong> Se você limpou o histórico do navegador ou trocou de aparelho e sente falta de vistos anteriores, essa ferramenta faz uma varredura profunda na memória do dispositivo para recuperá-los.</p>
+                        <p><strong>1. Sincronização em Alta Performance:</strong> As leituras da nuvem operam em paralelo e com detecção inteligente de mudanças, tornando o salvamento muito mais rápido e econômico.</p>
+                        <p><strong>2. Baixar Arquivo de Vistos:</strong> Gera um arquivo JSON contendo todos os seus vistos e registros de aula para guardar em segurança no seu computador ou celular.</p>
+                        <p><strong>3. Subir Arquivo de Vistos:</strong> Permite carregar um arquivo de vistos salvo anteriormente. O sistema identifica aluno por aluno e data por data: insere o que for novo e preserva o que já existe sem criar duplicatas, sincronizando automaticamente tudo na nuvem.</p>
+                        <p><strong>4. Resgate de Backups:</strong> Faz uma varredura na memória interna do navegador deste aparelho caso algum registro anterior tenha desaparecido por limpeza de histórico.</p>
                     </div>
                 </div>
 
@@ -2859,7 +2886,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '6.7';
+        const APP_VERSION = '6.8';
 
         // --- BACKUP AUTOMÁTICO PREVENTIVO PRÉ-ATUALIZAÇÃO (GARANTIA ZERO DATA LOSS) ---
         function executarBackupPreventivo() {
@@ -7274,14 +7301,17 @@ createApp({
             try {
                 if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
 
-                // 1. Sincronizar turmas (busca do servidor com fallback offline)
-                let docTurmas;
-                try {
-                    docTurmas = await db.collection('diario_turmas').doc('geral').get({ source: 'server' });
-                } catch(e) {
-                    docTurmas = await db.collection('diario_turmas').doc('geral').get();
-                }
-                if (docTurmas.exists) {
+                // 1. Busca em paralelo simultânea de todos os 5 documentos no Firestore (Alta Performance)
+                const [docTurmas, docUsuarios, docSenhas, docDisciplinas, snapshotProfs] = await Promise.all([
+                    db.collection('diario_turmas').doc('geral').get().catch(err => { console.warn("docTurmas:", err); return null; }),
+                    db.collection('diario_config').doc('usuarios').get().catch(err => { console.warn("docUsuarios:", err); return null; }),
+                    db.collection('diario_config').doc('senhas').get().catch(err => { console.warn("docSenhas:", err); return null; }),
+                    db.collection('diario_config').doc('disciplinas').get().catch(err => { console.warn("docDisciplinas:", err); return null; }),
+                    db.collection('diario_professores').get().catch(err => { console.warn("snapshotProfs:", err); return null; })
+                ]);
+
+                // 2. Processa Turmas
+                if (docTurmas && docTurmas.exists) {
                     const data = docTurmas.data();
                     if (data && data.turmas) {
                         const tNuvem = { ...data.turmas };
@@ -7296,19 +7326,13 @@ createApp({
                         ultimoHashTurmasSalvo = JSON.stringify(turmas.value);
                         corrigirSituacoesCorrompidas();
                     }
-                } else {
-                    await db.collection('diario_turmas').doc('geral').set({ turmas: turmas.value });
+                } else if (docTurmas && !docTurmas.exists) {
+                    db.collection('diario_turmas').doc('geral').set({ turmas: turmas.value }).catch(() => {});
                     ultimoHashTurmasSalvo = JSON.stringify(turmas.value);
                 }
 
-                // 2. Sincronizar usuários e atribuições escolares diretamente do servidor
-                let docUsuarios;
-                try {
-                    docUsuarios = await db.collection('diario_config').doc('usuarios').get({ source: 'server' });
-                } catch(e) {
-                    docUsuarios = await db.collection('diario_config').doc('usuarios').get();
-                }
-                if (docUsuarios.exists) {
+                // 3. Processa Usuários e Atribuições
+                if (docUsuarios && docUsuarios.exists) {
                     const data = docUsuarios.data();
                     if (data && Array.isArray(data.usuarios) && data.usuarios.length > 0) {
                         const mesclados = [...data.usuarios];
@@ -7326,20 +7350,15 @@ createApp({
                         usuarios.value = mesclados;
                         localStorage.setItem('diario_usuarios_db', JSON.stringify(usuarios.value));
                     }
-                } else {
-                    await db.collection('diario_config').doc('usuarios').set({
+                } else if (docUsuarios && !docUsuarios.exists) {
+                    db.collection('diario_config').doc('usuarios').set({
                         usuarios: usuarios.value,
                         atualizadoEm: new Date().toISOString()
-                    });
+                    }).catch(() => {});
                 }
 
-                let docSenhas;
-                try {
-                    docSenhas = await db.collection('diario_config').doc('senhas').get({ source: 'server' });
-                } catch(e) {
-                    docSenhas = await db.collection('diario_config').doc('senhas').get();
-                }
-                if (docSenhas.exists) {
+                // 4. Processa Senhas
+                if (docSenhas && docSenhas.exists) {
                     const data = docSenhas.data();
                     if (data && data.senhas) {
                         senhas.value = { ...senhas.value, ...data.senhas };
@@ -7348,30 +7367,21 @@ createApp({
                     }
                 }
 
-                // Sincronizar catálogo de disciplinas
-                let docDisciplinas;
-                try {
-                    docDisciplinas = await db.collection('diario_config').doc('disciplinas').get({ source: 'server' });
-                } catch(e) {
-                    docDisciplinas = await db.collection('diario_config').doc('disciplinas').get();
-                }
-                if (docDisciplinas.exists) {
+                // 5. Processa Disciplinas
+                if (docDisciplinas && docDisciplinas.exists) {
                     const data = docDisciplinas.data();
                     if (data && Array.isArray(data.disciplinas) && data.disciplinas.length > 0) {
                         disciplinasCadastradas.value = data.disciplinas;
                         localStorage.setItem('diario_disciplinas_db', JSON.stringify(disciplinasCadastradas.value));
                     }
-                } else {
-                    await db.collection('diario_config').doc('disciplinas').set({
+                } else if (docDisciplinas && !docDisciplinas.exists) {
+                    db.collection('diario_config').doc('disciplinas').set({
                         disciplinas: disciplinasCadastradas.value,
                         atualizadoEm: new Date().toISOString()
-                    });
+                    }).catch(() => {});
                 }
 
-                // 3. Sincronizar registros de TODOS os professores cadastrados na nuvem
-                const snapshotProfs = await db.collection('diario_professores').get();
-                
-                // Lê armazenamento local atual deste dispositivo para preservar quaisquer vistos
+                // 6. Processa Vistos e Registros dos Professores (Mesclagem Aditiva Sem Perdas)
                 let localReg = {};
                 let localCont = {};
                 try {
@@ -7381,28 +7391,28 @@ createApp({
                     if (rawCont) localCont = JSON.parse(rawCont);
                 } catch(e) {}
 
-                // Inicia mesclando os registros em memória com o que está gravado localmente
                 let unificadoReg = mesclarObjetosRegistros(registros.value, localReg);
                 let unificadoCont = { ...conteudos.value, ...localCont };
 
-                // Mescla os registros de todos os professores da nuvem de forma aditiva e sem perda
-                snapshotProfs.forEach(docProf => {
-                    const data = docProf.data();
-                    if (data) {
-                        if (data.registros) {
-                            unificadoReg = mesclarObjetosRegistros(unificadoReg, data.registros);
+                if (snapshotProfs) {
+                    snapshotProfs.forEach(docProf => {
+                        const data = docProf.data();
+                        if (data) {
+                            if (data.registros) {
+                                unificadoReg = mesclarObjetosRegistros(unificadoReg, data.registros);
+                            }
+                            if (data.conteudos) {
+                                Object.keys(data.conteudos).forEach(chave => {
+                                    if (!unificadoCont[chave]) {
+                                        unificadoCont[chave] = data.conteudos[chave];
+                                    } else {
+                                        unificadoCont[chave] = { ...data.conteudos[chave], ...unificadoCont[chave] };
+                                    }
+                                });
+                            }
                         }
-                        if (data.conteudos) {
-                            Object.keys(data.conteudos).forEach(chave => {
-                                if (!unificadoCont[chave]) {
-                                    unificadoCont[chave] = data.conteudos[chave];
-                                } else {
-                                    unificadoCont[chave] = { ...data.conteudos[chave], ...unificadoCont[chave] };
-                                }
-                            });
-                        }
-                    }
-                });
+                    });
+                }
 
                 registros.value = unificadoReg;
                 conteudos.value = unificadoCont;
@@ -7413,8 +7423,7 @@ createApp({
                     migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
                 }
 
-                // 4. AUTO-UPLOAD DE SEGURANÇA: Se o professor ativo possui vistos válidos de suas disciplinas,
-                // garante que o documento dele no Firestore seja atualizado imediatamente para os colegas verem
+                // 7. Auto-Upload Inteligente: Envia à nuvem apenas se houver novidade
                 if (currentUser.value && db) {
                     const chavesProf = getChavesDoProfessor(currentUser.value);
                     const dadosParaSubir = {};
@@ -7431,7 +7440,6 @@ createApp({
                         }
                     });
 
-                    // Se não tiver chaves específicas mapeadas (ex: professor geral sem grade), inclui tudo que tem visto
                     if (totalVistosProf === 0 && !isAdmin.value) {
                         Object.keys(unificadoReg).forEach(k => {
                             if (Object.keys(unificadoReg[k] || {}).length > 0) {
@@ -7442,24 +7450,37 @@ createApp({
                     }
 
                     if (Object.keys(dadosParaSubir).length > 0 && totalVistosProf > 0) {
-                        await db.collection('diario_professores').doc(currentUser.value).set({
-                            registros: dadosParaSubir,
-                            conteudos: contParaSubir,
-                            atualizadoEm: new Date().toISOString()
-                        }, { merge: true });
-                        console.log(`[Auto-Upload Cloud] ${totalVistosProf} vistos de ${currentUser.value} enviados à nuvem.`);
+                        let mudouEmRelacaoANuvem = true;
+                        if (snapshotProfs) {
+                            const profDoc = snapshotProfs.docs && snapshotProfs.docs.find(d => d.id === currentUser.value);
+                            if (profDoc && profDoc.exists) {
+                                const dataProf = profDoc.data();
+                                if (dataProf && JSON.stringify(dataProf.registros || {}) === JSON.stringify(dadosParaSubir) &&
+                                    JSON.stringify(dataProf.conteudos || {}) === JSON.stringify(contParaSubir)) {
+                                    mudouEmRelacaoANuvem = false;
+                                }
+                            }
+                        }
+                        if (mudouEmRelacaoANuvem) {
+                            await db.collection('diario_professores').doc(currentUser.value).set({
+                                registros: dadosParaSubir,
+                                conteudos: contParaSubir,
+                                atualizadoEm: new Date().toISOString()
+                            }, { merge: true });
+                            console.log(`[Auto-Upload Cloud] ${totalVistosProf} vistos de ${currentUser.value} sincronizados.`);
+                        }
                     }
                 }
 
                 if (statusConexao.value !== 'offline') statusConexao.value = 'online';
             } catch (err) {
-                console.error("Erro na sincronização:", err);
+                console.error("Erro na sincronização rápida:", err);
                 if (!navigator.onLine) statusConexao.value = 'offline';
                 else statusConexao.value = 'online';
             } finally {
                 setTimeout(() => {
                     isRecebendoNuvem = false;
-                }, 500);
+                }, 300);
             }
         }
 
@@ -7518,14 +7539,249 @@ createApp({
             }
         }
 
+        // --- EXPORTAÇÃO E IMPORTAÇÃO MANUAL DE ARQUIVO DE VISTOS (ANTI-DUPLICATAS & ISOLAMENTO POR PROFESSOR) ---
+        const inputUploadVistosRef = ref(null);
+
+        function pertenceAoProfessorLogado(chaveTurmaDisc, chavesProf) {
+            if (!chavesProf || chavesProf.length === 0) return true;
+            if (chavesProf.includes(chaveTurmaDisc)) return true;
+            const partes = chaveTurmaDisc.split('__');
+            if (partes.length < 2) return false;
+            const t = partes[0];
+            const d = partes.slice(1).join('__');
+            const tReal = typeof encontrarTurmaReal === 'function' ? encontrarTurmaReal(t) : t;
+            const tCurto = typeof getCodigoTurmaCurto === 'function' ? getCodigoTurmaCurto(t) : t;
+            return chavesProf.includes(`${tReal}__${d}`) || chavesProf.includes(`${tCurto}__${d}`);
+        }
+
+        function exportarArquivoVistos() {
+            try {
+                const user = currentUser.value || 'Geral';
+                const reg = registros.value || {};
+                const cont = conteudos.value || {};
+                const chavesProf = getChavesDoProfessor(user);
+
+                // Exporta estritamente apenas os vistos e conteúdos atribuídos ao professor logado
+                const regProf = {};
+                const contProf = {};
+                if (chavesProf.length > 0) {
+                    Object.keys(reg).forEach(k => {
+                        if (pertenceAoProfessorLogado(k, chavesProf)) {
+                            regProf[k] = reg[k];
+                        }
+                    });
+                    Object.keys(cont).forEach(k => {
+                        if (pertenceAoProfessorLogado(k, chavesProf)) {
+                            contProf[k] = cont[k];
+                        }
+                    });
+                } else {
+                    Object.assign(regProf, reg);
+                    Object.assign(contProf, cont);
+                }
+
+                const total = contarTotalVistosEmRegistros(regProf);
+                
+                const payload = {
+                    formato: "diario_digital_vistos",
+                    versaoApp: APP_VERSION,
+                    exportadoEm: new Date().toISOString(),
+                    professor: user,
+                    totalVistos: total,
+                    registros: regProf,
+                    conteudos: contProf
+                };
+
+                const dataStr = new Date().toISOString().slice(0, 10);
+                const nomeArquivo = `vistos-${user.toLowerCase().replace(/[^a-z0-9]/g, '_')}-${dataStr}.json`;
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = nomeArquivo;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                alert(`✅ Arquivo de vistos exportado com sucesso!\n\nProfessor(a): ${user}\nArquivo: ${nomeArquivo}\nTotal de vistos exportados do seu perfil: ${total}`);
+            } catch (err) {
+                console.error('Erro ao exportar arquivo de vistos:', err);
+                alert('⚠️ Erro ao gerar download do arquivo de vistos.');
+            }
+        }
+
+        function acionarSubidaArquivoVistos() {
+            if (inputUploadVistosRef.value) {
+                inputUploadVistosRef.value.value = '';
+                inputUploadVistosRef.value.click();
+            }
+        }
+
+        async function subirArquivoVistos(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            try {
+                const user = currentUser.value;
+                if (!user) {
+                    alert('⚠️ Faça login para subir seu arquivo de vistos.');
+                    return;
+                }
+
+                const text = await file.text();
+                const data = JSON.parse(text);
+
+                // Suporta tanto o arquivo exportado de vistos quanto backups gerais
+                const regImportados = data.registros || (data.dados && data.dados.registros) || null;
+                const contImportados = data.conteudos || (data.dados && data.dados.conteudos) || {};
+
+                if (!regImportados || typeof regImportados !== 'object' || Object.keys(regImportados).length === 0) {
+                    alert('⚠️ O arquivo selecionado não contém dados válidos de vistos.');
+                    return;
+                }
+
+                const chavesProf = getChavesDoProfessor(user);
+                const chavesArquivo = Object.keys(regImportados);
+                const chavesValidasDoProfessor = chavesProf.length > 0
+                    ? chavesArquivo.filter(k => pertenceAoProfessorLogado(k, chavesProf))
+                    : chavesArquivo;
+
+                if (chavesValidasDoProfessor.length === 0) {
+                    alert(`⚠️ O arquivo selecionado não contém vistos das turmas e disciplinas atribuídas a ${user}.\n\nNenhum dado foi alterado para proteger os registros dos outros professores.`);
+                    return;
+                }
+
+                function temAlgumVisto(it) {
+                    if (!it) return false;
+                    if (typeof it === 'object') {
+                        return !!(it.caderno || it.livro || it.atividade || it.visto || it.isContagem || (it.pontoPositivo && it.pontoPositivo !== 0));
+                    }
+                    return it === true || it === 1;
+                }
+
+                // Mesclagem inteligente: insere novos e preserva existentes sem gerar duplicatas
+                // Apenas toca nas turmas e disciplinas do professor logado!
+                let novosVistosInseridos = 0;
+                let vistosExistentesMantidos = 0;
+                const regAtual = JSON.parse(JSON.stringify(registros.value || {}));
+
+                for (const chaveTurmaDisc of chavesValidasDoProfessor) {
+                    if (!regAtual[chaveTurmaDisc]) {
+                        regAtual[chaveTurmaDisc] = {};
+                    }
+                    const datasImportadas = regImportados[chaveTurmaDisc];
+                    if (datasImportadas && typeof datasImportadas === 'object') {
+                        for (const dataDia of Object.keys(datasImportadas)) {
+                            if (!regAtual[chaveTurmaDisc][dataDia]) {
+                                regAtual[chaveTurmaDisc][dataDia] = {};
+                            }
+                            const alunosImportados = datasImportadas[dataDia];
+                            if (alunosImportados && typeof alunosImportados === 'object') {
+                                for (const alunoId of Object.keys(alunosImportados)) {
+                                    const itemImp = alunosImportados[alunoId];
+                                    const itemAtual = regAtual[chaveTurmaDisc][dataDia][alunoId];
+                                    const tinhaVistoAntes = temAlgumVisto(itemAtual);
+                                    const temVistoNoArquivo = temAlgumVisto(itemImp);
+
+                                    if (!itemAtual) {
+                                        // Não existia: insere
+                                        regAtual[chaveTurmaDisc][dataDia][alunoId] = JSON.parse(JSON.stringify(itemImp));
+                                        if (temVistoNoArquivo) novosVistosInseridos++;
+                                    } else {
+                                        // Já existia: mescla sem duplicar
+                                        let alterouAlgo = false;
+                                        if (itemImp && typeof itemImp === 'object') {
+                                            if (itemImp.caderno && !itemAtual.caderno) { itemAtual.caderno = true; alterouAlgo = true; }
+                                            if (itemImp.livro && !itemAtual.livro) { itemAtual.livro = true; alterouAlgo = true; }
+                                            if (itemImp.atividade && !itemAtual.atividade) { itemAtual.atividade = true; alterouAlgo = true; }
+                                            if (itemImp.isContagem && !itemAtual.isContagem) { itemAtual.isContagem = true; alterouAlgo = true; }
+                                            if (itemImp.qtd && (!itemAtual.qtd || itemImp.qtd > itemAtual.qtd)) {
+                                                itemAtual.qtd = itemImp.qtd;
+                                                alterouAlgo = true;
+                                            }
+                                        }
+                                        if (!tinhaVistoAntes && alterouAlgo) {
+                                            novosVistosInseridos++;
+                                        } else if (temVistoNoArquivo) {
+                                            vistosExistentesMantidos++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Mescla conteúdos de aula apenas das disciplinas do professor logado
+                const contAtual = { ...conteudos.value };
+                for (const k of Object.keys(contImportados)) {
+                    if (pertenceAoProfessorLogado(k, chavesProf)) {
+                        if (!contAtual[k]) {
+                            contAtual[k] = contImportados[k];
+                        } else {
+                            contAtual[k] = { ...contImportados[k], ...contAtual[k] };
+                        }
+                    }
+                }
+
+                registros.value = regAtual;
+                conteudos.value = contAtual;
+                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
+
+                const totalPerfil = contarTotalVistosDoProfessor(user);
+
+                // Sincronização imediata na nuvem EXCLUSIVAMENTE para o documento do professor logado
+                if (db && user) {
+                    if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
+
+                    const dadosProfEnvio = {};
+                    const contProfEnvio = {};
+                    if (chavesProf.length > 0) {
+                        chavesProf.forEach(k => {
+                            if (regAtual[k]) dadosProfEnvio[k] = regAtual[k];
+                            if (contAtual[k]) contProfEnvio[k] = contAtual[k];
+                        });
+                    } else {
+                        Object.assign(dadosProfEnvio, regAtual);
+                        Object.assign(contProfEnvio, contAtual);
+                    }
+
+                    await db.collection('diario_professores').doc(user).set({
+                        registros: dadosProfEnvio,
+                        conteudos: contProfEnvio,
+                        atualizadoEm: new Date().toISOString()
+                    }, { merge: true });
+
+                    if (statusConexao.value !== 'offline') statusConexao.value = 'online';
+                }
+
+                alert(
+                    `✅ Arquivo de vistos processado e sincronizado com sucesso!\n\n` +
+                    `• Professor(a): ${user}\n` +
+                    `• Novos vistos adicionados: ${novosVistosInseridos}\n` +
+                    `• Vistos existentes mantidos (sem duplicatas): ${vistosExistentesMantidos}\n` +
+                    `• Total de vistos do seu perfil: ${totalPerfil}\n\n` +
+                    `🔒 Os vistos de outros professores foram 100% preservados e não sofreram alterações.\n` +
+                    `☁️ Sincronização exclusiva com a nuvem do seu perfil concluída!`
+                );
+            } catch (err) {
+                console.error('Erro ao subir arquivo de vistos:', err);
+                alert('⚠️ Falha ao ler o arquivo. Certifique-se de que é um arquivo JSON válido do diário.');
+            } finally {
+                if (event.target) event.target.value = '';
+            }
+        }
+
         let debounceNuvem = null;
+        let ultimoHashProfessorSalvo = '';
         function salvarNuvemProfessor(user, reg, cont) {
             if (!db || !user || isRecebendoNuvem) return;
             // Proteção contra exclusão: não envia mapa completamente vazio se nada foi preenchido
             if (contarTotalVistosEmRegistros(reg) === 0 && (!cont || Object.keys(cont).length === 0)) {
                 return;
             }
-            if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
             clearTimeout(debounceNuvem);
             debounceNuvem = setTimeout(() => {
                 const chaveAtual = getChaveAtual();
@@ -7546,6 +7802,13 @@ createApp({
                     contEnvio = cont[chaveAtual] ? { [chaveAtual]: cont[chaveAtual] } : {};
                 }
 
+                // Comparação de payload para evitar requisições redundantes de rede
+                const payloadKey = profDestino + '__' + JSON.stringify(dadosEnvio) + '__' + JSON.stringify(contEnvio);
+                if (payloadKey === ultimoHashProfessorSalvo) return;
+
+                if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
+                ultimoHashProfessorSalvo = payloadKey;
+
                 db.collection('diario_professores').doc(profDestino).set({
                     registros: dadosEnvio,
                     conteudos: contEnvio,
@@ -7564,7 +7827,7 @@ createApp({
                         atualizadoEm: new Date().toISOString()
                     }, { merge: true }).catch(() => {});
                 }
-            }, 800);
+            }, 600);
         }
 
         let debounceTurmas = null;
@@ -7676,6 +7939,7 @@ createApp({
             modalNuvem, nuvemConectada, statusConexao, abrirModalNuvem, salvarConfigNuvem, sincronizarAgora,
             mostrarInstrucoesNuvem,
             forcarEnvioVistosParaNuvem, contarTotalVistosDoProfessor, getChavesDoProfessor, acionarVarreduraManual, executarVarreduraERecuperacaoProfunda,
+            exportarArquivoVistos, acionarSubidaArquivoVistos, subirArquivoVistos, inputUploadVistosRef,
             pwaPrompt, mostrarBotaoInstalar, instalarAppPWA,
             novaVersaoDisponivel, versaoMaisRecente, fecharNotificacaoVersao, aplicarAtualizacaoApp
         };
