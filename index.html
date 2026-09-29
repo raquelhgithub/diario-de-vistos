@@ -483,7 +483,11 @@
 
             <!-- DATA DA AULA -->
             <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Data da Aula</label>
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data da Aula</label>
+                    <span v-if="qtdVistosNaDataSelecionada > 0" class="text-[9px] font-black text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200" title="Alunos com visto nesta data">{{ qtdVistosNaDataSelecionada }} com visto</span>
+                    <span v-else-if="datasComVistosNaTurma.length > 0" class="text-[9px] font-bold text-amber-600 bg-amber-100 px-1 rounded cursor-pointer" @click="selectedDate = datasComVistosNaTurma[0]" title="Clique para ir para a última aula com vistos">{{ datasComVistosNaTurma.length }} aulas</span>
+                </div>
                 <input type="date" v-model="selectedDate" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm">
             </div>
 
@@ -634,6 +638,19 @@
                             Data: {{ formatData(selectedDate) }}
                         </span>
                     </div>
+                </div>
+
+                <!-- BANNER DE AVISO / ATALHO RÁPIDO PARA AULAS COM VISTOS REGISTRADOS -->
+                <div v-if="datasComVistosNaTurma.length > 0 && qtdVistosNaDataSelecionada === 0" class="p-2.5 px-4 bg-amber-50 border-b border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-amber-900">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-amber-600 text-sm"></i>
+                        <span>Nenhum visto lançado em <strong>{{ formatData(selectedDate) }}</strong>. Esta disciplina possui <strong>{{ datasComVistosNaTurma.length }} aula(s) registrada(s)</strong> no diário.</span>
+                    </div>
+                    <button @click="selectedDate = datasComVistosNaTurma[0]" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1 rounded-lg text-xs transition shrink-0 flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
+                        <i class="fa-solid fa-calendar-day"></i>
+                        <span>Ver última aula com vistos: {{ formatData(datasComVistosNaTurma[0]) }}</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
                 </div>
 
                 <!-- BARRA DE BUSCA RÁPIDA E CONCLUSÃO DIÁRIA DA TURMA -->
@@ -2756,7 +2773,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '6.4';
+        const APP_VERSION = '6.5';
 
         // --- BACKUP AUTOMÁTICO PREVENTIVO PRÉ-ATUALIZAÇÃO (GARANTIA ZERO DATA LOSS) ---
         function executarBackupPreventivo() {
@@ -3266,6 +3283,7 @@ createApp({
             }
 
             currentUser.value = loginForm.value.usuario;
+            localStorage.setItem('diario_usuario_ativo', currentUser.value);
             loginForm.value.senha = '';
             carregarDadosProfessor();
             sincronizarComNuvem();
@@ -3273,6 +3291,7 @@ createApp({
 
         function fazerLogout() {
             currentUser.value = '';
+            localStorage.removeItem('diario_usuario_ativo');
             loginForm.value = { usuario: '', senha: '' };
         }
 
@@ -3588,6 +3607,23 @@ createApp({
             return arr.length > 0 ? arr : ['GERAL'];
         }
 
+        function getProfessorDaTurmaEDisciplina(turmaReal, disc) {
+            if (!turmaReal) return null;
+            const codCurto = getCodigoTurmaCurto(turmaReal).toLowerCase();
+            const dUpper = (disc || '').toUpperCase();
+            const prof = usuarios.value.find(u => {
+                if (!u.turmasDisciplinas) return false;
+                return Object.keys(u.turmasDisciplinas).some(k => {
+                    if (getCodigoTurmaCurto(k).toLowerCase() === codCurto) {
+                        const list = u.turmasDisciplinas[k] || [];
+                        return !disc || list.some(d => d.toUpperCase() === dUpper);
+                    }
+                    return false;
+                });
+            });
+            return prof ? prof.nome : null;
+        }
+
         const turmasDisponiveis = computed(() => {
             if (isAdmin.value && adminVerTodasTurmas.value) {
                 return turmasOrdenadas.value;
@@ -3618,15 +3654,24 @@ createApp({
         function getRegistrosEfetivosTurma(turma, disc) {
             const t = turma || selectedClass.value;
             if (!t) return {};
+            const codCurto = getCodigoTurmaCurto(t);
+            const turmaReal = encontrarTurmaReal(t);
             const d = disc !== undefined ? disc : (selectedDisciplina.value || '');
-            const chave = getChaveTurmaDisc(t, d);
-            const regDisc = (chave && registros.value[chave]) ? registros.value[chave] : {};
-            const regLegado = registros.value[t] || {};
+            
+            const chave = getChaveTurmaDisc(turmaReal, d);
+            const chaveCurta = (codCurto && d) ? `${codCurto}__${d}` : codCurto;
+
+            const regDisc = (chave && registros.value[chave])
+                         || (chaveCurta && registros.value[chaveCurta])
+                         || {};
+            const regLegado = (turmaReal && registros.value[turmaReal])
+                           || (codCurto && registros.value[codCurto])
+                           || {};
             
             if (Object.keys(regDisc).length === 0 && Object.keys(regLegado).length === 0) {
                 return {};
             }
-            if (chave === t || Object.keys(regLegado).length === 0) {
+            if (chave === turmaReal || Object.keys(regLegado).length === 0) {
                 return regDisc;
             }
             return { ...regLegado, ...regDisc };
@@ -3635,50 +3680,57 @@ createApp({
         function getConteudosEfetivosTurma(turma, disc) {
             const t = turma || selectedClass.value;
             if (!t) return {};
+            const codCurto = getCodigoTurmaCurto(t);
+            const turmaReal = encontrarTurmaReal(t);
             const d = disc !== undefined ? disc : (selectedDisciplina.value || '');
-            const chave = getChaveTurmaDisc(t, d);
-            const contDisc = (chave && conteudos.value[chave]) ? conteudos.value[chave] : {};
-            const contLegado = conteudos.value[t] || {};
+            
+            const chave = getChaveTurmaDisc(turmaReal, d);
+            const chaveCurta = (codCurto && d) ? `${codCurto}__${d}` : codCurto;
+
+            const contDisc = (chave && conteudos.value[chave])
+                          || (chaveCurta && conteudos.value[chaveCurta])
+                          || {};
+            const contLegado = (turmaReal && conteudos.value[turmaReal])
+                            || (codCurto && conteudos.value[codCurto])
+                            || {};
 
             if (Object.keys(contDisc).length === 0 && Object.keys(contLegado).length === 0) {
                 return {};
             }
-            if (chave === t || Object.keys(contLegado).length === 0) {
+            if (chave === turmaReal || Object.keys(contLegado).length === 0) {
                 return contDisc;
             }
             return { ...contLegado, ...contDisc };
         }
 
         function migrarRegistrosLegadosSeNecessario(turma, disc) {
-            if (!turma || !disc || !currentUser.value) return;
-            const chave = `${turma}__${disc}`;
-            const chaveLegada = turma;
-            
-            // Backup inicial de segurança se ainda não feito
-            const backupKey = `diario_backup_vistos_pre_disciplinas_${currentUser.value}`;
-            if (!localStorage.getItem(backupKey) && registros.value && Object.keys(registros.value).length > 0) {
-                localStorage.setItem(backupKey, JSON.stringify({
-                    registros: registros.value,
-                    conteudos: conteudos.value,
-                    timestamp: new Date().toISOString()
-                }));
-            }
+            if (!currentUser.value) return;
+            const t = turma || selectedClass.value;
+            const d = disc || selectedDisciplina.value;
+            if (!t || !d) return;
+            const codCurto = getCodigoTurmaCurto(t);
+            const turmaReal = encontrarTurmaReal(t);
+            const chave = `${turmaReal}__${d}`;
+            const chaveCurta = `${codCurto}__${d}`;
 
-            if (registros.value[chaveLegada] && Object.keys(registros.value[chaveLegada]).length > 0) {
-                if (!registros.value[chave]) registros.value[chave] = {};
-                Object.keys(registros.value[chaveLegada]).forEach(d => {
-                    if (!registros.value[chave][d] || Object.keys(registros.value[chave][d]).length === 0) {
-                        registros.value[chave][d] = JSON.parse(JSON.stringify(registros.value[chaveLegada][d]));
-                    }
-                });
-            }
-            if (conteudos.value[chaveLegada] && Object.keys(conteudos.value[chaveLegada]).length > 0) {
-                if (!conteudos.value[chave]) conteudos.value[chave] = {};
-                Object.keys(conteudos.value[chaveLegada]).forEach(d => {
-                    if (conteudos.value[chave][d] === undefined || conteudos.value[chave][d] === '') {
-                        conteudos.value[chave][d] = conteudos.value[chaveLegada][d];
-                    }
-                });
+            // Harmoniza registros legados sem disciplina ou com código curto para a chave oficial
+            [turmaReal, codCurto, chaveCurta].forEach(origem => {
+                if (origem && origem !== chave && registros.value[origem] && Object.keys(registros.value[origem]).length > 0) {
+                    if (!registros.value[chave]) registros.value[chave] = {};
+                    Object.keys(registros.value[origem]).forEach(dataISO => {
+                        if (!registros.value[chave][dataISO]) {
+                            registros.value[chave][dataISO] = JSON.parse(JSON.stringify(registros.value[origem][dataISO]));
+                        } else {
+                            registros.value[chave][dataISO] = {
+                                ...JSON.parse(JSON.stringify(registros.value[origem][dataISO])),
+                                ...registros.value[chave][dataISO]
+                            };
+                        }
+                    });
+                }
+            });
+            if (!registros.value[chave]) {
+                registros.value[chave] = {};
             }
         }
 
@@ -3730,6 +3782,10 @@ createApp({
 
         onMounted(() => {
             corrigirSituacoesCorrompidas();
+            const usuarioSalvo = localStorage.getItem('diario_usuario_ativo');
+            if (usuarioSalvo) {
+                currentUser.value = usuarioSalvo;
+            }
             if (turmasDisponiveis.value.length > 0) {
                 selectedClass.value = turmasDisponiveis.value[0];
             }
@@ -4192,11 +4248,20 @@ createApp({
             }
         }
 
-        // Leitura pura O(1) sem efeitos colaterais
+        // Leitura pura O(1) com harmonização de chaves completas e curtas
         function getRegistro(studentId) {
             const chave = getChaveAtual();
-            if (!chave) return REGISTRO_PADRAO_VAZIO;
-            const diaRegs = registros.value?.[chave]?.[selectedDate.value];
+            const data = selectedDate.value;
+            const t = selectedClass.value;
+            const codCurto = getCodigoTurmaCurto(t);
+            const d = selectedDisciplina.value || '';
+            const chaveCurta = (codCurto && d) ? `${codCurto}__${d}` : '';
+
+            const diaRegs = (chave && registros.value?.[chave]?.[data])
+                         || (chaveCurta && registros.value?.[chaveCurta]?.[data])
+                         || (t && registros.value?.[t]?.[data])
+                         || (codCurto && registros.value?.[codCurto]?.[data]);
+
             if (diaRegs && diaRegs[studentId]) {
                 return diaRegs[studentId];
             }
@@ -4208,19 +4273,28 @@ createApp({
             initDataStructure();
             const chave = getChaveAtual();
             if (!chave) return { ...REGISTRO_PADRAO_VAZIO };
-            if (!registros.value[chave][selectedDate.value][studentId]) {
-                const regLegado = (registros.value[selectedClass.value] && registros.value[selectedClass.value][selectedDate.value] && registros.value[selectedClass.value][selectedDate.value][studentId]) || null;
+            const data = selectedDate.value;
+            const t = selectedClass.value;
+            const codCurto = getCodigoTurmaCurto(t);
+            const d = selectedDisciplina.value || '';
+            const chaveCurta = (codCurto && d) ? `${codCurto}__${d}` : '';
+
+            if (!registros.value[chave][data][studentId]) {
+                const regLegado = (chaveCurta && registros.value[chaveCurta]?.[data]?.[studentId])
+                               || (t && registros.value[t]?.[data]?.[studentId])
+                               || (codCurto && registros.value[codCurto]?.[data]?.[studentId])
+                               || null;
                 if (regLegado) {
-                    registros.value[chave][selectedDate.value][studentId] = JSON.parse(JSON.stringify(regLegado));
+                    registros.value[chave][data][studentId] = JSON.parse(JSON.stringify(regLegado));
                 } else {
-                    registros.value[chave][selectedDate.value][studentId] = {
+                    registros.value[chave][data][studentId] = {
                         caderno: false, livro: false, atividade: false, copiou: false, incompleto: false, dormiu: false,
                         pontoPositivo: 0, pontoNegativo: 0,
                         pontoPositivoTrabalho: 0, pontoNegativoTrabalho: 0
                     };
                 }
             }
-            const reg = registros.value[chave][selectedDate.value][studentId];
+            const reg = registros.value[chave][data][studentId];
             if (reg.pontoPositivo === undefined) reg.pontoPositivo = 0;
             if (reg.pontoNegativo === undefined) reg.pontoNegativo = 0;
             if (reg.pontoPositivoTrabalho === undefined) reg.pontoPositivoTrabalho = 0;
@@ -4237,6 +4311,8 @@ createApp({
                 const atual = typeof reg.pontoNegativo === 'number' ? reg.pontoNegativo : 0;
                 reg.pontoNegativo = Math.max(0, Math.round((atual + delta) * 10) / 10);
             }
+            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
         }
 
         function alterarPontosTrabalho(studentId, tipo, delta) {
@@ -4248,11 +4324,15 @@ createApp({
                 const atual = typeof reg.pontoNegativoTrabalho === 'number' ? reg.pontoNegativoTrabalho : 0;
                 reg.pontoNegativoTrabalho = Math.max(0, Math.round((atual + delta) * 10) / 10);
             }
+            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
         }
 
         function toggleItem(studentId, field) {
             const reg = getRegistroParaEdicao(studentId);
             reg[field] = !reg[field];
+            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
         }
 
         function marcarTodosFizeram() {
@@ -4265,6 +4345,8 @@ createApp({
                 const reg = getRegistroParaEdicao(aluno.id);
                 reg.atividade = true;
             });
+            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
             dispararToastUndo(`⭐ Visto de Atividade (+1,0) atribuído para ${ativos.length} alunos ativos.`, snapshot, chave, selectedDate.value);
         }
 
@@ -4278,6 +4360,8 @@ createApp({
                 const reg = getRegistroParaEdicao(aluno.id);
                 reg.caderno = true;
             });
+            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
             dispararToastUndo(`Caderno (+1,0) marcado para ${ativos.length} alunos ativos.`, snapshot, chave, selectedDate.value);
         }
 
@@ -4291,6 +4375,8 @@ createApp({
                 const reg = getRegistroParaEdicao(aluno.id);
                 reg.livro = true;
             });
+            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
             dispararToastUndo(`Livro (+1,0) marcado para ${ativos.length} alunos ativos.`, snapshot, chave, selectedDate.value);
         }
 
@@ -4304,6 +4390,8 @@ createApp({
                 const reg = getRegistroParaEdicao(aluno.id);
                 reg.atividade = true;
             });
+            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
             dispararToastUndo(`Atividade (+1,0) marcada para ${ativos.length} alunos ativos.`, snapshot, chave, selectedDate.value);
         }
 
@@ -4325,6 +4413,8 @@ createApp({
                 reg.pontoPositivoTrabalho = 0;
                 reg.pontoNegativoTrabalho = 0;
             });
+            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
             dispararToastUndo(`Todos os registros do dia foram desmarcados.`, snapshot, chave, selectedDate.value);
         }
 
@@ -4340,6 +4430,8 @@ createApp({
                 reg.livro = true;
                 reg.atividade = true;
             });
+            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
             dispararToastUndo(`Todos os vistos marcados para ${ativos.length} alunos ativos.`, snapshot, chave, selectedDate.value);
         }
 
@@ -4350,13 +4442,9 @@ createApp({
             const total = ativos.length;
             if (total === 0) return { avaliados: 0, total: 0, porcentagem: 0 };
 
-            const chave = getChaveAtual();
-            const data = selectedDate.value;
-            const diaData = registros.value?.[chave]?.[data] || {};
-
             let avaliados = 0;
             ativos.forEach(aluno => {
-                const r = diaData[aluno.id];
+                const r = getRegistro(aluno.id);
                 if (r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu || (r.pontoPositivo > 0) || (r.pontoNegativo > 0) || (r.pontoPositivoTrabalho > 0) || (r.pontoNegativoTrabalho > 0))) {
                     avaliados++;
                 }
@@ -4364,6 +4452,18 @@ createApp({
 
             const porcentagem = Math.round((avaliados / total) * 100);
             return { avaliados, total, porcentagem };
+        });
+
+        const qtdVistosNaDataSelecionada = computed(() => {
+            return progressoChamadaDia.value.avaliados;
+        });
+
+        const datasComVistosNaTurma = computed(() => {
+            const tData = getRegistrosEfetivosTurma();
+            return Object.keys(tData).filter(d => {
+                const diaObj = tData[d] || {};
+                return Object.values(diaObj).some(r => r && (r.caderno || r.livro || r.atividade || r.copiou || r.incompleto || r.dormiu || (r.pontoPositivo > 0) || (r.pontoNegativo > 0) || (r.pontoPositivoTrabalho > 0) || (r.pontoNegativoTrabalho > 0) || r.isContagem));
+            }).sort().reverse();
         });
 
         function getTotaisAluno(studentId, bimestre = fechamentoBimestre.value) {
@@ -6628,7 +6728,7 @@ createApp({
                     db = firebase.firestore();
 
                     // Habilita persistência offline com IndexedDB
-                    db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+                    db.enablePersistence().catch(err => {
                         if (err.code === 'failed-precondition') {
                             console.warn('Persistência offline: múltiplas abas abertas.');
                         } else if (err.code === 'unimplemented') {
@@ -6670,7 +6770,9 @@ createApp({
         async function sincronizarComNuvem() {
             if (!db) return;
             try {
-                // Sincronizar turmas
+                if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
+
+                // 1. Sincronizar turmas
                 const docTurmas = await db.collection('diario_turmas').doc('geral').get();
                 if (docTurmas.exists) {
                     const data = docTurmas.data();
@@ -6683,13 +6785,14 @@ createApp({
                             }
                         });
                         turmas.value = tNuvem;
+                        localStorage.setItem('diario_turmas_db', JSON.stringify(turmas.value));
                         corrigirSituacoesCorrompidas();
                     }
                 } else {
                     await db.collection('diario_turmas').doc('geral').set({ turmas: turmas.value });
                 }
 
-                // Sincronizar usuários e senhas
+                // 2. Sincronizar usuários e senhas
                 const docUsuarios = await db.collection('diario_config').doc('usuarios').get();
                 if (docUsuarios.exists) {
                     const data = docUsuarios.data();
@@ -6741,32 +6844,57 @@ createApp({
                     });
                 }
 
-                // Sincronizar dados do professor atual
-                if (currentUser.value) {
-                    const docProf = await db.collection('diario_professores').doc(currentUser.value).get();
-                    if (docProf.exists) {
-                        const data = docProf.data();
-                        if (data) {
-                            if (data.registros) {
-                                registros.value = data.registros;
-                                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
-                            }
-                            if (data.conteudos) {
-                                conteudos.value = data.conteudos;
-                                localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
-                            }
-                            migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
+                // 3. Sincronizar registros de TODOS os professores cadastrados na nuvem
+                const snapshotProfs = await db.collection('diario_professores').get();
+                const unificadoReg = { ...registros.value };
+                const unificadoCont = { ...conteudos.value };
+
+                snapshotProfs.forEach(docProf => {
+                    const data = docProf.data();
+                    if (data) {
+                        if (data.registros) {
+                            Object.keys(data.registros).forEach(chave => {
+                                if (!unificadoReg[chave]) {
+                                    unificadoReg[chave] = data.registros[chave];
+                                } else {
+                                    const chaveObj = { ...data.registros[chave], ...unificadoReg[chave] };
+                                    Object.keys(data.registros[chave]).forEach(d => {
+                                        if (!unificadoReg[chave][d]) {
+                                            chaveObj[d] = data.registros[chave][d];
+                                        } else {
+                                            chaveObj[d] = { ...data.registros[chave][d], ...unificadoReg[chave][d] };
+                                        }
+                                    });
+                                    unificadoReg[chave] = chaveObj;
+                                }
+                            });
                         }
-                    } else {
-                        await db.collection('diario_professores').doc(currentUser.value).set({
-                            registros: registros.value,
-                            conteudos: conteudos.value,
-                            atualizadoEm: new Date().toISOString()
-                        });
+                        if (data.conteudos) {
+                            Object.keys(data.conteudos).forEach(chave => {
+                                if (!unificadoCont[chave]) {
+                                    unificadoCont[chave] = data.conteudos[chave];
+                                } else {
+                                    unificadoCont[chave] = { ...data.conteudos[chave], ...unificadoCont[chave] };
+                                }
+                            });
+                        }
                     }
+                });
+
+                registros.value = unificadoReg;
+                conteudos.value = unificadoCont;
+
+                if (currentUser.value) {
+                    localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                    localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
+                    migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
                 }
+
+                if (statusConexao.value !== 'offline') statusConexao.value = 'online';
             } catch (err) {
                 console.error("Erro na sincronização:", err);
+                if (!navigator.onLine) statusConexao.value = 'offline';
+                else statusConexao.value = 'online';
             }
         }
 
@@ -6780,7 +6908,17 @@ createApp({
             if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
             clearTimeout(debounceNuvem);
             debounceNuvem = setTimeout(() => {
-                db.collection('diario_professores').doc(user).set({
+                const chaveAtual = getChaveAtual();
+                let profDestino = user;
+                if (isAdmin.value && chaveAtual) {
+                    const partes = chaveAtual.split('__');
+                    const t = partes[0];
+                    const d = partes[1] || '';
+                    const profResp = getProfessorDaTurmaEDisciplina(t, d);
+                    if (profResp) profDestino = profResp;
+                }
+
+                db.collection('diario_professores').doc(profDestino).set({
                     registros: reg,
                     conteudos: cont,
                     atualizadoEm: new Date().toISOString()
@@ -6790,7 +6928,15 @@ createApp({
                     console.warn("Erro ao salvar prof na nuvem:", err);
                     if (!navigator.onLine) statusConexao.value = 'offline';
                 });
-            }, 1000);
+
+                if (profDestino !== user) {
+                    db.collection('diario_professores').doc(user).set({
+                        registros: reg,
+                        conteudos: cont,
+                        atualizadoEm: new Date().toISOString()
+                    }, { merge: true }).catch(() => {});
+                }
+            }, 800);
         }
 
         let debounceTurmas = null;
@@ -6840,7 +6986,7 @@ createApp({
             currentTab, apenasAtivos, ordenacaoAlunos, alternarOrdenacao, setOrdenacao,
             filtroSemVistos, alternarFiltroSemVistos, alunoFocadoIndex, focarAlunoCard, getSituacaoBadge,
             buscaAlunoChamada, buscaAlunoFechamento, inputBuscaChamadaRef, inputBuscaFechamentoRef,
-            progressoChamadaDia, fechamentoAlunosResumo,
+            progressoChamadaDia, qtdVistosNaDataSelecionada, datasComVistosNaTurma, fechamentoAlunosResumo,
             conteudoDia, currentStudentList, maxPontuacaoTurma, getRegistro, toggleItem, alterarPontos, alterarPontosTrabalho,
             marcarTodosFizeram, marcarTodosCaderno, marcarTodosLivro, marcarTodosAtividade, desmarcarTudo, marcarTodosVistos,
             toastUndo, desfazerAcaoEmLote, fecharToastUndo,
