@@ -33,6 +33,11 @@ service cloud.firestore {
       allow read, write: if isOwnProfessor(professorId) || isAdmin();
     }
 
+    // Subcoleção de pacotes (arquitetura particionada em pacotes < 1MB)
+    match /diario_professores/{professorId}/pacotes/{pacoteId} {
+      allow read, write: if isOwnProfessor(professorId) || isAdmin();
+    }
+
     // Subcoleção de bimestres (nova arquitetura particionada)
     match /diario_professores/{professorId}/bimestres/{bimestreId} {
       allow read, write: if isOwnProfessor(professorId) || isAdmin();

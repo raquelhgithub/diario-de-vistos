@@ -431,16 +431,20 @@
                             'px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border shadow-sm transition',
                             statusConexao === 'offline' ? 'bg-rose-700 hover:bg-rose-600 text-white border-rose-500 animate-pulse' :
                             statusConexao === 'sincronizando' ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 border-amber-300' :
+                            statusConexao === 'pendente' ? 'bg-amber-600 hover:bg-amber-500 text-white border-amber-400' :
+                            statusConexao === 'erro' ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400' :
                             'bg-emerald-700 hover:bg-emerald-600 text-white border-emerald-500'
                         ]" 
-                        :title="statusConexao === 'offline' ? 'Modo Offline: Sem conexão de internet. Os dados estão gravados com segurança localmente e serão sincronizados automaticamente assim que a conexão retornar.' : statusConexao === 'sincronizando' ? 'Sincronizando dados com o banco online...' : 'Conectado e 100% sincronizado com a nuvem.'">
+                        :title="statusConexao === 'offline' ? 'Modo Offline: Sem conexão de internet. Os dados estão gravados com segurança localmente e serão sincronizados automaticamente assim que a conexão retornar.' : statusConexao === 'sincronizando' ? 'Sincronizando dados com o banco online...' : statusConexao === 'pendente' ? 'A conexão com a nuvem está lenta. Seus dados estão salvos e protegidos no aparelho e serão gravados na nuvem assim que a rede confirmar.' : statusConexao === 'erro' ? 'Erro na comunicação com a nuvem. Os dados estão preservados localmente.' : 'Conectado e 100% sincronizado com a nuvem.'">
                     <i :class="[
                         'fa-solid',
                         statusConexao === 'offline' ? 'fa-wifi-slash text-rose-200' :
                         statusConexao === 'sincronizando' ? 'fa-circle-notch fa-spin text-indigo-950' :
+                        statusConexao === 'pendente' ? 'fa-cloud-arrow-up text-amber-200' :
+                        statusConexao === 'erro' ? 'fa-triangle-exclamation text-rose-200' :
                         'fa-cloud text-emerald-200'
                     ]"></i>
-                    <span>{{ statusConexao === 'offline' ? 'Modo Offline' : statusConexao === 'sincronizando' ? 'Salvando...' : 'Nuvem OK' }}</span>
+                    <span>{{ statusConexao === 'offline' ? 'Modo Offline' : statusConexao === 'sincronizando' ? 'Salvando...' : statusConexao === 'pendente' ? 'Pendente' : statusConexao === 'erro' ? 'Erro Nuvem' : 'Nuvem OK' }}</span>
                 </button>
 
                 <!-- BOTÃO MODO ESCURO (DARK MODE) -->
@@ -6860,13 +6864,9 @@ createApp({
                         }
                     }
 
-                    // Se o backup foi gerado por um professor específico (ex: Raquel), salva direto no documento dele na nuvem
+                    // Se o backup foi gerado por um professor específico (ex: Raquel), salva direto no documento dele na nuvem via chunks seguros
                     if (parsed.geradoPor && db && parsed.registros) {
-                        await db.collection('diario_professores').doc(parsed.geradoPor).set({
-                            registros: parsed.registros,
-                            conteudos: parsed.conteudos || {},
-                            atualizadoEm: new Date().toISOString()
-                        }, { merge: true });
+                        await salvarProfessorComChunks(parsed.geradoPor, parsed.registros, parsed.conteudos || {});
                     }
 
                     // Sincroniza tudo para consolidar
@@ -7650,6 +7650,206 @@ createApp({
             }
         }
 
+        // =========================================================================
+        // SISTEMA DE PACOTES / CHUNKS (< 1MB) - ALTA RESILIÊNCIA E ZERO DATA LOSS
+        // =========================================================================
+        const TAMANHO_MAX_PACOTE = 400 * 1024; // 400 KB (Buffer amplo contra o limite estrito de 1.048.576 bytes do Firestore)
+        let watchdogPendente = null;
+
+        function dividirEmPacotes(reg, cont, maxBytes = TAMANHO_MAX_PACOTE) {
+            const chaves = Array.from(new Set([...Object.keys(reg || {}), ...Object.keys(cont || {})]));
+            if (chaves.length === 0) return [];
+
+            const strTotal = JSON.stringify(reg || {}) + JSON.stringify(cont || {});
+            if (strTotal.length <= maxBytes) {
+                return [{ index: 0, total: 1, registros: reg || {}, conteudos: cont || {} }];
+            }
+
+            const pacotes = [];
+            let curReg = {};
+            let curCont = {};
+
+            function tamanhoAtual() {
+                return JSON.stringify(curReg).length + JSON.stringify(curCont).length;
+            }
+
+            for (const k of chaves) {
+                const itemReg = reg && reg[k] ? reg[k] : null;
+                const itemCont = cont && cont[k] ? cont[k] : null;
+                const itemStrLen = (itemReg ? JSON.stringify(itemReg).length : 0) + (itemCont ? JSON.stringify(itemCont).length : 0);
+
+                if (itemStrLen > maxBytes) {
+                    if (Object.keys(curReg).length > 0 || Object.keys(curCont).length > 0) {
+                        pacotes.push({ index: pacotes.length, registros: curReg, conteudos: curCont });
+                        curReg = {};
+                        curCont = {};
+                    }
+
+                    const datas = Array.from(new Set([...Object.keys(itemReg || {}), ...Object.keys(itemCont || {})]));
+                    let subReg = {};
+                    let subCont = {};
+
+                    for (const d of datas) {
+                        const subStrLen = JSON.stringify(subReg).length + JSON.stringify(subCont).length;
+                        if (subStrLen > maxBytes && (Object.keys(subReg).length > 0 || Object.keys(subCont).length > 0)) {
+                            pacotes.push({ index: pacotes.length, registros: { [k]: subReg }, conteudos: { [k]: subCont } });
+                            subReg = {};
+                            subCont = {};
+                        }
+                        if (itemReg && itemReg[d]) subReg[d] = itemReg[d];
+                        if (itemCont && itemCont[d]) subCont[d] = itemCont[d];
+                    }
+                    if (Object.keys(subReg).length > 0 || Object.keys(subCont).length > 0) {
+                        pacotes.push({ index: pacotes.length, registros: { [k]: subReg }, conteudos: { [k]: subCont } });
+                    }
+                    continue;
+                }
+
+                if (tamanhoAtual() + itemStrLen > maxBytes && (Object.keys(curReg).length > 0 || Object.keys(curCont).length > 0)) {
+                    pacotes.push({ index: pacotes.length, registros: curReg, conteudos: curCont });
+                    curReg = {};
+                    curCont = {};
+                }
+
+                if (itemReg) curReg[k] = itemReg;
+                if (itemCont) curCont[k] = itemCont;
+            }
+
+            if (Object.keys(curReg).length > 0 || Object.keys(curCont).length > 0) {
+                pacotes.push({ index: pacotes.length, registros: curReg, conteudos: curCont });
+            }
+
+            pacotes.forEach((p, idx) => {
+                p.index = idx;
+                p.total = pacotes.length;
+            });
+
+            return pacotes;
+        }
+
+        function recombinarPacotes(pacotes) {
+            const unificadoReg = {};
+            const unificadoCont = {};
+
+            if (!Array.isArray(pacotes)) return { registros: unificadoReg, conteudos: unificadoCont };
+
+            pacotes.forEach(p => {
+                if (p && p.registros) {
+                    Object.keys(p.registros).forEach(turmaKey => {
+                        if (!unificadoReg[turmaKey]) unificadoReg[turmaKey] = {};
+                        Object.keys(p.registros[turmaKey]).forEach(data => {
+                            if (!unificadoReg[turmaKey][data]) unificadoReg[turmaKey][data] = {};
+                            unificadoReg[turmaKey][data] = {
+                                ...unificadoReg[turmaKey][data],
+                                ...p.registros[turmaKey][data]
+                            };
+                        });
+                    });
+                }
+                if (p && p.conteudos) {
+                    Object.keys(p.conteudos).forEach(turmaKey => {
+                        if (!unificadoCont[turmaKey]) unificadoCont[turmaKey] = {};
+                        unificadoCont[turmaKey] = {
+                            ...unificadoCont[turmaKey],
+                            ...p.conteudos[turmaKey]
+                        };
+                    });
+                }
+            });
+
+            return { registros: unificadoReg, conteudos: unificadoCont };
+        }
+
+        async function carregarDadosDeDocProfessor(docProf) {
+            if (!docProf) return { registros: {}, conteudos: {} };
+            const data = typeof docProf.data === 'function' ? docProf.data() : docProf;
+            if (!data) return { registros: {}, conteudos: {} };
+
+            if (data.isChunked && data.totalChunks > 1) {
+                try {
+                    const profId = docProf.id;
+                    const snap = await db.collection('diario_professores').doc(profId).collection('pacotes').get();
+                    const pacotes = [];
+                    snap.forEach(d => pacotes.push(d.data()));
+                    pacotes.sort((a, b) => (a.index || 0) - (b.index || 0));
+                    return recombinarPacotes(pacotes);
+                } catch(e) {
+                    console.warn(`Erro ao buscar pacotes particionados do professor ${docProf.id}:`, e);
+                    return { registros: data.registros || {}, conteudos: data.conteudos || {} };
+                }
+            }
+
+            return { registros: data.registros || {}, conteudos: data.conteudos || {} };
+        }
+
+        async function salvarProfessorComChunks(profId, reg, cont) {
+            if (!db || !profId) return;
+
+            // Proteção contra sobrescrita vazia acidental
+            if (contarTotalVistosEmRegistros(reg) === 0 && (!cont || Object.keys(cont).length === 0)) {
+                return;
+            }
+
+            if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
+
+            if (watchdogPendente) clearTimeout(watchdogPendente);
+            watchdogPendente = setTimeout(() => {
+                if (statusConexao.value === 'sincronizando') {
+                    statusConexao.value = 'pendente';
+                }
+            }, 10000);
+
+            try {
+                const pacotes = dividirEmPacotes(reg, cont, TAMANHO_MAX_PACOTE);
+                const agora = new Date().toISOString();
+
+                if (pacotes.length <= 1) {
+                    const p = pacotes[0] || { registros: reg, conteudos: cont };
+                    await db.collection('diario_professores').doc(profId).set({
+                        registros: p.registros || {},
+                        conteudos: p.conteudos || {},
+                        isChunked: false,
+                        totalChunks: 1,
+                        atualizadoEm: agora
+                    });
+                } else {
+                    console.log(`[Chunking] 📦 Arquivo > 400KB. Dividindo ${profId} em ${pacotes.length} pacotes sequenciais...`);
+                    for (let i = 0; i < pacotes.length; i++) {
+                        const p = pacotes[i];
+                        await db.collection('diario_professores').doc(profId).collection('pacotes').doc(`pacote_${i}`).set({
+                            index: i,
+                            total: pacotes.length,
+                            registros: p.registros || {},
+                            conteudos: p.conteudos || {},
+                            atualizadoEm: agora
+                        });
+                        console.log(`[Chunking]  -> Pacote ${i + 1}/${pacotes.length} enviado com sucesso (${JSON.stringify(p).length} bytes).`);
+                    }
+
+                    await db.collection('diario_professores').doc(profId).set({
+                        isChunked: true,
+                        totalChunks: pacotes.length,
+                        registros: {},
+                        conteudos: {},
+                        atualizadoEm: agora
+                    });
+                    console.log(`[Chunking] ✅ Gravação particionada de ${profId} finalizada com sucesso!`);
+                }
+
+                if (watchdogPendente) clearTimeout(watchdogPendente);
+                if (statusConexao.value !== 'offline') statusConexao.value = 'online';
+            } catch (err) {
+                if (watchdogPendente) clearTimeout(watchdogPendente);
+                console.error(`Erro ao salvar professor ${profId} com chunks:`, err);
+                if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                    statusConexao.value = 'offline';
+                } else {
+                    statusConexao.value = 'erro';
+                }
+                throw err;
+            }
+        }
+
         async function sincronizarComNuvem() {
             if (!db) return;
             isRecebendoNuvem = true;
@@ -7736,7 +7936,7 @@ createApp({
                     }).catch(() => {});
                 }
 
-                // 6. Processa Vistos e Registros dos Professores (Mesclagem Aditiva Sem Perdas)
+                // 6. Processa Vistos e Registros dos Professores (Mesclagem Aditiva Sem Perdas & Suporte a Chunks)
                 let localReg = {};
                 let localCont = {};
                 try {
@@ -7750,23 +7950,25 @@ createApp({
                 let unificadoCont = { ...conteudos.value, ...localCont };
 
                 if (snapshotProfs) {
-                    snapshotProfs.forEach(docProf => {
-                        const data = docProf.data();
-                        if (data) {
-                            if (data.registros) {
-                                unificadoReg = mesclarObjetosRegistros(unificadoReg, data.registros);
+                    for (const docProf of snapshotProfs.docs) {
+                        // Isolamento inteligente: cada professor baixa seus próprios dados, admin tem visão ampla
+                        const isUsuarioAtual = currentUser.value && (docProf.id === currentUser.value);
+                        if (isUsuarioAtual || isAdmin.value) {
+                            const dadosProf = await carregarDadosDeDocProfessor(docProf);
+                            if (dadosProf.registros) {
+                                unificadoReg = mesclarObjetosRegistros(unificadoReg, dadosProf.registros);
                             }
-                            if (data.conteudos) {
-                                Object.keys(data.conteudos).forEach(chave => {
+                            if (dadosProf.conteudos) {
+                                Object.keys(dadosProf.conteudos).forEach(chave => {
                                     if (!unificadoCont[chave]) {
-                                        unificadoCont[chave] = data.conteudos[chave];
+                                        unificadoCont[chave] = dadosProf.conteudos[chave];
                                     } else {
-                                        unificadoCont[chave] = { ...data.conteudos[chave], ...unificadoCont[chave] };
+                                        unificadoCont[chave] = { ...dadosProf.conteudos[chave], ...unificadoCont[chave] };
                                     }
                                 });
                             }
                         }
-                    });
+                    }
                 }
 
                 registros.value = unificadoReg;
@@ -7815,19 +8017,16 @@ createApp({
                             const profDoc = snapshotProfs.docs && snapshotProfs.docs.find(d => d.id === currentUser.value);
                             if (profDoc && profDoc.exists) {
                                 const dataProf = profDoc.data();
-                                if (dataProf && JSON.stringify(dataProf.registros || {}) === JSON.stringify(dadosParaSubir) &&
+                                if (dataProf && !dataProf.isChunked &&
+                                    JSON.stringify(dataProf.registros || {}) === JSON.stringify(dadosParaSubir) &&
                                     JSON.stringify(dataProf.conteudos || {}) === JSON.stringify(contParaSubir)) {
                                     mudouEmRelacaoANuvem = false;
                                 }
                             }
                         }
                         if (mudouEmRelacaoANuvem) {
-                            await db.collection('diario_professores').doc(currentUser.value).set({
-                                registros: dadosParaSubir,
-                                conteudos: contParaSubir,
-                                atualizadoEm: new Date().toISOString()
-                            }, { merge: true });
-                            console.log(`[Auto-Upload Cloud] ${totalVistosProf} vistos de ${currentUser.value} sincronizados.`);
+                            await salvarProfessorComChunks(currentUser.value, dadosParaSubir, contParaSubir);
+                            console.log(`[Auto-Upload Cloud] ${totalVistosProf} vistos de ${currentUser.value} sincronizados com segurança.`);
                         }
                     }
                 }
@@ -7835,8 +8034,11 @@ createApp({
                 if (statusConexao.value !== 'offline') statusConexao.value = 'online';
             } catch (err) {
                 console.error("Erro na sincronização rápida:", err);
-                if (!navigator.onLine) statusConexao.value = 'offline';
-                else statusConexao.value = 'online';
+                if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                    statusConexao.value = 'offline';
+                } else {
+                    statusConexao.value = 'erro';
+                }
             } finally {
                 setTimeout(() => {
                     isRecebendoNuvem = false;
@@ -7881,11 +8083,7 @@ createApp({
                 });
 
                 const total = contarTotalVistosEmRegistros(dadosParaSubir);
-                await db.collection('diario_professores').doc(currentUser.value).set({
-                    registros: dadosParaSubir,
-                    conteudos: contParaSubir,
-                    atualizadoEm: new Date().toISOString()
-                }, { merge: true });
+                await salvarProfessorComChunks(currentUser.value, dadosParaSubir, contParaSubir);
 
                 registros.value = unificado;
                 localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
@@ -8119,13 +8317,7 @@ createApp({
                         Object.assign(contProfEnvio, contAtual);
                     }
 
-                    await db.collection('diario_professores').doc(user).set({
-                        registros: dadosProfEnvio,
-                        conteudos: contProfEnvio,
-                        atualizadoEm: new Date().toISOString()
-                    }, { merge: true });
-
-                    if (statusConexao.value !== 'offline') statusConexao.value = 'online';
+                    await salvarProfessorComChunks(user, dadosProfEnvio, contProfEnvio);
                 }
 
                 alert(
@@ -8180,27 +8372,21 @@ createApp({
                 localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
 
                 if (db) {
-                    db.collection('diario_professores').doc(user).set({
-                        registros: regLimpo,
-                        conteudos: contLimpo,
-                        atualizadoEm: new Date().toISOString()
-                    }).then(() => {
-                        if (statusConexao.value !== 'offline') statusConexao.value = 'online';
-                    }).catch(e => {
-                        console.warn('Erro ao sincronizar restauração:', e);
-                        statusConexao.value = (typeof navigator !== 'undefined' && navigator.onLine) ? 'online' : 'offline';
-                    });
+                    await salvarProfessorComChunks(user, regLimpo, contLimpo);
                 }
 
                 fazerBackupRotativo(user, registros.value);
-                statusConexao.value = 'online';
                 atualizarSaudeDosDados();
 
                 const total = contarTotalVistosDoProfessor(user);
                 alert(`🎉 Maravilha! Registros originais restaurados com sucesso para ${user}!\n\n• Total de vistos legítimos: ${total}\n• Turmas ativas: ${Object.keys(regLimpo).length}\n• Todas as somas duplicadas e dados que não existiam foram eliminados.`);
             } catch(e) {
                 console.error("Erro na restauração limpa:", e);
-                statusConexao.value = 'online';
+                if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                    statusConexao.value = 'offline';
+                } else {
+                    statusConexao.value = 'erro';
+                }
                 alert('⚠️ Não foi possível restaurar os dados automaticamente: ' + (e.message || 'Erro desconhecido.'));
             }
         }
@@ -8231,32 +8417,30 @@ createApp({
                 if (profDestino !== user && chaveAtual) {
                     dadosEnvio = { [chaveAtual]: reg[chaveAtual] || {} };
                     contEnvio = cont[chaveAtual] ? { [chaveAtual]: cont[chaveAtual] } : {};
+                } else {
+                    // Isolamento por professor: envia apenas as turmas canônicas atribuídas
+                    const chavesProf = getChavesDoProfessor(profDestino);
+                    if (chavesProf.length > 0) {
+                        dadosEnvio = {};
+                        contEnvio = {};
+                        chavesProf.forEach(k => {
+                            if (reg[k]) dadosEnvio[k] = reg[k];
+                            if (cont[k]) contEnvio[k] = cont[k];
+                        });
+                    }
                 }
 
                 // Comparação de payload para evitar requisições redundantes de rede
                 const payloadKey = profDestino + '__' + JSON.stringify(dadosEnvio) + '__' + JSON.stringify(contEnvio);
                 if (payloadKey === ultimoHashProfessorSalvo) return;
-
-                if (statusConexao.value !== 'offline') statusConexao.value = 'sincronizando';
                 ultimoHashProfessorSalvo = payloadKey;
 
-                db.collection('diario_professores').doc(profDestino).set({
-                    registros: dadosEnvio,
-                    conteudos: contEnvio,
-                    atualizadoEm: new Date().toISOString()
-                }, { merge: true }).then(() => {
-                    if (statusConexao.value !== 'offline') statusConexao.value = 'online';
-                }).catch(err => {
-                    console.warn("Erro ao salvar prof na nuvem:", err);
-                    statusConexao.value = (typeof navigator !== 'undefined' && navigator.onLine) ? 'online' : 'offline';
+                salvarProfessorComChunks(profDestino, dadosEnvio, contEnvio).catch(err => {
+                    console.warn("Erro ao salvar prof na nuvem via chunks:", err);
                 });
 
                 if (profDestino !== user) {
-                    db.collection('diario_professores').doc(user).set({
-                        registros: reg,
-                        conteudos: cont,
-                        atualizadoEm: new Date().toISOString()
-                    }, { merge: true }).catch(() => {});
+                    salvarProfessorComChunks(user, reg, cont).catch(() => {});
                 }
             }, 600);
         }
