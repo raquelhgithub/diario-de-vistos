@@ -2984,7 +2984,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '7.0';
+        const APP_VERSION = '7.1';
 
         // --- BACKUP AUTOMÁTICO PREVENTIVO PRÉ-ATUALIZAÇÃO (GARANTIA ZERO DATA LOSS) ---
         function executarBackupPreventivo() {
@@ -4468,6 +4468,19 @@ createApp({
         function atualizarStatusOffline() {
             statusConexao.value = 'offline';
         }
+
+        // WATCHDOG DE CONEXÃO: Garante que o status 'sincronizando' nunca fique travado na interface
+        let timerWatchdogSincronizando = null;
+        watch(statusConexao, (novoStatus) => {
+            clearTimeout(timerWatchdogSincronizando);
+            if (novoStatus === 'sincronizando') {
+                timerWatchdogSincronizando = setTimeout(() => {
+                    if (statusConexao.value === 'sincronizando') {
+                        statusConexao.value = (typeof navigator !== 'undefined' && navigator.onLine) ? 'online' : 'offline';
+                    }
+                }, 3500);
+            }
+        });
 
         watch(turmasDisponiveis, (novasTurmas) => {
             if (!selectedClass.value || !novasTurmas.includes(selectedClass.value)) {
@@ -8167,10 +8180,15 @@ createApp({
                 localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
 
                 if (db) {
-                    await db.collection('diario_professores').doc(user).set({
+                    db.collection('diario_professores').doc(user).set({
                         registros: regLimpo,
                         conteudos: contLimpo,
                         atualizadoEm: new Date().toISOString()
+                    }).then(() => {
+                        if (statusConexao.value !== 'offline') statusConexao.value = 'online';
+                    }).catch(e => {
+                        console.warn('Erro ao sincronizar restauração:', e);
+                        statusConexao.value = (typeof navigator !== 'undefined' && navigator.onLine) ? 'online' : 'offline';
                     });
                 }
 
@@ -8230,7 +8248,7 @@ createApp({
                     if (statusConexao.value !== 'offline') statusConexao.value = 'online';
                 }).catch(err => {
                     console.warn("Erro ao salvar prof na nuvem:", err);
-                    if (!navigator.onLine) statusConexao.value = 'offline';
+                    statusConexao.value = (typeof navigator !== 'undefined' && navigator.onLine) ? 'online' : 'offline';
                 });
 
                 if (profDestino !== user) {
@@ -8261,7 +8279,7 @@ createApp({
                     if (statusConexao.value !== 'offline') statusConexao.value = 'online';
                 }).catch(err => {
                     console.warn("Erro ao salvar turmas na nuvem:", err);
-                    if (!navigator.onLine) statusConexao.value = 'offline';
+                    statusConexao.value = (typeof navigator !== 'undefined' && navigator.onLine) ? 'online' : 'offline';
                 });
             };
             if (imediato) {
@@ -8282,7 +8300,7 @@ createApp({
                 if (statusConexao.value !== 'offline') statusConexao.value = 'online';
             } catch (err) {
                 console.warn("Erro ao salvar usuários na nuvem:", err);
-                if (!navigator.onLine) statusConexao.value = 'offline';
+                statusConexao.value = (typeof navigator !== 'undefined' && navigator.onLine) ? 'online' : 'offline';
             }
         }
 

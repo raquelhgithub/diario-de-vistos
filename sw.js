@@ -1,5 +1,5 @@
 // Service Worker para Diário Digital de Vistos
-const CACHE_NAME = 'diario-vistos-v7.0';
+const CACHE_NAME = 'diario-vistos-v7.1';
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.action === 'skipWaiting') {
