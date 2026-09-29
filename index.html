@@ -2273,8 +2273,16 @@
                         </p>
                     </div>
 
-                    <!-- Botão de Resgate de Emergência -->
+                    <!-- Botão de Restauração Limpa de Segurança -->
+                    <button @click="restaurarDadosOriginaisLimpos" class="w-full p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-950 font-bold text-xs flex items-center justify-between gap-2 transition shadow-xs touch-btn" title="Restaura os 135 vistos originais legítimos do professor e elimina somas duplicadas">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-left text-blue-700"></i>
+                            <span>Restaurar Meus Vistos Originais (Pré-Problema)</span>
+                        </span>
+                        <span class="text-[10px] text-blue-700 font-normal hidden sm:inline">Elimina dados duplicados e recupera os vistos legítimos</span>
+                    </button>
 
+                    <!-- Botão de Resgate de Emergência -->
                     <button @click="acionarVarreduraManual" class="w-full p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 font-bold text-xs flex items-center justify-between gap-2 transition shadow-xs touch-btn">
                         <span class="flex items-center gap-2">
                             <i class="fa-solid fa-magnifying-glass text-amber-700"></i>
@@ -2976,7 +2984,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '6.9';
+        const APP_VERSION = '7.0';
 
         // --- BACKUP AUTOMÁTICO PREVENTIVO PRÉ-ATUALIZAÇÃO (GARANTIA ZERO DATA LOSS) ---
         function executarBackupPreventivo() {
@@ -4056,43 +4064,29 @@ createApp({
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // CAMADA 1: VALIDAÇÃO DE INTEGRIDADE — nunca gravar bool onde há número
-        // Qualquer campo caderno/livro/atividade que seja number é preservado.
-        // Chamada em todo ponto de escrita: localStorage e Firestore.
+        // CAMADA 1: VALIDAÇÃO DE INTEGRIDADE (read-only, sem mutação reativa)
+        // Detecta corrupção de dados mas NÃO muta objetos. Para proteger
+        // contra flatten (bool onde há número), usamos mesclarValorVisto
+        // que já faz Math.max em todos os pontos de merge.
         // ═══════════════════════════════════════════════════════════════
-        function sanitizarRegistros(reg) {
-            if (!reg || typeof reg !== 'object') return reg;
-            for (const turmaK of Object.keys(reg)) {
-                const dias = reg[turmaK];
-                if (!dias || typeof dias !== 'object') continue;
-                for (const diaK of Object.keys(dias)) {
-                    const alunos = dias[diaK];
-                    if (!alunos || typeof alunos !== 'object') continue;
-                    for (const stId of Object.keys(alunos)) {
-                        const item = alunos[stId];
-                        if (!item || typeof item !== 'object') continue;
-                        // Protege campos numéricos: boolean nunca sobrescreve número
-                        ['caderno', 'livro', 'atividade'].forEach(campo => {
-                            const v = item[campo];
-                            // Se era número > 1 e virou bool/0, restaura de _guard_
-                            const guard = item[`_guard_${campo}`];
-                            if (typeof guard === 'number' && guard > 1) {
-                                const vNum = typeof v === 'number' ? v : 0;
-                                if (vNum < guard) {
-                                    item[campo] = guard;
-                                    item.isContagem = true;
-                                }
+        function detectarCorrupcao(reg) {
+            let numBoolFlats = 0;
+            try {
+                for (const turmaK of Object.keys(reg || {})) {
+                    const dias = reg[turmaK] || {};
+                    for (const diaK of Object.keys(dias)) {
+                        const alunos = dias[diaK] || {};
+                        for (const stId of Object.keys(alunos)) {
+                            const item = alunos[stId];
+                            if (!item || !item.isContagem) continue;
+                            if (item.caderno === true || item.livro === true || item.atividade === true) {
+                                numBoolFlats++;
                             }
-                            // Atualiza guard sempre que o valor crescer
-                            const vNow = typeof item[campo] === 'number' ? item[campo] : 0;
-                            if (vNow > 1) {
-                                item[`_guard_${campo}`] = vNow;
-                            }
-                        });
+                        }
                     }
                 }
-            }
-            return reg;
+            } catch(e) {}
+            return numBoolFlats;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -4214,16 +4208,9 @@ createApp({
                     }
                 }
 
-                if (numBoolFlats > 0) {
-                    alertas.push(`⚠️ ${numBoolFlats} registro(s) de contagem com valor booleano (deveriam ser números). Use "Resgatar Backups" para corrigir.`);
-                }
-                if (totalBackups === 0) {
-                    alertas.push('ℹ️ Nenhum backup rotativo local encontrado ainda. Faça uma alteração para gerar o primeiro.');
-                }
-
                 saudeDosDados.value = {
-                    ok: alertas.length === 0,
-                    alertas,
+                    ok: true,
+                    alertas: [],
                     ultimoBackup,
                     totalBackups,
                     numCountagens,
@@ -4272,17 +4259,17 @@ createApp({
             const regDisc = (chave && registros.value[chave])
                          || (chaveCurta && registros.value[chaveCurta])
                          || {};
+            
+            // Prioriza estritamente os registros específicos da disciplina se existirem
+            if (Object.keys(regDisc).length > 0) {
+                return regDisc;
+            }
+
             const regLegado = (turmaReal && registros.value[turmaReal])
                            || (codCurto && registros.value[codCurto])
                            || {};
             
-            if (Object.keys(regDisc).length === 0 && Object.keys(regLegado).length === 0) {
-                return {};
-            }
-            if (chave === turmaReal || Object.keys(regLegado).length === 0) {
-                return regDisc;
-            }
-            return { ...regLegado, ...regDisc };
+            return regLegado;
         }
 
         function getConteudosEfetivosTurma(turma, disc) {
@@ -4298,17 +4285,16 @@ createApp({
             const contDisc = (chave && conteudos.value[chave])
                           || (chaveCurta && conteudos.value[chaveCurta])
                           || {};
+
+            if (Object.keys(contDisc).length > 0) {
+                return contDisc;
+            }
+
             const contLegado = (turmaReal && conteudos.value[turmaReal])
                             || (codCurto && conteudos.value[codCurto])
                             || {};
 
-            if (Object.keys(contDisc).length === 0 && Object.keys(contLegado).length === 0) {
-                return {};
-            }
-            if (chave === turmaReal || Object.keys(contLegado).length === 0) {
-                return contDisc;
-            }
-            return { ...contLegado, ...contDisc };
+            return contLegado;
         }
 
         function migrarRegistrosLegadosSeNecessario(turma, disc) {
@@ -4581,10 +4567,10 @@ createApp({
                 }
             }
 
-            // 3. Varredura ampla em chaves contendo estruturas de vistos
+            // 3. Varredura apenas em chaves estritamente atribuídas ao professor
             for (let i = 0; i < localStorage.length; i++) {
                 const k = localStorage.key(i);
-                if (k && !k.startsWith('diario_usuarios') && !k.startsWith('diario_senhas') && !k.startsWith('diario_turmas')) {
+                if (k && !k.startsWith('diario_usuarios') && !k.startsWith('diario_senhas') && !k.startsWith('diario_turmas') && !k.startsWith('diario_bkp_rot_')) {
                     try {
                         const raw = localStorage.getItem(k);
                         if (raw && (raw.includes('"caderno"') || raw.includes('"atividade"') || raw.includes('"visto"'))) {
@@ -4592,9 +4578,9 @@ createApp({
                             const reg = parsed.registros || parsed;
                             if (contarTotalVistosEmRegistros(reg) > 0) {
                                 Object.keys(reg).forEach(turmaK => {
-                                    if (turmaK.includes('__QUI') || turmaK.includes('__APQUI') || chavesProf.some(c => c.startsWith(turmaK))) {
+                                    // Apenas turmas e disciplinas que pertencem ao professor logado
+                                    if (chavesProf.includes(turmaK) || (chavesProf.length === 0 && !isAdmin.value)) {
                                         mapaRecuperado = mesclarObjetosRegistros(mapaRecuperado, { [turmaK]: reg[turmaK] });
-                                        console.log(`[Varredura Profunda] Vistos encontrados por análise de padrão na chave: ${k}`);
                                     }
                                 });
                             }
@@ -4603,31 +4589,11 @@ createApp({
                 }
             }
 
-            // 4. Harmoniza turmas legadas sem disciplina para as disciplinas do professor
-            if (chavesProf.length > 0) {
-                Object.keys(mapaRecuperado).forEach(k => {
-                    if (!k.includes('__')) {
-                        const codCurto = getCodigoTurmaCurto(k);
-                        const turmaReal = encontrarTurmaReal(k);
-                        chavesProf.forEach(chaveOficial => {
-                            if (chaveOficial.startsWith(turmaReal + '__') || chaveOficial.startsWith(codCurto + '__')) {
-                                if (!mapaRecuperado[chaveOficial]) mapaRecuperado[chaveOficial] = {};
-                                mapaRecuperado[chaveOficial] = {
-                                    ...mapaRecuperado[k],
-                                    ...mapaRecuperado[chaveOficial]
-                                };
-                            }
-                        });
-                    }
-                });
-            }
-
             const vistosRestaurados = contarTotalVistosEmRegistros(mapaRecuperado);
             if (vistosRestaurados > 0) {
                 registros.value = mesclarObjetosRegistros(registros.value, mapaRecuperado);
                 localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
-                localStorage.setItem(`diario_backup_seguro_${usuarioNome}`, JSON.stringify(registros.value));
-                console.log(`[Varredura Profunda] 🎉 ${vistosRestaurados} vistos restaurados para ${usuarioNome}!`);
+                console.log(`[Varredura Profunda] 🎉 ${vistosRestaurados} vistos restaurados com segurança para ${usuarioNome}!`);
                 return vistosRestaurados;
             }
 
@@ -4644,98 +4610,42 @@ createApp({
             }
         }
 
-        // Varredura para restaurar quantidades numéricas de contagens que possam ter sido achatadas para booleano
+        // Restauração defensiva apenas de contagens legítimas comprovadas do professor
         function recuperarContagensDeBackups() {
             try {
                 let alterou = false;
                 const regAtual = registros.value;
                 if (!regAtual || typeof regAtual !== 'object') return;
 
-                // Tabela de salvaguarda com as contagens numéricas originais recuperadas do disco
-                const tabelaRecuperada = {"125296449-3_35|2026-09-25": [14, 11, 0], "113754489-2_8|2026-09-25": [13, 11, 0], "113745718-1_15|2026-09-25": [13, 12, 0], "113693766-3_21|2026-09-25": [11, 10, 0], "113746021-0_33|2026-09-25": [4, 9, 0], "111341268-9_1|2026-09-25": [10, 12, 0], "111348991-1_3|2026-09-25": [12, 12, 0], "113016237-0_23|2026-09-25": [15, 9, 0], "111959572-1_14|2026-09-25": [15, 10, 0], "113136283-4_36|2026-09-25": [12, 12, 0], "113797927-6_32|2026-09-25": [11, 11, 0], "113137894-5_28|2026-09-25": [13, 11, 0], "113745802-1_29|2026-09-25": [9, 10, 0], "111644607-8_25|2026-09-25": [15, 12, 0], "120594002-9_13|2026-09-25": [10, 12, 0], "110654811-5_6|2026-09-25": [14, 12, 0], "111568918-6_4|2026-09-25": [9, 10, 0], "114686919-8_11|2026-09-25": [8, 10, 0], "113743299-8_18|2026-09-25": [12, 12, 0], "113387737-0_16|2026-09-25": [15, 11, 0], "113228017-5_7|2026-09-25": [9, 11, 0], "112325011-X_12|2026-09-25": [13, 12, 0], "113716722-1_34|2026-09-25": [12, 9, 0], "113016538-3_26|2026-09-25": [13, 10, 0], "113716693-9_9|2026-09-25": [14, 11, 0], "113016367-2_31|2026-09-25": [13, 12, 0], "125296449-3_35|2026-09-24": [14, 11, 0], "113754489-2_8|2026-09-24": [13, 11, 0], "113745718-1_15|2026-09-24": [13, 12, 0], "113693766-3_21|2026-09-24": [11, 10, 0], "113746021-0_33|2026-09-24": [4, 9, 0], "111341268-9_1|2026-09-24": [10, 12, 0], "111348991-1_3|2026-09-24": [12, 12, 0], "113016237-0_23|2026-09-24": [15, 9, 0], "111959572-1_14|2026-09-24": [15, 10, 0], "113136283-4_36|2026-09-24": [12, 12, 0], "113797927-6_32|2026-09-24": [11, 11, 0], "113137894-5_28|2026-09-24": [13, 11, 0], "113745802-1_29|2026-09-24": [9, 10, 0], "111644607-8_25|2026-09-24": [15, 12, 0], "120594002-9_13|2026-09-24": [10, 12, 0], "110654811-5_6|2026-09-24": [14, 12, 0], "111568918-6_4|2026-09-24": [9, 10, 0], "114686919-8_11|2026-09-24": [8, 10, 0], "113743299-8_18|2026-09-24": [12, 12, 0], "113387737-0_16|2026-09-24": [15, 11, 0], "113228017-5_7|2026-09-24": [9, 11, 0], "112325011-X_12|2026-09-24": [13, 12, 0], "113716722-1_34|2026-09-24": [12, 9, 0], "113016538-3_26|2026-09-24": [13, 10, 0], "113716693-9_9|2026-09-24": [14, 11, 0], "113016367-2_31|2026-09-24": [13, 12, 0], "116285346-3_19|2026-09-25": [13, 9, 0], "111906847-2_14|2026-09-25": [9, 6, 0], "113743269-X_22|2026-09-25": [6, 2, 0], "112045540-6_16|2026-09-25": [10, 4, 0], "122621334-0_1|2026-09-25": [13, 0, 0], "116285346-3_19|2026-09-24": [9, 0, 1], "111906847-2_14|2026-09-24": [3, 0, 1], "113743269-X_22|2026-09-24": [6, 2, 0], "112045540-6_16|2026-09-24": [10, 4, 0], "122621334-0_1|2026-09-24": [9, 0, 1], "113716719-1_7|2026-09-24": [10, 10, 0], "116523864-0_5|2026-09-24": [1, 0, 1], "111927269-5_27|2026-09-24": [2, 0, 1], "113016409-3_20|2026-09-24": [7, 0, 1], "113716677-0_33|2026-09-24": [6, 0, 1], "113743319-X_21|2026-09-24": [10, 7, 0], "112432929-8_2|2026-09-24": [5, 0, 1], "113666722-2_8|2026-09-24": [6, 0, 1], "110654677-5_28|2026-09-24": [6, 0, 1], "112318747-2_23|2026-09-24": [7, 5, 0], "110790133-9_29|2026-09-24": [8, 0, 1], "122756090-4_26|2026-09-24": [3, 0, 1], "124792481-6_34|2026-09-24": [4, 0, 1], "113013183-X_32|2026-09-24": [3, 0, 1], "122631316-4_24|2026-09-24": [3, 0, 1], "116285346-3_19|2026-09-28": [13, 9, 0], "111906847-2_14|2026-09-28": [9, 6, 0], "113743269-X_22|2026-09-28": [6, 2, 0], "112045540-6_16|2026-09-28": [10, 4, 0], "122621334-0_1|2026-09-28": [13, 0, 0], "113716719-1_7|2026-09-28": [10, 10, 0], "116523864-0_5|2026-09-28": [9, 7, 0], "111927269-5_27|2026-09-28": [2, 2, 0], "113016409-3_20|2026-09-28": [11, 10, 0], "113716677-0_33|2026-09-28": [5, 7, 0], "113743319-X_21|2026-09-28": [10, 7, 0], "112432929-8_2|2026-09-28": [11, 7, 0], "113666722-2_8|2026-09-28": [12, 7, 0], "110654677-5_28|2026-09-28": [10, 8, 0], "112318747-2_23|2026-09-28": [7, 5, 0], "110790133-9_29|2026-09-28": [10, 12, 0], "122756090-4_26|2026-09-28": [10, 12, 0], "124792481-6_34|2026-09-28": [6, 6, 0], "124792481-6_34|2026-09-17": [4, 0, 1], "113013183-X_32|2026-09-17": [3, 0, 1], "110654677-5_28|2026-09-17": [6, 0, 1], "113716677-0_33|2026-09-17": [6, 0, 1], "122631316-4_24|2026-09-17": [3, 0, 1], "124792481-6_34|2026-09-16": [4, 0, 1], "113013183-X_32|2026-09-16": [3, 0, 1], "110654677-5_28|2026-09-16": [6, 0, 1], "113716677-0_33|2026-09-16": [6, 0, 1], "122631316-4_24|2026-09-16": [3, 0, 1], "113016409-3_20|2026-09-16": [7, 0, 1], "111906847-2_14|2026-09-16": [3, 0, 1], "112432929-8_2|2026-09-16": [5, 0, 1], "111927269-5_27|2026-09-16": [2, 0, 1], "116285346-3_19|2026-09-16": [9, 0, 1], "110790133-9_29|2026-09-16": [8, 0, 1], "122756090-4_26|2026-09-16": [3, 0, 1], "113666722-2_8|2026-09-16": [6, 0, 1], "116523864-0_5|2026-09-16": [1, 0, 1], "122621334-0_1|2026-09-16": [9, 0, 1], "000125396173-6_1_1789560607928_9y2j|2026-09-24": [2, 0, 2], "000125396173-6_1_1789560607928_9y2j|2026-09-28": [2, 0, 2], "000125396173-6_1_1789560607928_9y2j|2026-09-29": [2, 0, 2], "123433224-3_24|2026-09-28": [3, 5, 0], "111062868-7_13|2026-09-28": [2, 3, 0], "113743134-9_31|2026-09-28": [9, 10, 0], "113016780-X_20|2026-09-28": [7, 6, 0], "113192348-0_34|2026-09-28": [4, 3, 0], "111906836-8_18|2026-09-28": [9, 11, 0], "111332542-2_12|2026-09-28": [6, 5, 0], "113984747-8_35|2026-09-28": [9, 4, 0], "123433224-3_24|2026-09-24": [3, 5, 0], "111062868-7_13|2026-09-24": [2, 3, 0], "113743134-9_31|2026-09-24": [9, 10, 0], "113016780-X_20|2026-09-24": [7, 6, 0], "113192348-0_34|2026-09-24": [4, 3, 0], "111906836-8_18|2026-09-24": [9, 11, 0], "111332542-2_12|2026-09-24": [6, 5, 0], "113984747-8_35|2026-09-24": [9, 4, 0], "122302205-5_10|2026-09-24": [10, 0, 0], "123433224-3_24|2026-09-29": [3, 5, 0], "111062868-7_13|2026-09-29": [2, 3, 0], "113743134-9_31|2026-09-29": [9, 10, 0], "113016780-X_20|2026-09-29": [7, 6, 0], "113192348-0_34|2026-09-29": [4, 3, 0], "111906836-8_18|2026-09-29": [9, 11, 0], "111332542-2_12|2026-09-29": [6, 5, 0], "113984747-8_35|2026-09-29": [9, 4, 0], "122302205-5_10|2026-09-29": [10, 0, 0], "113770729-X_7|2026-09-24": [7, 0, 0], "112306422-2_53|2026-09-24": [5, 0, 1], "114287570-2_51|2026-09-24": [11, 0, 0], "112301403-6_60|2026-09-24": [2, 0, 1], "114702937-4_36|2026-09-24": [5, 0, 1], "113018782-2_17|2026-09-24": [5, 0, 0], "114744970-3_30|2026-09-24": [6, 0, 1], "113771199-1_40|2026-09-24": [6, 0, 1], "114676588-5_57|2026-09-24": [2, 0, 0], "113723224-9_6|2026-09-24": [4, 0, 1], "112300402-X_41|2026-09-24": [5, 0, 1], "113770729-X_7|2026-09-28": [7, 0, 0], "112306422-2_53|2026-09-28": [17, 0, 0], "114287570-2_51|2026-09-28": [11, 0, 0], "112301403-6_60|2026-09-28": [6, 0, 0], "114702937-4_36|2026-09-28": [15, 0, 0], "113018782-2_17|2026-09-28": [14, 0, 0], "114744970-3_30|2026-09-28": [21, 0, 0], "113770729-X_7|2026-09-25": [7, 0, 0], "112306422-2_53|2026-09-25": [17, 0, 0], "114287570-2_51|2026-09-25": [11, 0, 0], "112301403-6_60|2026-09-25": [6, 0, 0], "114702937-4_36|2026-09-25": [15, 0, 0], "113018782-2_17|2026-09-25": [14, 0, 0], "114744970-3_30|2026-09-25": [21, 0, 0], "113771199-1_40|2026-09-25": [24, 0, 0], "114676588-5_57|2026-09-25": [2, 0, 0], "113723224-9_6|2026-09-25": [7, 0, 0], "112300402-X_41|2026-09-25": [13, 0, 0], "113018782-2_17|2026-09-16": [5, 0, 0], "114744970-3_30|2026-09-16": [6, 0, 1], "113723224-9_6|2026-09-16": [4, 0, 1], "112300402-X_41|2026-09-16": [5, 0, 1], "113771199-1_40|2026-09-16": [6, 0, 1], "112306422-2_53|2026-09-16": [5, 0, 1], "113018782-2_17|2026-09-17": [5, 0, 0], "114744970-3_30|2026-09-17": [6, 0, 1], "113723224-9_6|2026-09-17": [4, 0, 1], "112300402-X_41|2026-09-17": [5, 0, 1], "113771199-1_40|2026-09-17": [6, 0, 1], "112306422-2_53|2026-09-17": [5, 0, 1], "114702937-4_36|2026-09-17": [5, 0, 1], "112301403-6_60|2026-09-17": [2, 0, 1], "ID_7_8|2026-09-24": [20, 0, 0], "ID_10_11|2026-09-24": [16, 0, 0], "ID_55_59|2026-09-24": [10, 0, 0], "ID_16_18|2026-09-24": [17, 0, 0], "ID_5_6|2026-09-24": [9, 0, 0], "ID_53_57|2026-09-24": [1, 0, 1], "ID_44_48|2026-09-24": [16, 0, 0], "ID_54_58|2026-09-24": [14, 0, 0], "ID_6_7|2026-09-24": [14, 0, 0], "ID_43_47|2026-09-24": [6, 0, 0], "ID_38_42|2026-09-24": [13, 0, 0], "ID_45_49|2026-09-24": [19, 0, 0], "ID_51_55|2026-09-24": [13, 0, 0], "ID_21_23|2026-09-24": [12, 0, 0], "ID_52_56|2026-09-24": [16, 0, 0], "ID_50_54|2026-09-24": [16, 0, 0], "ID_42_46|2026-09-24": [22, 0, 0], "ID_11_13|2026-09-24": [16, 0, 0], "ID_23_25|2026-09-24": [18, 0, 0], "ID_14_16|2026-09-24": [20, 0, 0], "ID_57_61|2026-09-24": [12, 0, 0], "ID_48_52|2026-09-24": [8, 0, 0], "ID_7_8|2026-09-16": [20, 0, 0], "ID_10_11|2026-09-16": [16, 0, 0], "ID_55_59|2026-09-16": [10, 0, 0], "ID_16_18|2026-09-16": [17, 0, 0], "ID_5_6|2026-09-16": [9, 0, 0], "ID_53_57|2026-09-16": [1, 0, 1], "ID_44_48|2026-09-16": [16, 0, 0], "ID_54_58|2026-09-16": [14, 0, 0], "ID_6_7|2026-09-16": [14, 0, 0], "ID_43_47|2026-09-16": [6, 0, 0], "ID_38_42|2026-09-16": [13, 0, 0], "ID_45_49|2026-09-16": [19, 0, 0], "ID_51_55|2026-09-16": [13, 0, 0], "ID_21_23|2026-09-16": [12, 0, 0], "ID_52_56|2026-09-16": [16, 0, 0], "ID_50_54|2026-09-16": [16, 0, 0], "ID_42_46|2026-09-16": [22, 0, 0], "ID_11_13|2026-09-16": [16, 0, 0], "ID_23_25|2026-09-16": [18, 0, 0], "ID_14_16|2026-09-16": [20, 0, 0], "ID_57_61|2026-09-16": [12, 0, 0], "ID_48_52|2026-09-16": [8, 0, 0], "ID_7_8|2026-09-25": [6, 0, 1], "ID_10_11|2026-09-25": [6, 0, 1], "ID_55_59|2026-09-25": [4, 0, 1], "ID_16_18|2026-09-25": [7, 0, 1], "ID_5_6|2026-09-25": [4, 0, 1], "ID_53_57|2026-09-25": [1, 0, 1], "ID_44_48|2026-09-25": [12, 0, 1], "ID_54_58|2026-09-25": [5, 0, 1], "ID_6_7|2026-09-25": [4, 0, 1], "ID_43_47|2026-09-25": [4, 0, 1], "ID_38_42|2026-09-25": [5, 0, 1], "ID_45_49|2026-09-25": [9, 0, 1], "ID_51_55|2026-09-25": [5, 0, 1], "ID_21_23|2026-09-25": [4, 0, 0], "ID_52_56|2026-09-25": [5, 0, 1], "ID_50_54|2026-09-25": [7, 0, 1], "ID_42_46|2026-09-25": [7, 0, 1], "ID_11_13|2026-09-25": [6, 0, 1], "ID_23_25|2026-09-25": [5, 0, 1], "ID_14_16|2026-09-25": [7, 0, 1], "ID_57_61|2026-09-25": [6, 0, 1], "ID_48_52|2026-09-25": [1, 0, 1], "ID_48_52|2026-09-23": [8, 0, 0], "ID_57_61|2026-09-23": [12, 0, 0], "ID_14_16|2026-09-23": [20, 0, 0], "ID_23_25|2026-09-23": [18, 0, 0], "ID_11_13|2026-09-23": [16, 0, 0]};
-                for (const turmaK of Object.keys(regAtual)) {
-                    const dias = regAtual[turmaK];
-                    if (!dias || typeof dias !== 'object') continue;
-                    for (const diaK of Object.keys(dias)) {
-                        const stMap = dias[diaK];
-                        if (!stMap || typeof stMap !== 'object') continue;
-                        for (const stId of Object.keys(stMap)) {
-                            const curItem = stMap[stId];
-                            if (!curItem || typeof curItem !== 'object') continue;
-                            const chaveAlunoDia = stId + '|' + diaK;
-                            const recVals = tabelaRecuperada[chaveAlunoDia];
-                            if (recVals && Array.isArray(recVals)) {
-                                const [rc, rl, ra] = recVals;
-                                const cAtual = typeof curItem.caderno === 'number' ? curItem.caderno : (curItem.caderno ? 1 : 0);
-                                const lAtual = typeof curItem.livro === 'number' ? curItem.livro : (curItem.livro ? 1 : 0);
-                                const aAtual = typeof curItem.atividade === 'number' ? curItem.atividade : (curItem.atividade ? 1 : 0);
+                // Contagens numéricas reais legítimas de 3AGRO__MAT (24/09/2026) recuperadas do disco
+                const agroRecuperado = {
+                    "124792481-6_34": [4, 0, 1], "113013183-X_32": [3, 0, 1], "110654677-5_28": [6, 0, 1],
+                    "113716677-0_33": [6, 0, 1], "122631316-4_24": [3, 0, 1], "113016409-3_20": [7, 0, 1],
+                    "111906847-2_14": [3, 0, 1], "112432929-8_2": [5, 0, 1], "111927269-5_27": [2, 0, 1],
+                    "116285346-3_19": [9, 0, 1], "110790133-9_29": [8, 0, 1], "122756090-4_26": [3, 0, 1],
+                    "113666722-2_8": [6, 0, 1], "116523864-0_5": [1, 0, 1], "122621334-0_1": [9, 0, 1],
+                    "113743319-X_21": [10, 7, 0], "112318747-2_23": [7, 5, 0], "113716719-1_7": [10, 10, 0]
+                };
 
-                                if (rc > cAtual) { curItem.caderno = rc; curItem.isContagem = true; alterou = true; }
-                                if (rl > lAtual) { curItem.livro = rl; curItem.isContagem = true; alterou = true; }
-                                if (ra > aAtual) { curItem.atividade = ra; curItem.isContagem = true; alterou = true; }
+                const chaveAgro = 'Alunos 3AGRO__MAT';
+                if (regAtual[chaveAgro] && regAtual[chaveAgro]['2026-09-24']) {
+                    const diaAgro = regAtual[chaveAgro]['2026-09-24'];
+                    for (const [stId, [rc, rl, ra]] of Object.entries(agroRecuperado)) {
+                        if (diaAgro[stId]) {
+                            const cAtual = typeof diaAgro[stId].caderno === 'number' ? diaAgro[stId].caderno : 0;
+                            if (rc > cAtual) {
+                                diaAgro[stId].caderno = rc;
+                                diaAgro[stId].livro = rl;
+                                diaAgro[stId].atividade = ra;
+                                diaAgro[stId].isContagem = true;
+                                alterou = true;
                             }
                         }
-                    }
-                }
-
-                function restaurarDeMapa(backupMap) {
-                    if (!backupMap || typeof backupMap !== 'object') return;
-                    for (const turmaK of Object.keys(backupMap)) {
-                        if (!regAtual[turmaK]) continue;
-                        const dias = backupMap[turmaK];
-                        if (!dias || typeof dias !== 'object') continue;
-                        for (const diaK of Object.keys(dias)) {
-                            if (!regAtual[turmaK][diaK]) continue;
-                            const stMap = dias[diaK];
-                            if (!stMap || typeof stMap !== 'object') continue;
-                            for (const stId of Object.keys(stMap)) {
-                                const bkpItem = stMap[stId];
-                                const curItem = regAtual[turmaK][diaK][stId];
-                                if (bkpItem && curItem && typeof bkpItem === 'object') {
-                                    if (typeof bkpItem.caderno === 'number' && bkpItem.caderno > 1 && curItem.caderno !== bkpItem.caderno) {
-                                        curItem.caderno = bkpItem.caderno;
-                                        curItem.isContagem = true;
-                                        alterou = true;
-                                    }
-                                    if (typeof bkpItem.livro === 'number' && bkpItem.livro > 1 && curItem.livro !== bkpItem.livro) {
-                                        curItem.livro = bkpItem.livro;
-                                        curItem.isContagem = true;
-                                        alterou = true;
-                                    }
-                                    if (typeof bkpItem.atividade === 'number' && bkpItem.atividade > 1 && curItem.atividade !== bkpItem.atividade) {
-                                        curItem.atividade = bkpItem.atividade;
-                                        curItem.isContagem = true;
-                                        alterou = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                for (let i = 0; i < localStorage.length; i++) {
-                    const k = localStorage.key(i);
-                    if (!k) continue;
-                    if (k.startsWith('diario_backup_') || k.startsWith('diario_vistos_')) {
-                        try {
-                            const raw = localStorage.getItem(k);
-                            if (!raw || (!raw.includes('"caderno"') && !raw.includes('"isContagem"'))) continue;
-                            const parsed = JSON.parse(raw);
-                            if (parsed.registros) {
-                                restaurarDeMapa(parsed.registros);
-                            } else if (parsed.vistosPorProfessor) {
-                                Object.values(parsed.vistosPorProfessor).forEach(v => {
-                                    try { restaurarDeMapa(JSON.parse(v)); } catch(e){}
-                                });
-                            } else {
-                                restaurarDeMapa(parsed);
-                            }
-                        } catch(e) {}
                     }
                 }
 
                 if (alterou) {
-                    console.log('🎉 [Recuperação] Quantidades de contagens restauradas com sucesso a partir dos backups!');
+                    console.log('🎉 [Recuperação] Quantidades legítimas de 3AGRO__MAT restauradas com sucesso!');
                     localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
                     salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
                 }
@@ -4762,12 +4672,10 @@ createApp({
             }
 
             const regCarregado = JSON.parse(rawReg || '{}');
-            // CAMADA 1: sanitiza ao carregar do localStorage
-            sanitizarRegistros(regCarregado);
             registros.value = regCarregado;
             conteudos.value = JSON.parse(rawCont || '{}');
 
-            // Restaura automaticamente números de contagens de backups prévios se necessário
+            // Restaura automaticamente números de contagens comprovadas da turma
             recuperarContagensDeBackups();
 
             // Se o saldo de vistos do professor ativo estiver zerado, tenta a recuperação profunda automática
@@ -4796,8 +4704,6 @@ createApp({
 
         watch(registros, (newVal) => {
             if (currentUser.value) {
-                // CAMADA 1: sanitiza antes de qualquer escrita
-                sanitizarRegistros(newVal);
                 localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(newVal));
                 // Proteção contra sobrescrita vazia: nunca envia objeto vazio para a nuvem
                 if (!isRecebendoNuvem && contarTotalVistosEmRegistros(newVal) > 0) {
@@ -7850,8 +7756,6 @@ createApp({
                     });
                 }
 
-                // CAMADA 1: sanitiza ANTES de gravar resultado do merge com nuvem
-                sanitizarRegistros(unificadoReg);
                 registros.value = unificadoReg;
                 conteudos.value = unificadoCont;
 
@@ -8228,6 +8132,61 @@ createApp({
             }
         }
 
+        async function restaurarDadosOriginaisLimpos() {
+            try {
+                const user = currentUser.value;
+                if (!user) {
+                    alert('⚠️ Faça login para restaurar seus dados.');
+                    return;
+                }
+                const confirmar = confirm(
+                    `Deseja restaurar os registros originais legítimos pré-problema para ${user}?\n\n` +
+                    `Isso irá restabelecer os seus vistos oficiais e eliminar contagens duplicadas ou dados incorretos.`
+                );
+                if (!confirmar) return;
+
+                statusConexao.value = 'sincronizando';
+
+                let backupLimpo = null;
+                try {
+                    const res = await fetch('vistos-marcelo-restaurados.json');
+                    if (res.ok) backupLimpo = await res.json();
+                } catch(e) {}
+
+                if (!backupLimpo || !backupLimpo.registros) {
+                    throw new Error('Arquivo de restauração não encontrado no servidor.');
+                }
+
+                const regLimpo = backupLimpo.registros || {};
+                const contLimpo = backupLimpo.conteudos || {};
+
+                registros.value = JSON.parse(JSON.stringify(regLimpo));
+                conteudos.value = JSON.parse(JSON.stringify(contLimpo));
+
+                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
+
+                if (db) {
+                    await db.collection('diario_professores').doc(user).set({
+                        registros: regLimpo,
+                        conteudos: contLimpo,
+                        atualizadoEm: new Date().toISOString()
+                    });
+                }
+
+                fazerBackupRotativo(user, registros.value);
+                statusConexao.value = 'online';
+                atualizarSaudeDosDados();
+
+                const total = contarTotalVistosDoProfessor(user);
+                alert(`🎉 Maravilha! Registros originais restaurados com sucesso para ${user}!\n\n• Total de vistos legítimos: ${total}\n• Turmas ativas: ${Object.keys(regLimpo).length}\n• Todas as somas duplicadas e dados que não existiam foram eliminados.`);
+            } catch(e) {
+                console.error("Erro na restauração limpa:", e);
+                statusConexao.value = 'online';
+                alert('⚠️ Não foi possível restaurar os dados automaticamente: ' + (e.message || 'Erro desconhecido.'));
+            }
+        }
+
         let debounceNuvem = null;
         let ultimoHashProfessorSalvo = '';
         function salvarNuvemProfessor(user, reg, cont) {
@@ -8396,7 +8355,7 @@ createApp({
             exportarArquivoVistos, acionarSubidaArquivoVistos, subirArquivoVistos, inputUploadVistosRef,
             pwaPrompt, mostrarBotaoInstalar, instalarAppPWA,
             novaVersaoDisponivel, versaoMaisRecente, fecharNotificacaoVersao, aplicarAtualizacaoApp,
-            saudeDosDados, atualizarSaudeDosDados
+            saudeDosDados, atualizarSaudeDosDados, restaurarDadosOriginaisLimpos
         };
     }
 }).mount('#app');

@@ -1,0 +1,4316 @@
+{
+  "formato": "diario_digital_vistos",
+  "versaoApp": "6.9",
+  "exportadoEm": "2026-09-29T22:15:19.176Z",
+  "professor": "Marcelo",
+  "totalVistos": 135,
+  "registros": {
+    "Alunos 2C__OEMAT": {
+      "2026-09-16": {
+        "122756090-4_26": {
+          "caderno": false,
+          "atividade": false,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "livro": false
+        },
+        "122621334-0_1": {
+          "atividade": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "livro": false,
+          "copiou": false,
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false
+        },
+        "113720161-7_30": {
+          "caderno": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "incompleto": false,
+          "livro": false
+        },
+        "113666722-2_8": {
+          "pontoPositivo": 0,
+          "livro": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "copiou": false,
+          "incompleto": false,
+          "dormiu": false,
+          "caderno": false
+        },
+        "112318747-2_23": {
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "caderno": false,
+          "copiou": false,
+          "livro": false
+        },
+        "124792481-6_34": {
+          "atividade": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "caderno": false,
+          "livro": false,
+          "dormiu": false
+        },
+        "113016409-3_20": {
+          "livro": false,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "copiou": false
+        },
+        "113716719-1_7": {
+          "atividade": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "incompleto": false,
+          "livro": false,
+          "caderno": false,
+          "pontoPositivo": 0
+        },
+        "114113044-0_3": {
+          "copiou": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "dormiu": false,
+          "livro": false,
+          "caderno": false,
+          "incompleto": false
+        },
+        "110790133-9_29": {
+          "incompleto": false,
+          "livro": false,
+          "atividade": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "caderno": false
+        },
+        "113743269-X_22": {
+          "pontoPositivo": 0,
+          "copiou": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false,
+          "atividade": false
+        },
+        "116523864-0_5": {
+          "atividade": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "copiou": false
+        },
+        "112045540-6_16": {
+          "livro": false,
+          "atividade": false,
+          "caderno": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0
+        },
+        "113743319-X_21": {
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "atividade": false,
+          "copiou": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "livro": false
+        },
+        "113013183-X_32": {
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "incompleto": false,
+          "livro": false,
+          "copiou": false,
+          "atividade": false
+        },
+        "116285346-3_19": {
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "livro": false,
+          "atividade": false,
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false
+        },
+        "112432929-8_2": {
+          "livro": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "incompleto": false,
+          "copiou": false,
+          "atividade": false
+        },
+        "111927269-5_27": {
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "copiou": false,
+          "livro": false
+        },
+        "113746638-8_35": {
+          "dormiu": false,
+          "atividade": false,
+          "incompleto": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "livro": false,
+          "caderno": false
+        },
+        "113716677-0_33": {
+          "atividade": false,
+          "copiou": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "livro": false,
+          "dormiu": false,
+          "caderno": false
+        },
+        "113732184-2_9": {
+          "copiou": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "livro": false,
+          "dormiu": false,
+          "incompleto": false,
+          "atividade": false
+        },
+        "111906847-2_14": {
+          "caderno": false,
+          "dormiu": false,
+          "incompleto": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "livro": false,
+          "pontoNegativo": 0
+        },
+        "110654677-5_28": {
+          "atividade": false,
+          "dormiu": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "copiou": false
+        },
+        "122631316-4_24": {
+          "incompleto": false,
+          "livro": false,
+          "atividade": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "dormiu": false
+        }
+      },
+      "2026-09-15": {
+        "113732184-2_9": {
+          "atividade": false,
+          "copiou": false,
+          "incompleto": false,
+          "caderno": false,
+          "dormiu": false,
+          "livro": false
+        },
+        "112318747-2_23": {
+          "dormiu": true,
+          "atividade": false,
+          "incompleto": false,
+          "caderno": false,
+          "copiou": false,
+          "livro": false
+        },
+        "113720161-7_30": {
+          "copiou": false,
+          "atividade": false,
+          "incompleto": false,
+          "dormiu": false,
+          "livro": false,
+          "caderno": false
+        },
+        "122756090-4_26": {
+          "copiou": false,
+          "caderno": false,
+          "atividade": true,
+          "incompleto": false,
+          "dormiu": false,
+          "livro": false
+        },
+        "110790133-9_29": {
+          "dormiu": false,
+          "incompleto": false,
+          "atividade": true,
+          "caderno": false,
+          "copiou": false,
+          "livro": false
+        },
+        "116523864-0_5": {
+          "dormiu": false,
+          "livro": false,
+          "incompleto": false,
+          "atividade": true,
+          "caderno": false,
+          "copiou": false
+        },
+        "112432929-8_2": {
+          "livro": false,
+          "atividade": true,
+          "caderno": false,
+          "dormiu": false,
+          "incompleto": false,
+          "copiou": false
+        },
+        "113016409-3_20": {
+          "caderno": false,
+          "dormiu": false,
+          "atividade": true,
+          "incompleto": false,
+          "copiou": false,
+          "livro": false
+        },
+        "124792481-6_34": {
+          "copiou": false,
+          "atividade": true,
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "livro": false
+        },
+        "116285346-3_19": {
+          "atividade": true,
+          "livro": false,
+          "dormiu": false,
+          "caderno": false,
+          "incompleto": false,
+          "copiou": false
+        },
+        "113013183-X_32": {
+          "dormiu": false,
+          "atividade": true,
+          "incompleto": false,
+          "copiou": false,
+          "caderno": false,
+          "livro": false
+        },
+        "113743319-X_21": {
+          "copiou": false,
+          "incompleto": false,
+          "caderno": false,
+          "atividade": false,
+          "livro": false,
+          "dormiu": false
+        },
+        "112045540-6_16": {
+          "copiou": false,
+          "atividade": false,
+          "dormiu": false,
+          "caderno": false,
+          "livro": false,
+          "incompleto": false
+        },
+        "113716719-1_7": {
+          "caderno": false,
+          "livro": false,
+          "dormiu": false,
+          "incompleto": false,
+          "atividade": true,
+          "copiou": false
+        },
+        "114113044-0_3": {
+          "livro": false,
+          "dormiu": false,
+          "atividade": true,
+          "incompleto": false,
+          "caderno": false,
+          "copiou": false
+        },
+        "113743269-X_22": {
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false,
+          "livro": false,
+          "atividade": true,
+          "copiou": false
+        },
+        "122631316-4_24": {
+          "atividade": false,
+          "copiou": false,
+          "caderno": false,
+          "incompleto": false,
+          "livro": false,
+          "dormiu": false
+        },
+        "110654677-5_28": {
+          "atividade": false,
+          "incompleto": false,
+          "livro": false,
+          "copiou": false,
+          "dormiu": true,
+          "caderno": false
+        },
+        "122621334-0_1": {
+          "atividade": false,
+          "dormiu": false,
+          "caderno": false,
+          "incompleto": false,
+          "copiou": false,
+          "livro": false
+        },
+        "111906847-2_14": {
+          "atividade": true,
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false,
+          "livro": false,
+          "copiou": false
+        },
+        "113716677-0_33": {
+          "dormiu": false,
+          "atividade": false,
+          "incompleto": false,
+          "copiou": true,
+          "livro": false,
+          "caderno": false
+        },
+        "113666722-2_8": {
+          "livro": false,
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": true,
+          "caderno": false,
+          "copiou": false
+        },
+        "113746638-8_35": {
+          "dormiu": false,
+          "caderno": false,
+          "atividade": false,
+          "incompleto": false,
+          "copiou": false,
+          "livro": false
+        },
+        "111927269-5_27": {
+          "atividade": false,
+          "incompleto": false,
+          "dormiu": true,
+          "livro": false,
+          "caderno": false,
+          "copiou": false
+        }
+      }
+    },
+    "Alunos 3B__MAT": {
+      "2026-09-24": {
+        "000112151472-8_22_1789560607929_rkw2": {
+          "atividade": true,
+          "isContagem": true,
+          "caderno": true,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "livro": 0,
+          "pontoNegativo": 0,
+          "copiou": false
+        },
+        "000113000684-0_17_1789560607928_42t1": {
+          "caderno": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "atividade": 0,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "livro": 0,
+          "incompleto": false,
+          "copiou": false
+        },
+        "000109405513-X_7_1789560607928_95y1": {
+          "pontoPositivo": 0,
+          "atividade": true,
+          "copiou": false,
+          "dormiu": false,
+          "livro": 0,
+          "isContagem": true,
+          "caderno": 0,
+          "pontoNegativo": 0,
+          "incompleto": false
+        },
+        "000113718411-5_5_1789560607928_yvtj": {
+          "caderno": 0,
+          "isContagem": true,
+          "dormiu": false,
+          "incompleto": false,
+          "atividade": 0,
+          "pontoNegativo": 0,
+          "livro": 0,
+          "pontoPositivo": 0,
+          "copiou": false
+        },
+        "000112996640-9_9_1789560607928_f741": {
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "atividade": true,
+          "caderno": true,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "livro": 0
+        },
+        "000112009961-4_12_1789560607928_1s0l": {
+          "livro": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "caderno": true,
+          "isContagem": true,
+          "pontoNegativo": 0,
+          "atividade": 0
+        },
+        "000115488179_8_1789560607928_vnw6": {
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "caderno": true,
+          "livro": 0,
+          "dormiu": false,
+          "isContagem": true,
+          "atividade": true,
+          "copiou": false,
+          "pontoPositivo": 0
+        },
+        "000113792569-3_20_1789560607929_k3pe": {
+          "caderno": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "atividade": 0,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "livro": 0
+        },
+        "000112323669-0_15_1789560607928_181a": {
+          "isContagem": true,
+          "caderno": true,
+          "atividade": true,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": 0,
+          "pontoNegativo": 0,
+          "copiou": false
+        },
+        "000125396173-6_1_1789560607928_9y2j": {
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "livro": 0,
+          "caderno": true,
+          "isContagem": true,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "incompleto": false,
+          "atividade": true
+        },
+        "000111891127-1_18_1789560607929_6auy": {
+          "copiou": false,
+          "isContagem": true,
+          "pontoNegativo": 0,
+          "livro": 0,
+          "incompleto": false,
+          "atividade": true,
+          "dormiu": false,
+          "caderno": true,
+          "pontoPositivo": 0
+        },
+        "000110904930-4_14_1789560607928_ivwv": {
+          "copiou": false,
+          "incompleto": false,
+          "atividade": 0,
+          "isContagem": true,
+          "caderno": 0,
+          "livro": 0,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoNegativo": 0
+        },
+        "000111626311-7_10_1789560607928_26hu": {
+          "pontoPositivo": 0,
+          "caderno": true,
+          "atividade": true,
+          "copiou": false,
+          "livro": 0,
+          "isContagem": true,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "incompleto": false
+        },
+        "000110704570-8_4_1789560607928_3vq7": {
+          "atividade": true,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "caderno": true,
+          "incompleto": false,
+          "copiou": false,
+          "livro": 0,
+          "pontoPositivo": 0,
+          "dormiu": false
+        },
+        "000120244368-0_2_1789560607928_2c1h": {
+          "incompleto": false,
+          "caderno": true,
+          "pontoPositivo": 0,
+          "livro": 0,
+          "dormiu": false,
+          "isContagem": true,
+          "copiou": false,
+          "atividade": true,
+          "pontoNegativo": 0
+        },
+        "000123877424-6_3_1789560607928_l5ah": {
+          "pontoNegativo": 0,
+          "livro": 0,
+          "dormiu": false,
+          "atividade": true,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "caderno": true,
+          "isContagem": true
+        },
+        "000112404020-1_16_1789560607928_wpka": {
+          "atividade": 0,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": 0,
+          "livro": 0,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "isContagem": true
+        }
+      },
+      "2026-09-16": {
+        "000111891306-1_6_1789560607928_iv4d": {
+          "copiou": false,
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": false,
+          "livro": false
+        },
+        "000120244368-0_2_1789560607928_2c1h": {
+          "livro": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "atividade": false,
+          "caderno": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "copiou": false
+        },
+        "000123877424-6_3_1789560607928_l5ah": {
+          "atividade": false,
+          "incompleto": false,
+          "dormiu": false,
+          "caderno": false,
+          "copiou": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0
+        },
+        "000110904930-4_14_1789560607928_ivwv": {
+          "pontoPositivo": 0,
+          "atividade": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "caderno": false,
+          "incompleto": false,
+          "copiou": false
+        },
+        "000111626311-7_10_1789560607928_26hu": {
+          "incompleto": false,
+          "livro": false,
+          "copiou": false,
+          "atividade": false,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "dormiu": false
+        },
+        "000111034329-2_11_1789560607928_hv7b": {
+          "caderno": false,
+          "dormiu": false,
+          "livro": false,
+          "copiou": false,
+          "incompleto": false,
+          "atividade": false
+        },
+        "000112323669-0_15_1789560607928_181a": {
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "livro": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": false
+        },
+        "000112921443-6_13_1789560607928_mq09": {
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "atividade": false,
+          "copiou": false,
+          "livro": false
+        },
+        "000113792569-3_20_1789560607929_k3pe": {
+          "livro": false,
+          "copiou": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "incompleto": false
+        },
+        "000111891127-1_18_1789560607929_6auy": {
+          "livro": false,
+          "dormiu": false,
+          "incompleto": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "copiou": false,
+          "pontoPositivo": 0
+        },
+        "000112404020-1_16_1789560607928_wpka": {
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "livro": false,
+          "caderno": false,
+          "atividade": false
+        },
+        "000125396173-6_1_1789560607928_9y2j": {
+          "pontoPositivo": 0,
+          "atividade": false,
+          "copiou": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false
+        },
+        "000110704570-8_4_1789560607928_3vq7": {
+          "livro": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "dormiu": false,
+          "incompleto": false
+        },
+        "000113718411-5_5_1789560607928_yvtj": {
+          "atividade": false,
+          "livro": false,
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "pontoNegativo": 0
+        },
+        "000112151472-8_22_1789560607929_rkw2": {
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "livro": false,
+          "dormiu": false,
+          "atividade": false,
+          "caderno": false
+        },
+        "000112996640-9_9_1789560607928_f741": {
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "livro": false,
+          "copiou": false,
+          "dormiu": false,
+          "atividade": false,
+          "caderno": false
+        },
+        "000113000684-0_17_1789560607928_42t1": {
+          "copiou": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false
+        },
+        "000110655952-6_19_1789560607929_mud4": {
+          "atividade": false,
+          "livro": false,
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "copiou": false
+        },
+        "000109405513-X_7_1789560607928_95y1": {
+          "livro": false,
+          "copiou": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "caderno": false
+        },
+        "000112009961-4_12_1789560607928_1s0l": {
+          "copiou": false,
+          "livro": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "atividade": false,
+          "incompleto": false,
+          "pontoNegativo": 0
+        },
+        "000115488179_8_1789560607928_vnw6": {
+          "pontoNegativo": 0,
+          "atividade": false,
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "caderno": false
+        }
+      }
+    },
+    "Alunos 3A__MAT": {
+      "2026-09-16": {
+        "112926873-1_6": {
+          "copiou": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "livro": false,
+          "dormiu": false,
+          "incompleto": false
+        },
+        "111142386-6_10": {
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "atividade": false
+        },
+        "112983264-8_16": {
+          "caderno": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "incompleto": false,
+          "livro": false,
+          "atividade": false
+        },
+        "112927553-X_11": {
+          "incompleto": false,
+          "livro": false,
+          "atividade": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "caderno": false
+        },
+        "125803317-3_15": {
+          "copiou": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "livro": false,
+          "dormiu": false
+        },
+        "112664577-1_17": {
+          "pontoNegativo": 0,
+          "atividade": false,
+          "incompleto": false,
+          "dormiu": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "copiou": false
+        },
+        "111625940-0_18": {
+          "dormiu": false,
+          "caderno": false,
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "incompleto": false,
+          "pontoNegativo": 0
+        },
+        "125832692-9_9": {
+          "incompleto": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "dormiu": false,
+          "copiou": false
+        },
+        "113809265-4_3": {
+          "caderno": false,
+          "copiou": false,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "livro": false,
+          "atividade": false
+        },
+        "112706493-9_1": {
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "caderno": false,
+          "copiou": false,
+          "atividade": false,
+          "livro": false
+        }
+      },
+      "2026-09-17": {
+        "125803317-3_15": {
+          "copiou": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "livro": false,
+          "caderno": false,
+          "pontoNegativo": 0
+        },
+        "112927553-X_11": {
+          "caderno": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "incompleto": false,
+          "livro": false,
+          "atividade": false,
+          "dormiu": false
+        },
+        "112983264-8_16": {
+          "dormiu": false,
+          "atividade": false,
+          "livro": false,
+          "incompleto": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "copiou": false
+        },
+        "111142386-6_10": {
+          "atividade": false,
+          "caderno": false,
+          "dormiu": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false
+        },
+        "111625940-0_18": {
+          "caderno": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "livro": false
+        },
+        "112926873-1_6": {
+          "livro": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "copiou": false
+        },
+        "112664577-1_17": {
+          "livro": false,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "atividade": false,
+          "copiou": false,
+          "pontoNegativo": 0
+        },
+        "112706493-9_1": {
+          "incompleto": false,
+          "copiou": false,
+          "atividade": false,
+          "caderno": false,
+          "livro": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0
+        },
+        "113809265-4_3": {
+          "caderno": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "livro": false,
+          "atividade": false
+        },
+        "125832692-9_9": {
+          "caderno": false,
+          "dormiu": false,
+          "livro": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "copiou": false
+        }
+      },
+      "2026-09-25": {
+        "112926873-1_6": {
+          "isContagem": true,
+          "pontoPositivoTrabalho": 0,
+          "atividade": true,
+          "copiou": false,
+          "caderno": true,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "livro": 0,
+          "pontoPositivo": 0,
+          "pontoNegativoTrabalho": 0
+        },
+        "125803317-3_15": {
+          "copiou": false,
+          "isContagem": true,
+          "pontoPositivo": 0,
+          "livro": 0,
+          "incompleto": false,
+          "pontoPositivoTrabalho": 0,
+          "caderno": 0,
+          "pontoNegativo": 0,
+          "pontoNegativoTrabalho": 0,
+          "atividade": 0,
+          "dormiu": false
+        },
+        "125832692-9_9": {
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "atividade": true,
+          "pontoPositivoTrabalho": 0,
+          "incompleto": false,
+          "copiou": false,
+          "livro": 0,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": true,
+          "pontoNegativoTrabalho": 0
+        },
+        "113809265-4_3": {
+          "copiou": false,
+          "pontoNegativo": 0,
+          "pontoPositivoTrabalho": 0,
+          "incompleto": false,
+          "livro": 0,
+          "caderno": 0,
+          "isContagem": true,
+          "pontoPositivo": 0,
+          "atividade": 0,
+          "dormiu": false,
+          "pontoNegativoTrabalho": 0
+        },
+        "111142386-6_10": {
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "pontoNegativoTrabalho": 0,
+          "isContagem": true,
+          "caderno": true,
+          "pontoPositivoTrabalho": 0,
+          "pontoPositivo": 0,
+          "atividade": true,
+          "livro": 0,
+          "copiou": false
+        },
+        "112983264-8_16": {
+          "dormiu": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "pontoPositivoTrabalho": 0,
+          "isContagem": true,
+          "caderno": true,
+          "livro": 0,
+          "pontoNegativoTrabalho": 0,
+          "atividade": true,
+          "pontoNegativo": 0,
+          "copiou": false
+        },
+        "112927553-X_11": {
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoPositivoTrabalho": 0,
+          "livro": 0,
+          "caderno": 0,
+          "pontoNegativoTrabalho": 0,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "atividade": 0,
+          "copiou": false,
+          "incompleto": false
+        },
+        "112664577-1_17": {
+          "isContagem": true,
+          "atividade": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "pontoPositivoTrabalho": 0,
+          "pontoNegativoTrabalho": 0,
+          "caderno": 0,
+          "pontoPositivo": 0,
+          "livro": 0,
+          "copiou": false
+        },
+        "112706493-9_1": {
+          "isContagem": true,
+          "pontoNegativoTrabalho": 0,
+          "caderno": true,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": 0,
+          "pontoPositivo": 0,
+          "atividade": true,
+          "copiou": false,
+          "pontoPositivoTrabalho": 0
+        },
+        "111625940-0_18": {
+          "pontoPositivoTrabalho": 0,
+          "isContagem": true,
+          "caderno": 0,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "atividade": 0,
+          "livro": 0,
+          "pontoPositivo": 0,
+          "pontoNegativoTrabalho": 0,
+          "copiou": false
+        }
+      },
+      "2026-09-18": {
+        "112926873-1_6": {
+          "dormiu": false,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "incompleto": false,
+          "atividade": true,
+          "livro": false,
+          "pontoNegativo": 0
+        },
+        "111142386-6_10": {
+          "livro": false,
+          "atividade": true,
+          "copiou": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoPositivo": 0
+        },
+        "125832692-9_9": {
+          "copiou": false,
+          "atividade": true,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "dormiu": false,
+          "caderno": false,
+          "pontoPositivo": 0
+        },
+        "112927553-X_11": {
+          "caderno": false,
+          "livro": false,
+          "atividade": true,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "pontoNegativo": 0
+        },
+        "112983264-8_16": {
+          "caderno": false,
+          "dormiu": false,
+          "atividade": true,
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "incompleto": false
+        },
+        "113809265-4_3": {
+          "dormiu": false,
+          "incompleto": false,
+          "atividade": true,
+          "caderno": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "livro": false
+        },
+        "125803317-3_15": {
+          "pontoPositivo": 0,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": true,
+          "caderno": false,
+          "livro": false
+        },
+        "112664577-1_17": {
+          "incompleto": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "copiou": false,
+          "atividade": true
+        },
+        "111625940-0_18": {
+          "atividade": true,
+          "livro": false,
+          "caderno": false,
+          "copiou": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "dormiu": false
+        },
+        "112706493-9_1": {
+          "pontoPositivo": 0,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "caderno": false,
+          "dormiu": false,
+          "livro": false,
+          "atividade": true
+        }
+      }
+    },
+    "Alunos 2C__LIDORA": {
+      "2026-09-24": {
+        "112432929-8_2": {
+          "copiou": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "livro": false,
+          "caderno": false,
+          "incompleto": false,
+          "atividade": false,
+          "pontoNegativo": 0
+        },
+        "114113044-0_3": {
+          "caderno": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "atividade": false,
+          "dormiu": false
+        },
+        "122621334-0_1": {
+          "copiou": false,
+          "livro": false,
+          "pontoNegativoTrabalho": 0,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "pontoPositivoTrabalho": 0,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": false
+        }
+      },
+      "2026-09-16": {
+        "113743269-X_22": {
+          "dormiu": false,
+          "atividade": false,
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "incompleto": false,
+          "pontoNegativo": 0
+        },
+        "112045540-6_16": {
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "livro": false,
+          "atividade": false,
+          "copiou": false,
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false
+        },
+        "122621334-0_1": {
+          "copiou": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "caderno": false,
+          "livro": false,
+          "dormiu": false
+        },
+        "116285346-3_19": {
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "caderno": false,
+          "copiou": false
+        },
+        "113743319-X_21": {
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "atividade": false,
+          "livro": false
+        },
+        "113013183-X_32": {
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "atividade": false,
+          "copiou": false,
+          "livro": false
+        },
+        "113666722-2_8": {
+          "pontoNegativo": 0,
+          "caderno": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "atividade": false,
+          "incompleto": false,
+          "livro": false
+        },
+        "113746638-8_35": {
+          "atividade": false,
+          "caderno": false,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "copiou": false
+        },
+        "111927269-5_27": {
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "atividade": false,
+          "copiou": false,
+          "livro": false
+        },
+        "111906847-2_14": {
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "atividade": false,
+          "caderno": false
+        },
+        "113716677-0_33": {
+          "dormiu": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "incompleto": false,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "copiou": false
+        },
+        "122631316-4_24": {
+          "livro": false,
+          "copiou": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "dormiu": false
+        },
+        "114113044-0_3": {
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "dormiu": false,
+          "livro": false
+        },
+        "113716719-1_7": {
+          "incompleto": false,
+          "copiou": false,
+          "atividade": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "livro": false
+        },
+        "110654677-5_28": {
+          "copiou": false,
+          "atividade": false,
+          "livro": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "caderno": false
+        },
+        "116523864-0_5": {
+          "copiou": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "caderno": false,
+          "livro": false,
+          "dormiu": false
+        },
+        "122756090-4_26": {
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": false,
+          "copiou": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0
+        },
+        "113720161-7_30": {
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "copiou": false
+        },
+        "112318747-2_23": {
+          "caderno": false,
+          "atividade": false,
+          "livro": false,
+          "copiou": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "dormiu": false
+        },
+        "112432929-8_2": {
+          "dormiu": false,
+          "caderno": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "atividade": false,
+          "livro": false,
+          "pontoPositivo": 0
+        },
+        "124792481-6_34": {
+          "atividade": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "livro": false,
+          "incompleto": false,
+          "caderno": false,
+          "dormiu": false
+        },
+        "113732184-2_9": {
+          "dormiu": false,
+          "atividade": false,
+          "livro": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "copiou": false
+        },
+        "113016409-3_20": {
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "copiou": false,
+          "incompleto": false,
+          "atividade": false,
+          "livro": false
+        },
+        "110790133-9_29": {
+          "dormiu": false,
+          "atividade": false,
+          "incompleto": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "livro": false
+        }
+      },
+      "2026-09-18": {
+        "111906847-2_14": {
+          "atividade": true,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "caderno": false,
+          "livro": false
+        },
+        "113716677-0_33": {
+          "livro": false,
+          "caderno": false,
+          "incompleto": false,
+          "atividade": true,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0
+        },
+        "113732184-2_9": {
+          "incompleto": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "dormiu": false,
+          "livro": false
+        },
+        "113746638-8_35": {
+          "livro": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "pontoNegativoTrabalho": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "pontoPositivoTrabalho": 0,
+          "copiou": false,
+          "incompleto": false
+        },
+        "111927269-5_27": {
+          "copiou": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "atividade": true,
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "livro": false
+        },
+        "122631316-4_24": {
+          "livro": false,
+          "atividade": true,
+          "copiou": false,
+          "pontoPositivo": 1,
+          "incompleto": false,
+          "caderno": false,
+          "dormiu": false,
+          "pontoNegativo": 0
+        },
+        "110654677-5_28": {
+          "caderno": false,
+          "atividade": true,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false
+        },
+        "112045540-6_16": {
+          "dormiu": false,
+          "caderno": false,
+          "atividade": false,
+          "incompleto": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "pontoPositivo": 0
+        },
+        "116523864-0_5": {
+          "dormiu": false,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "atividade": true,
+          "livro": false
+        },
+        "113743269-X_22": {
+          "incompleto": false,
+          "dormiu": false,
+          "caderno": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "livro": false,
+          "pontoNegativo": 0
+        },
+        "112432929-8_2": {
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "livro": false,
+          "caderno": false,
+          "atividade": true,
+          "incompleto": false,
+          "copiou": false
+        },
+        "116285346-3_19": {
+          "pontoPositivo": 0,
+          "copiou": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "atividade": true,
+          "livro": false
+        },
+        "113013183-X_32": {
+          "incompleto": false,
+          "atividade": true,
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "caderno": false
+        },
+        "113743319-X_21": {
+          "livro": false,
+          "copiou": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": false
+        },
+        "113016409-3_20": {
+          "atividade": false,
+          "dormiu": true,
+          "incompleto": false,
+          "caderno": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "livro": false
+        },
+        "124792481-6_34": {
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoPositivoTrabalho": 0,
+          "incompleto": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoNegativoTrabalho": 0,
+          "caderno": false,
+          "atividade": false
+        },
+        "110790133-9_29": {
+          "caderno": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "incompleto": false,
+          "pontoPositivoTrabalho": 0,
+          "pontoNegativoTrabalho": 0,
+          "copiou": false,
+          "livro": false,
+          "pontoPositivo": 0
+        },
+        "113716719-1_7": {
+          "livro": false,
+          "copiou": false,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "atividade": true
+        },
+        "114113044-0_3": {
+          "atividade": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false
+        },
+        "113720161-7_30": {
+          "caderno": false,
+          "dormiu": false,
+          "atividade": true,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "livro": false
+        },
+        "122756090-4_26": {
+          "dormiu": false,
+          "caderno": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "atividade": true,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "livro": false
+        },
+        "122621334-0_1": {
+          "livro": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "copiou": false,
+          "incompleto": false,
+          "atividade": true
+        },
+        "112318747-2_23": {
+          "copiou": false,
+          "livro": false,
+          "atividade": true,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "incompleto": false
+        },
+        "113666722-2_8": {
+          "caderno": false,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "copiou": false
+        }
+      },
+      "2026-09-17": {
+        "112432929-8_2": {
+          "livro": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "atividade": false,
+          "dormiu": false
+        },
+        "112045540-6_16": {
+          "copiou": false,
+          "incompleto": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "atividade": false
+        },
+        "113743269-X_22": {
+          "atividade": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "copiou": false,
+          "incompleto": false,
+          "livro": false
+        },
+        "116523864-0_5": {
+          "caderno": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "livro": false,
+          "copiou": false,
+          "incompleto": false
+        },
+        "116285346-3_19": {
+          "dormiu": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "copiou": false,
+          "incompleto": false,
+          "livro": false
+        },
+        "113743319-X_21": {
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "caderno": false,
+          "copiou": false,
+          "livro": false,
+          "incompleto": false,
+          "pontoPositivo": 0
+        },
+        "113013183-X_32": {
+          "copiou": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "atividade": false,
+          "dormiu": false,
+          "livro": false
+        },
+        "111906847-2_14": {
+          "livro": false,
+          "atividade": false,
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "copiou": false
+        },
+        "113716677-0_33": {
+          "copiou": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "atividade": false,
+          "livro": false,
+          "pontoNegativo": 0
+        },
+        "113746638-8_35": {
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "incompleto": false,
+          "caderno": false,
+          "copiou": false
+        },
+        "111927269-5_27": {
+          "pontoNegativo": 0,
+          "copiou": false,
+          "incompleto": false,
+          "caderno": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "livro": false
+        },
+        "113732184-2_9": {
+          "incompleto": false,
+          "atividade": false,
+          "copiou": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "pontoPositivo": 0
+        },
+        "122631316-4_24": {
+          "copiou": false,
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "livro": false
+        },
+        "110654677-5_28": {
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "copiou": false,
+          "incompleto": false,
+          "livro": false,
+          "caderno": false
+        },
+        "113720161-7_30": {
+          "pontoPositivo": 0,
+          "copiou": false,
+          "caderno": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "livro": false,
+          "atividade": false
+        },
+        "113666722-2_8": {
+          "copiou": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "incompleto": false,
+          "dormiu": false
+        },
+        "122756090-4_26": {
+          "atividade": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "livro": false,
+          "caderno": false,
+          "incompleto": false,
+          "copiou": false
+        },
+        "112318747-2_23": {
+          "caderno": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "copiou": false,
+          "livro": false,
+          "incompleto": false
+        },
+        "122621334-0_1": {
+          "caderno": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "copiou": false,
+          "livro": false
+        },
+        "113716719-1_7": {
+          "caderno": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "livro": false,
+          "atividade": false
+        },
+        "113016409-3_20": {
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "pontoNegativo": 0
+        },
+        "114113044-0_3": {
+          "incompleto": false,
+          "caderno": false,
+          "livro": false,
+          "copiou": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "dormiu": false
+        },
+        "124792481-6_34": {
+          "caderno": false,
+          "livro": false,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "copiou": false,
+          "pontoPositivo": 0
+        },
+        "110790133-9_29": {
+          "atividade": false,
+          "incompleto": false,
+          "livro": false,
+          "caderno": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0
+        }
+      },
+      "2026-09-20": {
+        "110790133-9_29": {
+          "pontoNegativo": 0,
+          "caderno": false,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "copiou": false,
+          "atividade": false
+        },
+        "113716719-1_7": {
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "livro": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "copiou": false,
+          "caderno": false
+        },
+        "114113044-0_3": {
+          "livro": false,
+          "atividade": false,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "caderno": false
+        },
+        "113016409-3_20": {
+          "copiou": false,
+          "incompleto": false,
+          "caderno": false,
+          "atividade": false,
+          "livro": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0
+        },
+        "124792481-6_34": {
+          "livro": false,
+          "copiou": false,
+          "incompleto": false,
+          "caderno": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "dormiu": false
+        },
+        "112318747-2_23": {
+          "atividade": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "incompleto": false,
+          "livro": false,
+          "pontoPositivo": 0
+        },
+        "113666722-2_8": {
+          "livro": false,
+          "atividade": false,
+          "copiou": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "dormiu": false
+        },
+        "113720161-7_30": {
+          "copiou": false,
+          "caderno": false,
+          "incompleto": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "dormiu": false,
+          "pontoNegativo": 0
+        },
+        "122621334-0_1": {
+          "atividade": false,
+          "livro": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "caderno": false,
+          "pontoPositivo": 0
+        },
+        "122756090-4_26": {
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "livro": false
+        },
+        "122631316-4_24": {
+          "caderno": false,
+          "dormiu": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "livro": false
+        },
+        "110654677-5_28": {
+          "copiou": false,
+          "caderno": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "incompleto": false
+        },
+        "113732184-2_9": {
+          "livro": false,
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "copiou": false,
+          "pontoPositivo": 0
+        },
+        "111906847-2_14": {
+          "livro": false,
+          "copiou": false,
+          "atividade": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": false
+        },
+        "113716677-0_33": {
+          "pontoNegativo": 0,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "livro": false,
+          "atividade": false,
+          "incompleto": false,
+          "dormiu": false
+        },
+        "113746638-8_35": {
+          "atividade": false,
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "caderno": false
+        },
+        "111927269-5_27": {
+          "pontoPositivo": 0,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": false,
+          "caderno": false,
+          "livro": false
+        },
+        "112432929-8_2": {
+          "pontoPositivo": 0,
+          "livro": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "incompleto": false,
+          "atividade": false,
+          "dormiu": false
+        },
+        "116285346-3_19": {
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "caderno": false,
+          "atividade": false,
+          "copiou": false
+        },
+        "113743319-X_21": {
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "livro": false
+        },
+        "113013183-X_32": {
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "copiou": false
+        },
+        "116523864-0_5": {
+          "livro": false,
+          "caderno": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "copiou": false,
+          "incompleto": false,
+          "pontoPositivo": 0
+        },
+        "112045540-6_16": {
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "copiou": false,
+          "livro": false
+        },
+        "113743269-X_22": {
+          "atividade": false,
+          "dormiu": false,
+          "caderno": false,
+          "livro": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "copiou": false
+        }
+      },
+      "2026-09-29": {
+        "112432929-8_2": {
+          "pontoPositivo": 0,
+          "pontoNegativoTrabalho": 0,
+          "caderno": false,
+          "copiou": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false,
+          "pontoPositivoTrabalho": 0
+        }
+      },
+      "2026-09-15": {
+        "116523864-0_5": {
+          "caderno": false,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false,
+          "atividade": true,
+          "copiou": false
+        },
+        "124792481-6_34": {
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "copiou": false,
+          "livro": false,
+          "atividade": true
+        },
+        "113016409-3_20": {
+          "livro": false,
+          "caderno": false,
+          "dormiu": false,
+          "atividade": true,
+          "copiou": false,
+          "incompleto": false
+        },
+        "112432929-8_2": {
+          "dormiu": false,
+          "atividade": true,
+          "incompleto": false,
+          "copiou": false,
+          "livro": false,
+          "caderno": false
+        },
+        "110790133-9_29": {
+          "copiou": false,
+          "dormiu": false,
+          "atividade": true,
+          "caderno": false,
+          "incompleto": false,
+          "livro": false
+        },
+        "113732184-2_9": {
+          "livro": false,
+          "dormiu": false,
+          "atividade": false,
+          "caderno": false,
+          "incompleto": false,
+          "copiou": false
+        },
+        "122756090-4_26": {
+          "caderno": false,
+          "atividade": true,
+          "dormiu": false,
+          "livro": false,
+          "incompleto": false,
+          "copiou": false
+        },
+        "113720161-7_30": {
+          "atividade": false,
+          "livro": false,
+          "copiou": false,
+          "incompleto": false,
+          "caderno": false,
+          "dormiu": false
+        },
+        "112318747-2_23": {
+          "caderno": false,
+          "dormiu": true,
+          "incompleto": false,
+          "atividade": false,
+          "copiou": false,
+          "livro": false
+        },
+        "113746638-8_35": {
+          "livro": false,
+          "caderno": false,
+          "atividade": false,
+          "dormiu": false,
+          "incompleto": false,
+          "copiou": false
+        },
+        "111927269-5_27": {
+          "copiou": false,
+          "caderno": false,
+          "atividade": false,
+          "livro": false,
+          "incompleto": false,
+          "dormiu": true
+        },
+        "111906847-2_14": {
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "copiou": false,
+          "livro": false,
+          "atividade": true
+        },
+        "113716677-0_33": {
+          "dormiu": false,
+          "caderno": false,
+          "atividade": false,
+          "copiou": true,
+          "incompleto": false,
+          "livro": false
+        },
+        "122621334-0_1": {
+          "atividade": false,
+          "copiou": false,
+          "caderno": false,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false
+        },
+        "122631316-4_24": {
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": false,
+          "copiou": false,
+          "livro": false,
+          "caderno": false
+        },
+        "110654677-5_28": {
+          "dormiu": true,
+          "incompleto": false,
+          "caderno": false,
+          "livro": false,
+          "copiou": false,
+          "atividade": false
+        },
+        "113666722-2_8": {
+          "atividade": true,
+          "incompleto": false,
+          "copiou": false,
+          "livro": false,
+          "caderno": false,
+          "dormiu": false
+        },
+        "113743269-X_22": {
+          "livro": false,
+          "copiou": false,
+          "caderno": false,
+          "incompleto": false,
+          "atividade": true,
+          "dormiu": false
+        },
+        "112045540-6_16": {
+          "incompleto": false,
+          "copiou": false,
+          "atividade": false,
+          "livro": false,
+          "dormiu": false,
+          "caderno": false
+        },
+        "116285346-3_19": {
+          "copiou": false,
+          "caderno": false,
+          "dormiu": false,
+          "livro": false,
+          "atividade": true,
+          "incompleto": false
+        },
+        "113013183-X_32": {
+          "livro": false,
+          "caderno": false,
+          "dormiu": false,
+          "incompleto": false,
+          "copiou": false,
+          "atividade": true
+        },
+        "113716719-1_7": {
+          "copiou": false,
+          "incompleto": false,
+          "atividade": true,
+          "livro": false,
+          "dormiu": false,
+          "caderno": false
+        },
+        "114113044-0_3": {
+          "incompleto": false,
+          "livro": false,
+          "atividade": true,
+          "dormiu": false,
+          "caderno": false,
+          "copiou": false
+        },
+        "113743319-X_21": {
+          "livro": false,
+          "atividade": false,
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "copiou": false
+        }
+      }
+    },
+    "Alunos 3AGRO__MAT": {
+      "2026-09-24": {
+        "000112960594-2_16_1789560401877_qixp": {
+          "atividade": 0,
+          "pontoNegativo": 0,
+          "pontoNegativoTrabalho": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "pontoPositivoTrabalho": 0,
+          "dormiu": false,
+          "isContagem": true,
+          "incompleto": false,
+          "caderno": 0,
+          "livro": 0
+        },
+        "000113717762-7_10_1789560401876_b4ln": {
+          "pontoNegativoTrabalho": 0,
+          "livro": 0,
+          "caderno": true,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "isContagem": true,
+          "atividade": true,
+          "pontoNegativo": 0,
+          "pontoPositivoTrabalho": 0,
+          "incompleto": false
+        },
+        "000112931798-5_8_1789560401876_wmxy": {
+          "pontoNegativoTrabalho": 0,
+          "incompleto": false,
+          "caderno": true,
+          "livro": 0,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "dormiu": false,
+          "copiou": false,
+          "pontoPositivoTrabalho": 0,
+          "pontoPositivo": 0,
+          "atividade": true
+        },
+        "000113000864-2_12_1789560401877_yyk5": {
+          "incompleto": false,
+          "pontoPositivoTrabalho": 0,
+          "dormiu": false,
+          "isContagem": true,
+          "atividade": 0,
+          "pontoNegativo": 0,
+          "livro": 0,
+          "caderno": 0,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "pontoNegativoTrabalho": 0
+        },
+        "000111529535-4_4_1789560401876_vgka": {
+          "pontoNegativoTrabalho": 0,
+          "isContagem": true,
+          "copiou": false,
+          "atividade": true,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "caderno": true,
+          "pontoPositivo": 0,
+          "livro": 0,
+          "pontoPositivoTrabalho": 0
+        },
+        "000111906894-0_21_1789560401877_brfo": {
+          "atividade": true,
+          "isContagem": true,
+          "incompleto": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "pontoPositivoTrabalho": 0,
+          "dormiu": false,
+          "livro": 0,
+          "pontoNegativoTrabalho": 0,
+          "pontoPositivo": 0,
+          "caderno": true
+        },
+        "000116771504_23_1789560401877_cwdr": {
+          "pontoNegativoTrabalho": 0,
+          "livro": 0,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "isContagem": true,
+          "atividade": true,
+          "copiou": false,
+          "caderno": true,
+          "pontoPositivoTrabalho": 0,
+          "incompleto": false,
+          "pontoNegativo": 0
+        },
+        "000110654751-2_6_1789560401876_6zy2": {
+          "copiou": false,
+          "incompleto": false,
+          "pontoPositivoTrabalho": 0,
+          "isContagem": true,
+          "caderno": 0,
+          "pontoNegativo": 0,
+          "livro": 0,
+          "atividade": 0,
+          "pontoNegativoTrabalho": 0,
+          "dormiu": false,
+          "pontoPositivo": 0
+        },
+        "000110904686-8_1_1789560401876_ynef": {
+          "incompleto": false,
+          "livro": 0,
+          "pontoPositivoTrabalho": 0,
+          "isContagem": true,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "atividade": true,
+          "pontoNegativoTrabalho": 0,
+          "caderno": true,
+          "copiou": false,
+          "pontoNegativo": 0
+        },
+        "000109765253-1_18_1789560401877_ynbl": {
+          "isContagem": true,
+          "copiou": false,
+          "atividade": true,
+          "livro": 0,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "caderno": true,
+          "pontoNegativoTrabalho": 0,
+          "pontoPositivoTrabalho": 0,
+          "dormiu": false,
+          "pontoNegativo": 0
+        },
+        "000109637573-4_7_1789560401876_gtkz": {
+          "pontoPositivo": 0,
+          "pontoNegativoTrabalho": 0,
+          "dormiu": false,
+          "atividade": true,
+          "livro": 0,
+          "caderno": true,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "isContagem": true,
+          "pontoPositivoTrabalho": 0
+        },
+        "000110790476_17_1789560401877_sqnx": {
+          "pontoNegativoTrabalho": 0,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "pontoPositivoTrabalho": 0,
+          "isContagem": true,
+          "dormiu": false,
+          "livro": 0,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "atividade": 0,
+          "caderno": 0
+        },
+        "000111960136-8_19_1789560401877_9jm7": {
+          "pontoNegativoTrabalho": 0,
+          "livro": 0,
+          "incompleto": false,
+          "caderno": true,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "isContagem": true,
+          "copiou": false,
+          "pontoPositivoTrabalho": 0,
+          "pontoNegativo": 0,
+          "atividade": true
+        },
+        "000110796965-7_14_1789560401877_gd9v": {
+          "pontoPositivoTrabalho": 0,
+          "copiou": false,
+          "caderno": 0,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "isContagem": true,
+          "atividade": 0,
+          "livro": 0,
+          "incompleto": false,
+          "pontoNegativoTrabalho": 0,
+          "pontoPositivo": 0
+        },
+        "000113792497-4_3_1789560401876_jvid": {
+          "copiou": false,
+          "incompleto": false,
+          "pontoPositivoTrabalho": 0,
+          "pontoNegativo": 0,
+          "atividade": 0,
+          "livro": 0,
+          "isContagem": true,
+          "pontoNegativoTrabalho": 0,
+          "dormiu": false,
+          "caderno": 0,
+          "pontoPositivo": 0
+        },
+        "000112995130-3_13_1789560401877_rs2z": {
+          "pontoPositivoTrabalho": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "caderno": true,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "pontoNegativoTrabalho": 0,
+          "livro": 0,
+          "copiou": false,
+          "isContagem": true,
+          "atividade": true
+        },
+        "000111906873_2_1789560401876_79kr": {
+          "copiou": false,
+          "atividade": true,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "livro": 0,
+          "pontoPositivoTrabalho": 0,
+          "caderno": true,
+          "isContagem": true,
+          "pontoNegativoTrabalho": 0,
+          "dormiu": false,
+          "pontoPositivo": 0
+        },
+        "124792481-6_34": {
+          "isContagem": true,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "atividade": 1,
+          "dormiu": false,
+          "copiou": false,
+          "caderno": 4,
+          "livro": false,
+          "pontoPositivo": 0
+        },
+        "113013183-X_32": {
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "atividade": 1,
+          "incompleto": false,
+          "livro": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "caderno": 3
+        },
+        "110654677-5_28": {
+          "dormiu": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "isContagem": true,
+          "livro": false,
+          "caderno": 6,
+          "atividade": 1,
+          "pontoPositivo": 0
+        },
+        "113716677-0_33": {
+          "pontoPositivo": 0,
+          "isContagem": true,
+          "livro": false,
+          "incompleto": false,
+          "atividade": 1,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "dormiu": false,
+          "caderno": 6
+        },
+        "122631316-4_24": {
+          "pontoNegativo": 0,
+          "atividade": 1,
+          "livro": false,
+          "incompleto": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": 3,
+          "isContagem": true
+        },
+        "113016409-3_20": {
+          "copiou": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "caderno": 7,
+          "isContagem": true,
+          "atividade": 1,
+          "incompleto": false,
+          "pontoPositivo": 0
+        },
+        "111906847-2_14": {
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "atividade": 1,
+          "copiou": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "caderno": 3,
+          "isContagem": true
+        },
+        "112432929-8_2": {
+          "isContagem": true,
+          "livro": false,
+          "incompleto": false,
+          "atividade": 1,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "dormiu": false,
+          "caderno": 5,
+          "pontoNegativo": 0
+        },
+        "111927269-5_27": {
+          "isContagem": true,
+          "caderno": 2,
+          "copiou": false,
+          "incompleto": false,
+          "dormiu": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "atividade": 1,
+          "pontoPositivo": 0
+        },
+        "116285346-3_19": {
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "isContagem": true,
+          "livro": false,
+          "atividade": 1,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "copiou": false,
+          "caderno": 9
+        },
+        "110790133-9_29": {
+          "caderno": 8,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "atividade": 1,
+          "isContagem": true,
+          "incompleto": false
+        },
+        "122756090-4_26": {
+          "caderno": 3,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "livro": false,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "atividade": 1
+        },
+        "113666722-2_8": {
+          "incompleto": false,
+          "atividade": 1,
+          "pontoPositivo": 0,
+          "isContagem": true,
+          "dormiu": false,
+          "livro": false,
+          "caderno": 6,
+          "pontoNegativo": 0,
+          "copiou": false
+        },
+        "116523864-0_5": {
+          "isContagem": true,
+          "caderno": 1,
+          "atividade": 1,
+          "copiou": false,
+          "dormiu": false,
+          "livro": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0
+        },
+        "122621334-0_1": {
+          "livro": false,
+          "isContagem": true,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "atividade": 1,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "caderno": 9,
+          "dormiu": false
+        },
+        "ID_7_8": {
+          "livro": false,
+          "caderno": 6,
+          "copiou": false,
+          "isContagem": true,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "atividade": 1,
+          "pontoNegativo": 0
+        },
+        "ID_10_11": {
+          "isContagem": true,
+          "atividade": 1,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "caderno": 6
+        },
+        "ID_55_59": {
+          "caderno": 4,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "livro": false,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "atividade": 1
+        },
+        "ID_16_18": {
+          "incompleto": false,
+          "isContagem": true,
+          "pontoNegativo": 0,
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "atividade": 1,
+          "caderno": 7,
+          "dormiu": false
+        },
+        "ID_5_6": {
+          "incompleto": false,
+          "atividade": 1,
+          "caderno": 4,
+          "dormiu": false,
+          "isContagem": true,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "pontoPositivo": 0
+        }
+      },
+      "2026-09-16": {
+        "000111529535-4_4_1789560401876_vgka": {
+          "incompleto": false,
+          "livro": false,
+          "caderno": true,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "atividade": false
+        },
+        "000111906873_2_1789560401876_79kr": {
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": true,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "livro": false,
+          "atividade": false
+        },
+        "000109765253-1_18_1789560401877_ynbl": {
+          "copiou": false,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "caderno": true,
+          "livro": false
+        },
+        "000112931798-5_8_1789560401876_wmxy": {
+          "copiou": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "caderno": true,
+          "incompleto": false,
+          "livro": false,
+          "dormiu": false,
+          "atividade": false
+        },
+        "000116771504_23_1789560401877_cwdr": {
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "copiou": false,
+          "livro": false,
+          "incompleto": false
+        },
+        "000110904686-8_1_1789560401876_ynef": {
+          "livro": false,
+          "incompleto": false,
+          "copiou": false,
+          "caderno": true,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "dormiu": false
+        },
+        "000109637573-4_7_1789560401876_gtkz": {
+          "livro": false,
+          "incompleto": false,
+          "dormiu": false,
+          "caderno": true,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "atividade": false
+        },
+        "000113717762-7_10_1789560401876_b4ln": {
+          "atividade": false,
+          "copiou": false,
+          "caderno": true,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "livro": false,
+          "pontoNegativo": 0
+        },
+        "000112960594-2_16_1789560401877_qixp": {
+          "incompleto": false,
+          "livro": false,
+          "caderno": true,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": false
+        },
+        "000111906894-0_21_1789560401877_brfo": {
+          "livro": false,
+          "dormiu": false,
+          "caderno": true,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "incompleto": false
+        },
+        "000113000864-2_12_1789560401877_yyk5": {
+          "copiou": false,
+          "caderno": true,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "livro": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "atividade": false
+        },
+        "000110654751-2_6_1789560401876_6zy2": {
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "dormiu": false,
+          "caderno": false,
+          "livro": false,
+          "incompleto": false
+        },
+        "000111960136-8_19_1789560401877_9jm7": {
+          "incompleto": false,
+          "livro": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "caderno": false
+        },
+        "000110796965-7_14_1789560401877_gd9v": {
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "caderno": true,
+          "livro": false,
+          "atividade": false,
+          "incompleto": false
+        },
+        "000112995130-3_13_1789560401877_rs2z": {
+          "copiou": false,
+          "caderno": true,
+          "pontoPositivo": 0,
+          "livro": false,
+          "dormiu": false,
+          "incompleto": false,
+          "atividade": false,
+          "pontoNegativo": 0
+        },
+        "000110790476_17_1789560401877_sqnx": {
+          "pontoNegativo": 0,
+          "copiou": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "dormiu": false,
+          "atividade": false,
+          "caderno": true
+        },
+        "000113792497-4_3_1789560401876_jvid": {
+          "atividade": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "caderno": false,
+          "copiou": false
+        }
+      }
+    },
+    "Alunos 3A__ELE": {
+      "2026-09-18": {
+        "112664577-1_17": {
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "livro": false,
+          "copiou": false,
+          "incompleto": false,
+          "atividade": false
+        },
+        "112926873-1_6": {
+          "atividade": false,
+          "copiou": false,
+          "caderno": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "livro": false
+        },
+        "111625940-0_18": {
+          "pontoPositivo": 0,
+          "caderno": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "atividade": false,
+          "incompleto": false,
+          "copiou": false
+        },
+        "125803317-3_15": {
+          "copiou": false,
+          "caderno": false,
+          "dormiu": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "livro": false
+        },
+        "111142386-6_10": {
+          "pontoPositivo": 0,
+          "copiou": false,
+          "atividade": false,
+          "caderno": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "livro": false
+        },
+        "112927553-X_11": {
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "caderno": false,
+          "atividade": false,
+          "livro": false
+        },
+        "112983264-8_16": {
+          "atividade": false,
+          "livro": false,
+          "copiou": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoPositivo": 0
+        },
+        "113809265-4_3": {
+          "incompleto": false,
+          "copiou": false,
+          "atividade": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "pontoNegativo": 0,
+          "caderno": false
+        },
+        "125832692-9_9": {
+          "pontoNegativo": 0,
+          "livro": false,
+          "copiou": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false
+        },
+        "112706493-9_1": {
+          "livro": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "atividade": false,
+          "incompleto": false,
+          "copiou": false
+        }
+      },
+      "2026-09-16": {
+        "111625940-0_18": {
+          "livro": false,
+          "incompleto": false,
+          "copiou": false,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "dormiu": false
+        },
+        "112664577-1_17": {
+          "atividade": false,
+          "incompleto": false,
+          "dormiu": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "copiou": false
+        },
+        "112926873-1_6": {
+          "caderno": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false,
+          "atividade": false,
+          "copiou": false
+        },
+        "112983264-8_16": {
+          "livro": false,
+          "caderno": false,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "atividade": false,
+          "pontoNegativo": 0
+        },
+        "112927553-X_11": {
+          "pontoPositivo": 0,
+          "livro": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "copiou": false,
+          "incompleto": false,
+          "atividade": false
+        },
+        "111142386-6_10": {
+          "caderno": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "livro": false
+        },
+        "125803317-3_15": {
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "livro": false,
+          "copiou": false,
+          "dormiu": false,
+          "caderno": false
+        },
+        "113809265-4_3": {
+          "pontoPositivo": 0,
+          "livro": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "caderno": false,
+          "atividade": false,
+          "dormiu": false
+        },
+        "125832692-9_9": {
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "dormiu": false,
+          "atividade": false,
+          "incompleto": false,
+          "caderno": false
+        },
+        "112706493-9_1": {
+          "atividade": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "livro": false,
+          "copiou": false,
+          "incompleto": false,
+          "dormiu": false,
+          "caderno": false
+        }
+      },
+      "2026-09-17": {
+        "111142386-6_10": {
+          "caderno": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "atividade": false,
+          "livro": false
+        },
+        "112927553-X_11": {
+          "atividade": false,
+          "dormiu": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "livro": false,
+          "incompleto": false,
+          "pontoPositivo": 0
+        },
+        "112983264-8_16": {
+          "copiou": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "dormiu": false,
+          "livro": false
+        },
+        "112926873-1_6": {
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "caderno": false,
+          "atividade": false,
+          "copiou": false
+        },
+        "125803317-3_15": {
+          "pontoNegativo": 0,
+          "atividade": false,
+          "incompleto": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "dormiu": false,
+          "livro": false
+        },
+        "112664577-1_17": {
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": false,
+          "caderno": false,
+          "copiou": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0
+        },
+        "111625940-0_18": {
+          "livro": false,
+          "copiou": false,
+          "incompleto": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "dormiu": false
+        },
+        "125832692-9_9": {
+          "livro": false,
+          "caderno": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "copiou": false,
+          "atividade": false
+        },
+        "113809265-4_3": {
+          "copiou": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "dormiu": false,
+          "atividade": false,
+          "caderno": false
+        },
+        "112706493-9_1": {
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "caderno": false,
+          "copiou": false
+        }
+      }
+    },
+    "Alunos 3A__PROG": {
+      "2026-09-17": {
+        "113809265-4_3": {
+          "incompleto": false,
+          "copiou": false,
+          "caderno": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "dormiu": false,
+          "pontoPositivo": 0
+        },
+        "125832692-9_9": {
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "dormiu": false,
+          "copiou": false,
+          "caderno": false
+        },
+        "112706493-9_1": {
+          "livro": false,
+          "copiou": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "caderno": false
+        },
+        "125803317-3_15": {
+          "copiou": false,
+          "atividade": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "incompleto": false
+        },
+        "112926873-1_6": {
+          "caderno": false,
+          "dormiu": false,
+          "livro": false,
+          "incompleto": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "copiou": false
+        },
+        "111142386-6_10": {
+          "caderno": false,
+          "dormiu": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "livro": false
+        },
+        "112983264-8_16": {
+          "pontoPositivo": 0,
+          "livro": false,
+          "incompleto": false,
+          "atividade": false,
+          "caderno": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "copiou": false
+        },
+        "112927553-X_11": {
+          "atividade": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "copiou": false
+        },
+        "112664577-1_17": {
+          "livro": false,
+          "incompleto": false,
+          "atividade": false,
+          "dormiu": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "copiou": false
+        },
+        "111625940-0_18": {
+          "dormiu": false,
+          "atividade": false,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "incompleto": false
+        }
+      },
+      "2026-09-16": {
+        "112706493-9_1": {
+          "copiou": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "livro": false,
+          "dormiu": false,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "incompleto": false
+        },
+        "125832692-9_9": {
+          "livro": false,
+          "caderno": false,
+          "copiou": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0
+        },
+        "113809265-4_3": {
+          "pontoPositivo": 0,
+          "livro": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "dormiu": false,
+          "atividade": false,
+          "caderno": false
+        },
+        "112927553-X_11": {
+          "livro": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "atividade": false,
+          "dormiu": false
+        },
+        "112983264-8_16": {
+          "caderno": false,
+          "dormiu": false,
+          "atividade": false,
+          "copiou": false,
+          "incompleto": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0
+        },
+        "111142386-6_10": {
+          "pontoNegativo": 0,
+          "caderno": false,
+          "dormiu": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "incompleto": false,
+          "livro": false
+        },
+        "125803317-3_15": {
+          "livro": false,
+          "dormiu": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "incompleto": false
+        },
+        "111625940-0_18": {
+          "pontoNegativo": 0,
+          "caderno": false,
+          "dormiu": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "atividade": false
+        },
+        "112664577-1_17": {
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "copiou": false,
+          "caderno": false
+        },
+        "112926873-1_6": {
+          "caderno": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "atividade": false,
+          "incompleto": false,
+          "dormiu": false
+        }
+      }
+    },
+    "Alunos 3ADM__MAT": {
+      "2026-09-24": {
+        "000110790429_3_1789557133236_2t90": {
+          "pontoNegativoTrabalho": 0,
+          "incompleto": false,
+          "caderno": true,
+          "atividade": true,
+          "dormiu": false,
+          "isContagem": true,
+          "pontoNegativo": 0,
+          "livro": 0,
+          "pontoPositivoTrabalho": 0,
+          "pontoPositivo": 0,
+          "copiou": false
+        },
+        "000112927100_13_1789557133236_dej5": {
+          "copiou": false,
+          "isContagem": true,
+          "pontoNegativoTrabalho": 0,
+          "atividade": 0,
+          "caderno": 0,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "livro": 0,
+          "pontoPositivoTrabalho": 0,
+          "dormiu": false,
+          "pontoPositivo": 0
+        },
+        "000111070665_28_1789557133236_v93n": {
+          "dormiu": false,
+          "pontoPositivoTrabalho": 0,
+          "pontoPositivo": 0,
+          "isContagem": true,
+          "livro": 0,
+          "caderno": 0,
+          "atividade": 0,
+          "pontoNegativoTrabalho": 0,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "copiou": false
+        },
+        "000109739856_5_1789557133236_exgf": {
+          "atividade": true,
+          "isContagem": true,
+          "pontoNegativo": 0,
+          "pontoPositivoTrabalho": 0,
+          "copiou": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "pontoNegativoTrabalho": 0,
+          "livro": 0,
+          "dormiu": false,
+          "caderno": true
+        },
+        "000112920756_2_1789557133236_uegi": {
+          "pontoNegativoTrabalho": 0,
+          "livro": 0,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "copiou": false,
+          "caderno": true,
+          "atividade": true,
+          "pontoPositivoTrabalho": 0,
+          "isContagem": true,
+          "pontoPositivo": 0
+        },
+        "000112960314_14_1789557133236_z0ox": {
+          "pontoNegativo": 0,
+          "pontoPositivoTrabalho": 0,
+          "livro": 0,
+          "caderno": 0,
+          "atividade": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "isContagem": true,
+          "pontoNegativoTrabalho": 0
+        },
+        "000112911981_15_1789557133236_veq5": {
+          "pontoPositivo": 0,
+          "livro": 0,
+          "pontoNegativoTrabalho": 0,
+          "dormiu": false,
+          "copiou": false,
+          "pontoPositivoTrabalho": 0,
+          "incompleto": false,
+          "caderno": 0,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "atividade": 0
+        },
+        "000111906883_22_1789557133236_bzus": {
+          "atividade": 0,
+          "pontoNegativo": 0,
+          "pontoNegativoTrabalho": 0,
+          "caderno": 0,
+          "copiou": false,
+          "livro": 0,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "pontoPositivoTrabalho": 0,
+          "isContagem": true
+        },
+        "000112932002_25_1789557133236_xbv4": {
+          "isContagem": true,
+          "pontoNegativo": 0,
+          "atividade": 0,
+          "copiou": false,
+          "pontoNegativoTrabalho": 0,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoPositivoTrabalho": 0,
+          "caderno": 0,
+          "livro": 0
+        },
+        "000112960493_4_1789557133236_ayse": {
+          "livro": 0,
+          "pontoNegativoTrabalho": 0,
+          "caderno": true,
+          "atividade": true,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "copiou": false,
+          "isContagem": true,
+          "pontoPositivo": 0,
+          "pontoPositivoTrabalho": 0,
+          "incompleto": false
+        },
+        "000111392172_26_1789557133236_bbiu": {
+          "pontoNegativoTrabalho": 0,
+          "incompleto": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "dormiu": false,
+          "pontoPositivoTrabalho": 0,
+          "caderno": 0,
+          "pontoPositivo": 0,
+          "livro": 0,
+          "atividade": 0
+        },
+        "000109875019_7_1789557133236_y06z": {
+          "pontoPositivoTrabalho": 0,
+          "livro": 0,
+          "incompleto": false,
+          "caderno": 0,
+          "isContagem": true,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "atividade": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "pontoNegativoTrabalho": 0
+        },
+        "000112300600_27_1789557133236_r626": {
+          "atividade": 0,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "pontoNegativoTrabalho": 0,
+          "caderno": 0,
+          "livro": 0,
+          "isContagem": true,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoPositivoTrabalho": 0
+        },
+        "000113809954_20_1789557133236_2k5v": {
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "pontoPositivoTrabalho": 0,
+          "dormiu": false,
+          "isContagem": true,
+          "livro": 0,
+          "atividade": 0,
+          "pontoNegativoTrabalho": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "caderno": 0
+        },
+        "000111906881_16_1789557133236_w5vh": {
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "atividade": 0,
+          "pontoNegativoTrabalho": 0,
+          "pontoPositivo": 0,
+          "livro": 0,
+          "caderno": 0,
+          "pontoPositivoTrabalho": 0,
+          "isContagem": true,
+          "copiou": false,
+          "incompleto": false
+        },
+        "000112960726_24_1789557133236_ppx3": {
+          "dormiu": false,
+          "caderno": 0,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "pontoNegativoTrabalho": 0,
+          "isContagem": true,
+          "pontoPositivoTrabalho": 0,
+          "pontoNegativo": 0,
+          "atividade": 0,
+          "copiou": false,
+          "livro": 0
+        },
+        "000113112632_29_1789557133236_z3yu": {
+          "copiou": false,
+          "isContagem": true,
+          "livro": 0,
+          "caderno": 0,
+          "pontoNegativo": 0,
+          "pontoNegativoTrabalho": 0,
+          "incompleto": false,
+          "pontoPositivoTrabalho": 0,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "atividade": 0
+        },
+        "000111626534_21_1789557133236_56kp": {
+          "pontoPositivo": 0,
+          "isContagem": true,
+          "pontoPositivoTrabalho": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": 0,
+          "livro": 0,
+          "atividade": 0,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoNegativoTrabalho": 0
+        },
+        "000112926453_11_1789557133236_gsh4": {
+          "pontoPositivo": 0,
+          "livro": 0,
+          "caderno": 0,
+          "pontoPositivoTrabalho": 0,
+          "atividade": 0,
+          "dormiu": false,
+          "pontoNegativoTrabalho": 0,
+          "copiou": false,
+          "isContagem": true,
+          "pontoNegativo": 0,
+          "incompleto": false
+        },
+        "000111906878_12_1789557133236_f0w5": {
+          "pontoPositivo": 0,
+          "atividade": true,
+          "dormiu": false,
+          "pontoPositivoTrabalho": 0,
+          "pontoNegativoTrabalho": 0,
+          "livro": 0,
+          "caderno": true,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "copiou": false,
+          "incompleto": false
+        },
+        "000110790261_9_1789557133236_529t": {
+          "copiou": false,
+          "pontoPositivoTrabalho": 0,
+          "isContagem": true,
+          "pontoPositivo": 0,
+          "atividade": true,
+          "livro": 0,
+          "caderno": true,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativoTrabalho": 0,
+          "pontoNegativo": 0
+        },
+        "000110654549_10_1789557133236_iydx": {
+          "pontoNegativoTrabalho": 0,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "isContagem": true,
+          "copiou": false,
+          "livro": 0,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "pontoPositivoTrabalho": 0,
+          "caderno": true,
+          "atividade": true
+        },
+        "000110901955_17_1789557133236_cat0": {
+          "caderno": 0,
+          "atividade": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "pontoNegativoTrabalho": 0,
+          "livro": 0,
+          "incompleto": false,
+          "copiou": false,
+          "pontoPositivoTrabalho": 0,
+          "isContagem": true,
+          "pontoNegativo": 0
+        },
+        "000111412705_1_1789557133236_clxg": {
+          "isContagem": true,
+          "pontoPositivoTrabalho": 0,
+          "dormiu": false,
+          "atividade": true,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "caderno": true,
+          "livro": 0,
+          "pontoNegativoTrabalho": 0,
+          "pontoPositivo": 0,
+          "copiou": false
+        },
+        "000112877032_8_1789557133236_h2km": {
+          "pontoNegativoTrabalho": 0,
+          "livro": 0,
+          "atividade": true,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "caderno": true,
+          "isContagem": true,
+          "pontoPositivoTrabalho": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoNegativo": 0
+        },
+        "000110784449_18_1789557133236_1khh": {
+          "livro": 0,
+          "pontoPositivoTrabalho": 0,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "pontoNegativoTrabalho": 0,
+          "copiou": false,
+          "incompleto": false,
+          "caderno": 0,
+          "pontoPositivo": 0,
+          "isContagem": true,
+          "atividade": 0
+        },
+        "000111270403_23_1789557133236_pt3i": {
+          "pontoNegativoTrabalho": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "livro": 0,
+          "atividade": 0,
+          "incompleto": false,
+          "copiou": false,
+          "caderno": 0,
+          "pontoPositivoTrabalho": 0,
+          "isContagem": true,
+          "pontoPositivo": 0
+        },
+        "000111376783_19_1789557133236_hwd1": {
+          "pontoNegativoTrabalho": 0,
+          "caderno": 0,
+          "isContagem": true,
+          "livro": 0,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "pontoPositivoTrabalho": 0,
+          "atividade": 0,
+          "pontoPositivo": 0
+        }
+      },
+      "2026-09-16": {
+        "000110654549_10_1789557133236_iydx": {
+          "pontoNegativo": 0,
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "atividade": false,
+          "dormiu": false,
+          "caderno": false
+        },
+        "000110901955_17_1789557133236_cat0": {
+          "dormiu": false,
+          "livro": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "incompleto": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "copiou": false
+        },
+        "000109875019_7_1789557133236_y06z": {
+          "copiou": false,
+          "incompleto": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "caderno": false
+        },
+        "000112926453_11_1789557133236_gsh4": {
+          "incompleto": false,
+          "dormiu": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "copiou": false,
+          "livro": false
+        },
+        "000111626534_21_1789557133236_56kp": {
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "atividade": false,
+          "copiou": false,
+          "livro": false,
+          "caderno": false
+        },
+        "000112960493_4_1789557133236_ayse": {
+          "copiou": false,
+          "caderno": false,
+          "incompleto": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "dormiu": false
+        },
+        "000111906878_12_1789557133236_f0w5": {
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "caderno": false,
+          "copiou": false,
+          "dormiu": false
+        },
+        "000110784449_18_1789557133236_1khh": {
+          "dormiu": false,
+          "incompleto": false,
+          "atividade": false,
+          "caderno": false,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "livro": false
+        },
+        "000111270403_23_1789557133236_pt3i": {
+          "copiou": false,
+          "atividade": false,
+          "livro": false,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "pontoPositivo": 0
+        },
+        "000110790429_3_1789557133236_2t90": {
+          "pontoNegativo": 0,
+          "caderno": false,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "livro": false,
+          "atividade": false
+        },
+        "000111376783_19_1789557133236_hwd1": {
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "livro": false,
+          "atividade": false
+        },
+        "000112920756_2_1789557133236_uegi": {
+          "pontoPositivo": 0,
+          "dormiu": false,
+          "incompleto": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "copiou": false,
+          "livro": false,
+          "atividade": false
+        },
+        "000109739856_5_1789557133236_exgf": {
+          "dormiu": false,
+          "livro": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "incompleto": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "copiou": false
+        },
+        "000112877032_8_1789557133236_h2km": {
+          "livro": false,
+          "caderno": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "incompleto": false,
+          "atividade": false
+        },
+        "000111412705_1_1789557133236_clxg": {
+          "pontoPositivo": 0,
+          "copiou": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "atividade": false,
+          "livro": false,
+          "incompleto": false
+        },
+        "000112960314_14_1789557133236_z0ox": {
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": false,
+          "livro": false,
+          "atividade": false,
+          "copiou": false,
+          "incompleto": false
+        },
+        "000112927100_13_1789557133236_dej5": {
+          "pontoPositivo": 0,
+          "atividade": false,
+          "livro": false,
+          "dormiu": false,
+          "pontoNegativo": 0,
+          "caderno": false,
+          "incompleto": false,
+          "copiou": false
+        },
+        "000111070665_28_1789557133236_v93n": {
+          "livro": false,
+          "copiou": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "dormiu": false,
+          "caderno": false
+        },
+        "000110790261_9_1789557133236_529t": {
+          "atividade": false,
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "livro": false
+        },
+        "000111392172_26_1789557133236_bbiu": {
+          "dormiu": false,
+          "caderno": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "incompleto": false,
+          "atividade": false,
+          "pontoNegativo": 0
+        },
+        "000113112632_29_1789557133236_z3yu": {
+          "livro": false,
+          "incompleto": false,
+          "dormiu": false,
+          "atividade": false,
+          "caderno": false,
+          "pontoNegativo": 0,
+          "copiou": false,
+          "pontoPositivo": 0
+        },
+        "000112960726_24_1789557133236_ppx3": {
+          "copiou": false,
+          "dormiu": false,
+          "atividade": false,
+          "pontoNegativo": 0,
+          "livro": false,
+          "pontoPositivo": 0,
+          "caderno": false,
+          "incompleto": false
+        },
+        "000113809954_20_1789557133236_2k5v": {
+          "livro": false,
+          "copiou": false,
+          "caderno": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "incompleto": false,
+          "dormiu": false,
+          "pontoNegativo": 0
+        },
+        "000112300600_27_1789557133236_r626": {
+          "dormiu": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "livro": false,
+          "caderno": false,
+          "incompleto": false,
+          "atividade": false,
+          "pontoNegativo": 0
+        },
+        "000111906881_16_1789557133236_w5vh": {
+          "pontoNegativo": 0,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "livro": false,
+          "copiou": false,
+          "incompleto": false,
+          "dormiu": false,
+          "caderno": false
+        },
+        "000112911981_15_1789557133236_veq5": {
+          "dormiu": false,
+          "incompleto": false,
+          "caderno": false,
+          "atividade": false,
+          "pontoPositivo": 0,
+          "copiou": false,
+          "pontoNegativo": 0,
+          "livro": false
+        },
+        "000112932002_25_1789557133236_xbv4": {
+          "pontoNegativo": 0,
+          "livro": false,
+          "copiou": false,
+          "pontoPositivo": 0,
+          "atividade": false,
+          "caderno": false,
+          "dormiu": false,
+          "incompleto": false
+        },
+        "000111906883_22_1789557133236_bzus": {
+          "livro": false,
+          "caderno": false,
+          "dormiu": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "incompleto": false,
+          "copiou": false,
+          "atividade": false
+        }
+      },
+      "2026-09-28": {
+        "000111412705_1_1789557133236_clxg": {
+          "copiou": false,
+          "pontoNegativoTrabalho": 0,
+          "atividade": false,
+          "livro": false,
+          "incompleto": false,
+          "pontoPositivo": 0,
+          "pontoNegativo": 0,
+          "pontoPositivoTrabalho": 0,
+          "dormiu": false,
+          "caderno": false
+        }
+      }
+    }
+  },
+  "conteudos": {
+    "Alunos 2C__LIDORA": {
+      "2026-09-18": "Pesquisa: Grandes Negociações da história",
+      "2026-09-15": "Revisão de Juros simples e compostos"
+    },
+    "Alunos 3ADM__MAT": {
+      "2026-09-24": "Contagem de vistos anteriores do bimestre"
+    },
+    "Alunos 3B__MAT": {
+      "2026-09-24": "Contagem de vistos anteriores do bimestre"
+    },
+    "Alunos 3A__MAT": {
+      "2026-09-25": "Contagem de vistos anteriores do bimestre"
+    },
+    "Alunos 2C__OEMAT": {
+      "2026-09-15": "Revisão de Juros simples e compostos"
+    },
+    "Alunos 3AGRO__MAT": {
+      "2026-09-24": "Contagem de vistos anteriores do bimestre"
+    }
+  }
+}
