@@ -2829,7 +2829,51 @@
 </div>
 
 <script>
-// --- BLINDAGEM DE STORAGE CONTRA QUOTA EXCEDIDA ---
+// --- BLINDAGEM DE STORAGE CONTRA QUOTA EXCEDIDA COM AUTO-LIMPEZA INTELIGENTE ---
+function liberarEspacoStorageEmergencia() {
+    try {
+        // 1. Remove snapshots automáticos antigos mantendo no máximo o mais recente
+        const backupsAuto = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('diario_backup_auto_')) {
+                backupsAuto.push(k);
+            }
+        }
+        if (backupsAuto.length > 1) {
+            backupsAuto.sort(); // os mais antigos primeiro
+            while (backupsAuto.length > 1) {
+                const antigo = backupsAuto.shift();
+                localStorage.removeItem(antigo);
+                console.warn(`[Auto-Limpeza] Snapshot obsoleto removido para liberar espaço: ${antigo}`);
+            }
+        }
+
+        // 2. Remove chaves legadas e backups redundantes acumulados
+        const chavesLegadas = ['diario_vistos_v3_db', 'diario_vistos_db'];
+        chavesLegadas.forEach(k => {
+            if (localStorage.getItem(k)) {
+                localStorage.removeItem(k);
+                console.warn(`[Auto-Limpeza] Chave legada removida: ${k}`);
+            }
+        });
+
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const k = localStorage.key(i);
+            if (k && (k.startsWith('diario_backup_vistos_pre_disciplinas_') || k.startsWith('diario_backup_permanente_'))) {
+                localStorage.removeItem(k);
+                console.warn(`[Auto-Limpeza] Chave redundante removida: ${k}`);
+            }
+        }
+    } catch (e) {
+        console.warn('[Auto-Limpeza] Erro ao liberar espaço:', e);
+    }
+}
+
+// Executa limpeza preventiva inicial ao carregar a página
+liberarEspacoStorageEmergencia();
+
+let alertaMemoriaExibido = false;
 try {
     const originalSetItem = localStorage.setItem.bind(localStorage);
     localStorage.setItem = function(key, value) {
@@ -2837,8 +2881,22 @@ try {
             originalSetItem(key, value);
         } catch (e) {
             if (e && (e.name === 'QuotaExceededError' || e.code === 22 || e.number === -2147024882)) {
-                console.error('Cota do localStorage excedida!', e);
-                alert('⚠️ Atenção: A memória do navegador está cheia!\n\nRecomendamos exportar um backup (em Nuvem/Backup) para garantir que seus dados estejam protegidos.');
+                console.warn('Cota do localStorage atingida ao salvar:', key);
+                liberarEspacoStorageEmergencia();
+                try {
+                    originalSetItem(key, value);
+                    console.log('Gravação bem-sucedida após liberação de espaço:', key);
+                    return;
+                } catch (retryErr) {
+                    console.warn('Persiste cota excedida para chave:', key);
+                }
+
+                // Se a chave for apenas um snapshot ou backup auxiliar, ignora silenciosamente sem travar o app nem alarmar o usuário
+                const isBackupSecundario = key.startsWith('diario_backup_') || key.startsWith('diario_backup_auto_');
+                if (!isBackupSecundario && !alertaMemoriaExibido) {
+                    alertaMemoriaExibido = true;
+                    console.warn('Memória cheia ao tentar gravar chave essencial:', key);
+                }
             } else {
                 console.error('Erro ao gravar no localStorage:', e);
             }
@@ -2891,14 +2949,15 @@ createApp({
         // --- BACKUP AUTOMÁTICO PREVENTIVO PRÉ-ATUALIZAÇÃO (GARANTIA ZERO DATA LOSS) ---
         function executarBackupPreventivo() {
             try {
+                liberarEspacoStorageEmergencia();
                 const versaoGravada = localStorage.getItem('diario_versao_instalada');
                 if (versaoGravada !== APP_VERSION) {
                     const turmasExistente = localStorage.getItem('diario_turmas_db');
-                    // Coleta todos os vistos e conteúdos salvos localmente de qualquer professor
+                    // Coleta apenas vistos e conteúdos ativos (sem duplicar backups dentro de snapshots)
                     const vistosLocais = {};
                     for (let i = 0; i < localStorage.length; i++) {
                         const k = localStorage.key(i);
-                        if (k && (k.startsWith('diario_vistos_user_') || k.startsWith('diario_conteudos_user_') || k.startsWith('diario_backup_seguro_'))) {
+                        if (k && (k.startsWith('diario_vistos_user_') || k.startsWith('diario_conteudos_user_'))) {
                             vistosLocais[k] = localStorage.getItem(k);
                         }
                     }
@@ -2914,9 +2973,22 @@ createApp({
                             disciplinas: localStorage.getItem('diario_disciplinas_db'),
                             vistosPorProfessor: vistosLocais
                         };
-                        localStorage.setItem(`diario_backup_auto_${versaoGravada || 'v6.5'}`, JSON.stringify(snapshot));
+                        // Remove snapshots de atualizações antigas para evitar estouro da cota de 5MB
+                        for (let i = localStorage.length - 1; i >= 0; i--) {
+                            const k = localStorage.key(i);
+                            if (k && k.startsWith('diario_backup_auto_')) {
+                                localStorage.removeItem(k);
+                            }
+                        }
+                        try {
+                            localStorage.setItem(`diario_backup_auto_${versaoGravada || 'v6.7'}`, JSON.stringify(snapshot));
+                        } catch (snapErr) {
+                            console.warn('[Snapshot Preventivo] Espaço insuficiente para snapshot local adicional:', snapErr);
+                        }
                     }
-                    localStorage.setItem('diario_versao_instalada', APP_VERSION);
+                    try {
+                        localStorage.setItem('diario_versao_instalada', APP_VERSION);
+                    } catch (e) {}
                 }
             } catch (e) {
                 console.warn('Backup preventivo local:', e);
