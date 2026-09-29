@@ -758,7 +758,7 @@
                                         :class="['h-8 px-2.5 sm:px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 touch-btn', 
                                                 getRegistro(aluno.id).caderno ? 'bg-amber-500 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900']">
                                     <i class="fa-solid fa-book-bookmark text-xs" :class="getRegistro(aluno.id).caderno ? 'text-white' : 'text-amber-500'"></i>
-                                    <span>Caderno</span>
+                                    <span>Caderno{{ typeof getRegistro(aluno.id).caderno === 'number' && getRegistro(aluno.id).caderno > 1 ? ' (' + getRegistro(aluno.id).caderno + ')' : '' }}</span>
                                 </button>
 
                                 <!-- LIVRO -->
@@ -767,7 +767,7 @@
                                         :class="['h-8 px-2.5 sm:px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 touch-btn', 
                                                 getRegistro(aluno.id).livro ? 'bg-sky-600 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900']">
                                     <i class="fa-solid fa-layer-group text-xs" :class="getRegistro(aluno.id).livro ? 'text-white' : 'text-sky-600'"></i>
-                                    <span>Livro</span>
+                                    <span>Livro{{ typeof getRegistro(aluno.id).livro === 'number' && getRegistro(aluno.id).livro > 1 ? ' (' + getRegistro(aluno.id).livro + ')' : '' }}</span>
                                 </button>
 
                                 <!-- ACRÉSCIMO VISTOS (+0,5) -->
@@ -813,7 +813,7 @@
                                         :class="['h-8 px-2.5 sm:px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 touch-btn', 
                                                 getRegistro(aluno.id).atividade ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900']">
                                     <i class="fa-solid fa-file-lines text-xs" :class="getRegistro(aluno.id).atividade ? 'text-white' : 'text-emerald-600'"></i>
-                                    <span>Trabalho / Ativ.</span>
+                                    <span>Trabalho / Ativ.{{ typeof getRegistro(aluno.id).atividade === 'number' && getRegistro(aluno.id).atividade > 1 ? ' (' + getRegistro(aluno.id).atividade + ')' : '' }}</span>
                                 </button>
 
                                 <!-- ACRÉSCIMO TRABALHO (+0,5) -->
@@ -2242,7 +2242,39 @@
                         </div>
                     </div>
 
+                    <!-- CAMADA 4: PAINEL DE SAÚDE DOS DADOS -->
+                    <div :class="['rounded-2xl border p-3.5 space-y-2 transition', saudeDosDados.ok ? 'bg-emerald-50/60 border-emerald-200' : 'bg-amber-50/70 border-amber-300']">
+                        <div class="flex items-center justify-between">
+                            <label class="text-[11px] font-bold uppercase tracking-wider" :class="saudeDosDados.ok ? 'text-emerald-900' : 'text-amber-900'">
+                                <i :class="['fa-solid mr-1', saudeDosDados.ok ? 'fa-shield-halved text-emerald-600' : 'fa-triangle-exclamation text-amber-600']"></i>
+                                Saúde dos Dados
+                            </label>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" :class="saudeDosDados.ok ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-200 text-amber-900'">
+                                {{ saudeDosDados.ok ? '✅ Tudo OK' : '⚠️ Atenção' }}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                            <div class="bg-white/70 rounded-lg px-2.5 py-1.5 border border-slate-200">
+                                <div class="font-bold text-slate-500 uppercase text-[10px]">Backups Locais</div>
+                                <div class="font-extrabold text-indigo-900">{{ saudeDosDados.totalBackups }} / 5</div>
+                            </div>
+                            <div class="bg-white/70 rounded-lg px-2.5 py-1.5 border border-slate-200">
+                                <div class="font-bold text-slate-500 uppercase text-[10px]">Último Backup</div>
+                                <div class="font-extrabold text-indigo-900 truncate text-[10px]">
+                                    {{ saudeDosDados.ultimoBackup ? new Date(saudeDosDados.ultimoBackup).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="saudeDosDados.alertas.length > 0" class="space-y-1">
+                            <p v-for="alerta in saudeDosDados.alertas" :key="alerta" class="text-[11px] text-amber-800 leading-tight bg-amber-100/70 rounded-lg px-2.5 py-1.5">{{ alerta }}</p>
+                        </div>
+                        <p v-else class="text-[11px] text-emerald-700 leading-tight">
+                            Integridade verificada. Nenhuma contagem achatada detectada. Backups rotativos ativos.
+                        </p>
+                    </div>
+
                     <!-- Botão de Resgate de Emergência -->
+
                     <button @click="acionarVarreduraManual" class="w-full p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 font-bold text-xs flex items-center justify-between gap-2 transition shadow-xs touch-btn">
                         <span class="flex items-center gap-2">
                             <i class="fa-solid fa-magnifying-glass text-amber-700"></i>
@@ -2944,7 +2976,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '6.8';
+        const APP_VERSION = '6.9';
 
         // --- BACKUP AUTOMÁTICO PREVENTIVO PRÉ-ATUALIZAÇÃO (GARANTIA ZERO DATA LOSS) ---
         function executarBackupPreventivo() {
@@ -3922,6 +3954,7 @@ createApp({
         }
 
         // Conta quantos vistos ativos ou dados válidos existem em um objeto de registros
+        // Suporta contagens bimestrais com múltiplos vistos acumulados por aluno
         function contarTotalVistosEmRegistros(regs) {
             if (!regs || typeof regs !== 'object') return 0;
             let total = 0;
@@ -3935,8 +3968,14 @@ createApp({
                         const item = stMap[stId];
                         if (!item) continue;
                         if (typeof item === 'object') {
-                            if (item.caderno || item.livro || item.atividade || item.visto || item.isContagem || (item.pontoPositivo && item.pontoPositivo !== 0)) {
-                                total++;
+                            const c = typeof item.caderno === 'number' ? item.caderno : (item.caderno ? 1 : 0);
+                            const l = typeof item.livro === 'number' ? item.livro : (item.livro ? 1 : 0);
+                            const a = typeof item.atividade === 'number' ? item.atividade : (item.atividade ? 1 : 0);
+                            const soma = c + l + a;
+                            if (soma > 0) {
+                                total += soma;
+                            } else if (item.visto || (item.pontoPositivo && item.pontoPositivo !== 0)) {
+                                total += 1;
                             }
                         } else if (item === true || item === 1) {
                             total++;
@@ -3963,7 +4002,20 @@ createApp({
             return total;
         }
 
-        // Mesclagem profunda e não-destrutiva de dois mapas de registros (preserva sempre o que foi marcado)
+        // Mescla valores preservando sempre quantidades numéricas de contagens
+        function mesclarValorVisto(valA, valB) {
+            const numA = typeof valA === 'number' ? valA : 0;
+            const numB = typeof valB === 'number' ? valB : 0;
+            if (numA > 0 || numB > 0) {
+                return Math.max(numA, numB);
+            }
+            if (valA === true || valB === true) {
+                return true;
+            }
+            return false;
+        }
+
+        // Mesclagem profunda e não-destrutiva de dois mapas de registros (preserva sempre o que foi marcado e números de contagens)
         function mesclarObjetosRegistros(local, nuvem) {
             if (!local && !nuvem) return {};
             if (!local) return JSON.parse(JSON.stringify(nuvem));
@@ -3985,11 +4037,15 @@ createApp({
                                 if (!stNuvem) {
                                     resultado[k][d][stId] = stLocal;
                                 } else if (stLocal && typeof stLocal === 'object') {
-                                    resultado[k][d][stId] = { ...stNuvem, ...stLocal };
-                                    if (stLocal.caderno) resultado[k][d][stId].caderno = true;
-                                    if (stLocal.livro) resultado[k][d][stId].livro = true;
-                                    if (stLocal.atividade) resultado[k][d][stId].atividade = true;
-                                    if (stLocal.isContagem) resultado[k][d][stId].isContagem = true;
+                                    const base = typeof stNuvem === 'object' ? { ...stNuvem } : {};
+                                    resultado[k][d][stId] = {
+                                        ...base,
+                                        ...stLocal,
+                                        caderno: mesclarValorVisto(stLocal.caderno, base.caderno),
+                                        livro: mesclarValorVisto(stLocal.livro, base.livro),
+                                        atividade: mesclarValorVisto(stLocal.atividade, base.atividade),
+                                        isContagem: !!(stLocal.isContagem || base.isContagem)
+                                    };
                                 }
                             }
                         }
@@ -3997,6 +4053,183 @@ createApp({
                 }
             }
             return resultado;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // CAMADA 1: VALIDAÇÃO DE INTEGRIDADE — nunca gravar bool onde há número
+        // Qualquer campo caderno/livro/atividade que seja number é preservado.
+        // Chamada em todo ponto de escrita: localStorage e Firestore.
+        // ═══════════════════════════════════════════════════════════════
+        function sanitizarRegistros(reg) {
+            if (!reg || typeof reg !== 'object') return reg;
+            for (const turmaK of Object.keys(reg)) {
+                const dias = reg[turmaK];
+                if (!dias || typeof dias !== 'object') continue;
+                for (const diaK of Object.keys(dias)) {
+                    const alunos = dias[diaK];
+                    if (!alunos || typeof alunos !== 'object') continue;
+                    for (const stId of Object.keys(alunos)) {
+                        const item = alunos[stId];
+                        if (!item || typeof item !== 'object') continue;
+                        // Protege campos numéricos: boolean nunca sobrescreve número
+                        ['caderno', 'livro', 'atividade'].forEach(campo => {
+                            const v = item[campo];
+                            // Se era número > 1 e virou bool/0, restaura de _guard_
+                            const guard = item[`_guard_${campo}`];
+                            if (typeof guard === 'number' && guard > 1) {
+                                const vNum = typeof v === 'number' ? v : 0;
+                                if (vNum < guard) {
+                                    item[campo] = guard;
+                                    item.isContagem = true;
+                                }
+                            }
+                            // Atualiza guard sempre que o valor crescer
+                            const vNow = typeof item[campo] === 'number' ? item[campo] : 0;
+                            if (vNow > 1) {
+                                item[`_guard_${campo}`] = vNow;
+                            }
+                        });
+                    }
+                }
+            }
+            return reg;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // CAMADA 2: BACKUP ROTATIVO AUTOMÁTICO (5 últimos, versionados por data/hora)
+        // Chamada antes de qualquer escrita local ou envio à nuvem.
+        // ═══════════════════════════════════════════════════════════════
+        const MAX_BACKUPS_ROTATIVOS = 5;
+        function fazerBackupRotativo(user, reg) {
+            if (!user || !reg) return;
+            const total = contarTotalVistosEmRegistros(reg);
+            if (total === 0) return;
+            try {
+                const agora = new Date().toISOString();
+                const chaveNova = `diario_bkp_rot_${user}_${agora}`;
+                const payload = { savedAt: agora, professor: user, totalVistos: total, registros: reg };
+                localStorage.setItem(chaveNova, JSON.stringify(payload));
+                // Mantém apenas os MAX_BACKUPS_ROTATIVOS mais recentes
+                const prefix = `diario_bkp_rot_${user}_`;
+                const chaves = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith(prefix)) chaves.push(k);
+                }
+                chaves.sort(); // ISO ordena lexicograficamente por data
+                while (chaves.length > MAX_BACKUPS_ROTATIVOS) {
+                    localStorage.removeItem(chaves.shift());
+                }
+            } catch(e) {
+                // localStorage cheio: silencia, não interrompe o fluxo
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // CAMADA 3: EXPORTAÇÃO AUTOMÁTICA MENSAL
+        // Na primeira abertura de cada mês o app baixa automaticamente o JSON e avisa o prof.
+        // ═══════════════════════════════════════════════════════════════
+        function verificarExportacaoMensal(user, reg) {
+            if (!user || !reg) return;
+            const total = contarTotalVistosEmRegistros(reg);
+            if (total === 0) return;
+            try {
+                const mesAtual = new Date().toISOString().slice(0, 7); // "2026-09"
+                const chaveUlt = `diario_ultima_exportacao_auto_${user}`;
+                const ultMes = localStorage.getItem(chaveUlt);
+                if (ultMes === mesAtual) return; // já exportou esse mês
+                localStorage.setItem(chaveUlt, mesAtual);
+                // Gera download silencioso
+                const payload = {
+                    formato: 'diario_digital_vistos',
+                    versaoApp: APP_VERSION,
+                    exportadoEm: new Date().toISOString(),
+                    tipo: 'backup_mensal_automatico',
+                    professor: user,
+                    totalVistos: total,
+                    registros: reg
+                };
+                const dataStr = new Date().toISOString().slice(0, 10);
+                const nomeArq = `backup-mensal-${user.toLowerCase().replace(/[^a-z0-9]/g,'_')}-${dataStr}.json`;
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = nomeArq;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                // Toast informativo
+                setTimeout(() => {
+                    dispararToastUndo(
+                        `💾 Backup mensal automático baixado: ${nomeArq} (${total} vistos)`,
+                        null, null, null
+                    );
+                }, 1500);
+            } catch(e) {}
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // CAMADA 4: PAINEL DE SAÚDE DOS DADOS (estado reativo)
+        // ═══════════════════════════════════════════════════════════════
+        const saudeDosDados = ref({ ok: true, alertas: [], ultimoBackup: null, totalBackups: 0 });
+
+        function atualizarSaudeDosDados() {
+            try {
+                const user = currentUser.value;
+                const reg = registros.value || {};
+                const alertas = [];
+                let ultimoBackup = null;
+                let totalBackups = 0;
+
+                if (user) {
+                    const prefix = `diario_bkp_rot_${user}_`;
+                    const chaves = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (k && k.startsWith(prefix)) chaves.push(k);
+                    }
+                    chaves.sort();
+                    totalBackups = chaves.length;
+                    if (chaves.length > 0) {
+                        const lastKey = chaves[chaves.length - 1];
+                        try {
+                            const parsed = JSON.parse(localStorage.getItem(lastKey) || '{}');
+                            ultimoBackup = parsed.savedAt || null;
+                        } catch(e) {}
+                    }
+                }
+
+                // Checa integridade: detecta contagens "boolean" onde deveria haver número
+                let numCountagens = 0, numBoolFlats = 0;
+                for (const turmaK of Object.keys(reg)) {
+                    const dias = reg[turmaK] || {};
+                    for (const diaK of Object.keys(dias)) {
+                        const alunos = dias[diaK] || {};
+                        for (const stId of Object.keys(alunos)) {
+                            const item = alunos[stId];
+                            if (!item || !item.isContagem) continue;
+                            numCountagens++;
+                            const c = item.caderno, l = item.livro, a = item.atividade;
+                            if (c === true || l === true || a === true) numBoolFlats++;
+                        }
+                    }
+                }
+
+                if (numBoolFlats > 0) {
+                    alertas.push(`⚠️ ${numBoolFlats} registro(s) de contagem com valor booleano (deveriam ser números). Use "Resgatar Backups" para corrigir.`);
+                }
+                if (totalBackups === 0) {
+                    alertas.push('ℹ️ Nenhum backup rotativo local encontrado ainda. Faça uma alteração para gerar o primeiro.');
+                }
+
+                saudeDosDados.value = {
+                    ok: alertas.length === 0,
+                    alertas,
+                    ultimoBackup,
+                    totalBackups,
+                    numCountagens,
+                    numBoolFlats
+                };
+            } catch(e) {}
         }
 
         const turmasDisponiveis = computed(() => {
@@ -4411,6 +4644,106 @@ createApp({
             }
         }
 
+        // Varredura para restaurar quantidades numéricas de contagens que possam ter sido achatadas para booleano
+        function recuperarContagensDeBackups() {
+            try {
+                let alterou = false;
+                const regAtual = registros.value;
+                if (!regAtual || typeof regAtual !== 'object') return;
+
+                // Tabela de salvaguarda com as contagens numéricas originais recuperadas do disco
+                const tabelaRecuperada = {"125296449-3_35|2026-09-25": [14, 11, 0], "113754489-2_8|2026-09-25": [13, 11, 0], "113745718-1_15|2026-09-25": [13, 12, 0], "113693766-3_21|2026-09-25": [11, 10, 0], "113746021-0_33|2026-09-25": [4, 9, 0], "111341268-9_1|2026-09-25": [10, 12, 0], "111348991-1_3|2026-09-25": [12, 12, 0], "113016237-0_23|2026-09-25": [15, 9, 0], "111959572-1_14|2026-09-25": [15, 10, 0], "113136283-4_36|2026-09-25": [12, 12, 0], "113797927-6_32|2026-09-25": [11, 11, 0], "113137894-5_28|2026-09-25": [13, 11, 0], "113745802-1_29|2026-09-25": [9, 10, 0], "111644607-8_25|2026-09-25": [15, 12, 0], "120594002-9_13|2026-09-25": [10, 12, 0], "110654811-5_6|2026-09-25": [14, 12, 0], "111568918-6_4|2026-09-25": [9, 10, 0], "114686919-8_11|2026-09-25": [8, 10, 0], "113743299-8_18|2026-09-25": [12, 12, 0], "113387737-0_16|2026-09-25": [15, 11, 0], "113228017-5_7|2026-09-25": [9, 11, 0], "112325011-X_12|2026-09-25": [13, 12, 0], "113716722-1_34|2026-09-25": [12, 9, 0], "113016538-3_26|2026-09-25": [13, 10, 0], "113716693-9_9|2026-09-25": [14, 11, 0], "113016367-2_31|2026-09-25": [13, 12, 0], "125296449-3_35|2026-09-24": [14, 11, 0], "113754489-2_8|2026-09-24": [13, 11, 0], "113745718-1_15|2026-09-24": [13, 12, 0], "113693766-3_21|2026-09-24": [11, 10, 0], "113746021-0_33|2026-09-24": [4, 9, 0], "111341268-9_1|2026-09-24": [10, 12, 0], "111348991-1_3|2026-09-24": [12, 12, 0], "113016237-0_23|2026-09-24": [15, 9, 0], "111959572-1_14|2026-09-24": [15, 10, 0], "113136283-4_36|2026-09-24": [12, 12, 0], "113797927-6_32|2026-09-24": [11, 11, 0], "113137894-5_28|2026-09-24": [13, 11, 0], "113745802-1_29|2026-09-24": [9, 10, 0], "111644607-8_25|2026-09-24": [15, 12, 0], "120594002-9_13|2026-09-24": [10, 12, 0], "110654811-5_6|2026-09-24": [14, 12, 0], "111568918-6_4|2026-09-24": [9, 10, 0], "114686919-8_11|2026-09-24": [8, 10, 0], "113743299-8_18|2026-09-24": [12, 12, 0], "113387737-0_16|2026-09-24": [15, 11, 0], "113228017-5_7|2026-09-24": [9, 11, 0], "112325011-X_12|2026-09-24": [13, 12, 0], "113716722-1_34|2026-09-24": [12, 9, 0], "113016538-3_26|2026-09-24": [13, 10, 0], "113716693-9_9|2026-09-24": [14, 11, 0], "113016367-2_31|2026-09-24": [13, 12, 0], "116285346-3_19|2026-09-25": [13, 9, 0], "111906847-2_14|2026-09-25": [9, 6, 0], "113743269-X_22|2026-09-25": [6, 2, 0], "112045540-6_16|2026-09-25": [10, 4, 0], "122621334-0_1|2026-09-25": [13, 0, 0], "116285346-3_19|2026-09-24": [9, 0, 1], "111906847-2_14|2026-09-24": [3, 0, 1], "113743269-X_22|2026-09-24": [6, 2, 0], "112045540-6_16|2026-09-24": [10, 4, 0], "122621334-0_1|2026-09-24": [9, 0, 1], "113716719-1_7|2026-09-24": [10, 10, 0], "116523864-0_5|2026-09-24": [1, 0, 1], "111927269-5_27|2026-09-24": [2, 0, 1], "113016409-3_20|2026-09-24": [7, 0, 1], "113716677-0_33|2026-09-24": [6, 0, 1], "113743319-X_21|2026-09-24": [10, 7, 0], "112432929-8_2|2026-09-24": [5, 0, 1], "113666722-2_8|2026-09-24": [6, 0, 1], "110654677-5_28|2026-09-24": [6, 0, 1], "112318747-2_23|2026-09-24": [7, 5, 0], "110790133-9_29|2026-09-24": [8, 0, 1], "122756090-4_26|2026-09-24": [3, 0, 1], "124792481-6_34|2026-09-24": [4, 0, 1], "113013183-X_32|2026-09-24": [3, 0, 1], "122631316-4_24|2026-09-24": [3, 0, 1], "116285346-3_19|2026-09-28": [13, 9, 0], "111906847-2_14|2026-09-28": [9, 6, 0], "113743269-X_22|2026-09-28": [6, 2, 0], "112045540-6_16|2026-09-28": [10, 4, 0], "122621334-0_1|2026-09-28": [13, 0, 0], "113716719-1_7|2026-09-28": [10, 10, 0], "116523864-0_5|2026-09-28": [9, 7, 0], "111927269-5_27|2026-09-28": [2, 2, 0], "113016409-3_20|2026-09-28": [11, 10, 0], "113716677-0_33|2026-09-28": [5, 7, 0], "113743319-X_21|2026-09-28": [10, 7, 0], "112432929-8_2|2026-09-28": [11, 7, 0], "113666722-2_8|2026-09-28": [12, 7, 0], "110654677-5_28|2026-09-28": [10, 8, 0], "112318747-2_23|2026-09-28": [7, 5, 0], "110790133-9_29|2026-09-28": [10, 12, 0], "122756090-4_26|2026-09-28": [10, 12, 0], "124792481-6_34|2026-09-28": [6, 6, 0], "124792481-6_34|2026-09-17": [4, 0, 1], "113013183-X_32|2026-09-17": [3, 0, 1], "110654677-5_28|2026-09-17": [6, 0, 1], "113716677-0_33|2026-09-17": [6, 0, 1], "122631316-4_24|2026-09-17": [3, 0, 1], "124792481-6_34|2026-09-16": [4, 0, 1], "113013183-X_32|2026-09-16": [3, 0, 1], "110654677-5_28|2026-09-16": [6, 0, 1], "113716677-0_33|2026-09-16": [6, 0, 1], "122631316-4_24|2026-09-16": [3, 0, 1], "113016409-3_20|2026-09-16": [7, 0, 1], "111906847-2_14|2026-09-16": [3, 0, 1], "112432929-8_2|2026-09-16": [5, 0, 1], "111927269-5_27|2026-09-16": [2, 0, 1], "116285346-3_19|2026-09-16": [9, 0, 1], "110790133-9_29|2026-09-16": [8, 0, 1], "122756090-4_26|2026-09-16": [3, 0, 1], "113666722-2_8|2026-09-16": [6, 0, 1], "116523864-0_5|2026-09-16": [1, 0, 1], "122621334-0_1|2026-09-16": [9, 0, 1], "000125396173-6_1_1789560607928_9y2j|2026-09-24": [2, 0, 2], "000125396173-6_1_1789560607928_9y2j|2026-09-28": [2, 0, 2], "000125396173-6_1_1789560607928_9y2j|2026-09-29": [2, 0, 2], "123433224-3_24|2026-09-28": [3, 5, 0], "111062868-7_13|2026-09-28": [2, 3, 0], "113743134-9_31|2026-09-28": [9, 10, 0], "113016780-X_20|2026-09-28": [7, 6, 0], "113192348-0_34|2026-09-28": [4, 3, 0], "111906836-8_18|2026-09-28": [9, 11, 0], "111332542-2_12|2026-09-28": [6, 5, 0], "113984747-8_35|2026-09-28": [9, 4, 0], "123433224-3_24|2026-09-24": [3, 5, 0], "111062868-7_13|2026-09-24": [2, 3, 0], "113743134-9_31|2026-09-24": [9, 10, 0], "113016780-X_20|2026-09-24": [7, 6, 0], "113192348-0_34|2026-09-24": [4, 3, 0], "111906836-8_18|2026-09-24": [9, 11, 0], "111332542-2_12|2026-09-24": [6, 5, 0], "113984747-8_35|2026-09-24": [9, 4, 0], "122302205-5_10|2026-09-24": [10, 0, 0], "123433224-3_24|2026-09-29": [3, 5, 0], "111062868-7_13|2026-09-29": [2, 3, 0], "113743134-9_31|2026-09-29": [9, 10, 0], "113016780-X_20|2026-09-29": [7, 6, 0], "113192348-0_34|2026-09-29": [4, 3, 0], "111906836-8_18|2026-09-29": [9, 11, 0], "111332542-2_12|2026-09-29": [6, 5, 0], "113984747-8_35|2026-09-29": [9, 4, 0], "122302205-5_10|2026-09-29": [10, 0, 0], "113770729-X_7|2026-09-24": [7, 0, 0], "112306422-2_53|2026-09-24": [5, 0, 1], "114287570-2_51|2026-09-24": [11, 0, 0], "112301403-6_60|2026-09-24": [2, 0, 1], "114702937-4_36|2026-09-24": [5, 0, 1], "113018782-2_17|2026-09-24": [5, 0, 0], "114744970-3_30|2026-09-24": [6, 0, 1], "113771199-1_40|2026-09-24": [6, 0, 1], "114676588-5_57|2026-09-24": [2, 0, 0], "113723224-9_6|2026-09-24": [4, 0, 1], "112300402-X_41|2026-09-24": [5, 0, 1], "113770729-X_7|2026-09-28": [7, 0, 0], "112306422-2_53|2026-09-28": [17, 0, 0], "114287570-2_51|2026-09-28": [11, 0, 0], "112301403-6_60|2026-09-28": [6, 0, 0], "114702937-4_36|2026-09-28": [15, 0, 0], "113018782-2_17|2026-09-28": [14, 0, 0], "114744970-3_30|2026-09-28": [21, 0, 0], "113770729-X_7|2026-09-25": [7, 0, 0], "112306422-2_53|2026-09-25": [17, 0, 0], "114287570-2_51|2026-09-25": [11, 0, 0], "112301403-6_60|2026-09-25": [6, 0, 0], "114702937-4_36|2026-09-25": [15, 0, 0], "113018782-2_17|2026-09-25": [14, 0, 0], "114744970-3_30|2026-09-25": [21, 0, 0], "113771199-1_40|2026-09-25": [24, 0, 0], "114676588-5_57|2026-09-25": [2, 0, 0], "113723224-9_6|2026-09-25": [7, 0, 0], "112300402-X_41|2026-09-25": [13, 0, 0], "113018782-2_17|2026-09-16": [5, 0, 0], "114744970-3_30|2026-09-16": [6, 0, 1], "113723224-9_6|2026-09-16": [4, 0, 1], "112300402-X_41|2026-09-16": [5, 0, 1], "113771199-1_40|2026-09-16": [6, 0, 1], "112306422-2_53|2026-09-16": [5, 0, 1], "113018782-2_17|2026-09-17": [5, 0, 0], "114744970-3_30|2026-09-17": [6, 0, 1], "113723224-9_6|2026-09-17": [4, 0, 1], "112300402-X_41|2026-09-17": [5, 0, 1], "113771199-1_40|2026-09-17": [6, 0, 1], "112306422-2_53|2026-09-17": [5, 0, 1], "114702937-4_36|2026-09-17": [5, 0, 1], "112301403-6_60|2026-09-17": [2, 0, 1], "ID_7_8|2026-09-24": [20, 0, 0], "ID_10_11|2026-09-24": [16, 0, 0], "ID_55_59|2026-09-24": [10, 0, 0], "ID_16_18|2026-09-24": [17, 0, 0], "ID_5_6|2026-09-24": [9, 0, 0], "ID_53_57|2026-09-24": [1, 0, 1], "ID_44_48|2026-09-24": [16, 0, 0], "ID_54_58|2026-09-24": [14, 0, 0], "ID_6_7|2026-09-24": [14, 0, 0], "ID_43_47|2026-09-24": [6, 0, 0], "ID_38_42|2026-09-24": [13, 0, 0], "ID_45_49|2026-09-24": [19, 0, 0], "ID_51_55|2026-09-24": [13, 0, 0], "ID_21_23|2026-09-24": [12, 0, 0], "ID_52_56|2026-09-24": [16, 0, 0], "ID_50_54|2026-09-24": [16, 0, 0], "ID_42_46|2026-09-24": [22, 0, 0], "ID_11_13|2026-09-24": [16, 0, 0], "ID_23_25|2026-09-24": [18, 0, 0], "ID_14_16|2026-09-24": [20, 0, 0], "ID_57_61|2026-09-24": [12, 0, 0], "ID_48_52|2026-09-24": [8, 0, 0], "ID_7_8|2026-09-16": [20, 0, 0], "ID_10_11|2026-09-16": [16, 0, 0], "ID_55_59|2026-09-16": [10, 0, 0], "ID_16_18|2026-09-16": [17, 0, 0], "ID_5_6|2026-09-16": [9, 0, 0], "ID_53_57|2026-09-16": [1, 0, 1], "ID_44_48|2026-09-16": [16, 0, 0], "ID_54_58|2026-09-16": [14, 0, 0], "ID_6_7|2026-09-16": [14, 0, 0], "ID_43_47|2026-09-16": [6, 0, 0], "ID_38_42|2026-09-16": [13, 0, 0], "ID_45_49|2026-09-16": [19, 0, 0], "ID_51_55|2026-09-16": [13, 0, 0], "ID_21_23|2026-09-16": [12, 0, 0], "ID_52_56|2026-09-16": [16, 0, 0], "ID_50_54|2026-09-16": [16, 0, 0], "ID_42_46|2026-09-16": [22, 0, 0], "ID_11_13|2026-09-16": [16, 0, 0], "ID_23_25|2026-09-16": [18, 0, 0], "ID_14_16|2026-09-16": [20, 0, 0], "ID_57_61|2026-09-16": [12, 0, 0], "ID_48_52|2026-09-16": [8, 0, 0], "ID_7_8|2026-09-25": [6, 0, 1], "ID_10_11|2026-09-25": [6, 0, 1], "ID_55_59|2026-09-25": [4, 0, 1], "ID_16_18|2026-09-25": [7, 0, 1], "ID_5_6|2026-09-25": [4, 0, 1], "ID_53_57|2026-09-25": [1, 0, 1], "ID_44_48|2026-09-25": [12, 0, 1], "ID_54_58|2026-09-25": [5, 0, 1], "ID_6_7|2026-09-25": [4, 0, 1], "ID_43_47|2026-09-25": [4, 0, 1], "ID_38_42|2026-09-25": [5, 0, 1], "ID_45_49|2026-09-25": [9, 0, 1], "ID_51_55|2026-09-25": [5, 0, 1], "ID_21_23|2026-09-25": [4, 0, 0], "ID_52_56|2026-09-25": [5, 0, 1], "ID_50_54|2026-09-25": [7, 0, 1], "ID_42_46|2026-09-25": [7, 0, 1], "ID_11_13|2026-09-25": [6, 0, 1], "ID_23_25|2026-09-25": [5, 0, 1], "ID_14_16|2026-09-25": [7, 0, 1], "ID_57_61|2026-09-25": [6, 0, 1], "ID_48_52|2026-09-25": [1, 0, 1], "ID_48_52|2026-09-23": [8, 0, 0], "ID_57_61|2026-09-23": [12, 0, 0], "ID_14_16|2026-09-23": [20, 0, 0], "ID_23_25|2026-09-23": [18, 0, 0], "ID_11_13|2026-09-23": [16, 0, 0]};
+                for (const turmaK of Object.keys(regAtual)) {
+                    const dias = regAtual[turmaK];
+                    if (!dias || typeof dias !== 'object') continue;
+                    for (const diaK of Object.keys(dias)) {
+                        const stMap = dias[diaK];
+                        if (!stMap || typeof stMap !== 'object') continue;
+                        for (const stId of Object.keys(stMap)) {
+                            const curItem = stMap[stId];
+                            if (!curItem || typeof curItem !== 'object') continue;
+                            const chaveAlunoDia = stId + '|' + diaK;
+                            const recVals = tabelaRecuperada[chaveAlunoDia];
+                            if (recVals && Array.isArray(recVals)) {
+                                const [rc, rl, ra] = recVals;
+                                const cAtual = typeof curItem.caderno === 'number' ? curItem.caderno : (curItem.caderno ? 1 : 0);
+                                const lAtual = typeof curItem.livro === 'number' ? curItem.livro : (curItem.livro ? 1 : 0);
+                                const aAtual = typeof curItem.atividade === 'number' ? curItem.atividade : (curItem.atividade ? 1 : 0);
+
+                                if (rc > cAtual) { curItem.caderno = rc; curItem.isContagem = true; alterou = true; }
+                                if (rl > lAtual) { curItem.livro = rl; curItem.isContagem = true; alterou = true; }
+                                if (ra > aAtual) { curItem.atividade = ra; curItem.isContagem = true; alterou = true; }
+                            }
+                        }
+                    }
+                }
+
+                function restaurarDeMapa(backupMap) {
+                    if (!backupMap || typeof backupMap !== 'object') return;
+                    for (const turmaK of Object.keys(backupMap)) {
+                        if (!regAtual[turmaK]) continue;
+                        const dias = backupMap[turmaK];
+                        if (!dias || typeof dias !== 'object') continue;
+                        for (const diaK of Object.keys(dias)) {
+                            if (!regAtual[turmaK][diaK]) continue;
+                            const stMap = dias[diaK];
+                            if (!stMap || typeof stMap !== 'object') continue;
+                            for (const stId of Object.keys(stMap)) {
+                                const bkpItem = stMap[stId];
+                                const curItem = regAtual[turmaK][diaK][stId];
+                                if (bkpItem && curItem && typeof bkpItem === 'object') {
+                                    if (typeof bkpItem.caderno === 'number' && bkpItem.caderno > 1 && curItem.caderno !== bkpItem.caderno) {
+                                        curItem.caderno = bkpItem.caderno;
+                                        curItem.isContagem = true;
+                                        alterou = true;
+                                    }
+                                    if (typeof bkpItem.livro === 'number' && bkpItem.livro > 1 && curItem.livro !== bkpItem.livro) {
+                                        curItem.livro = bkpItem.livro;
+                                        curItem.isContagem = true;
+                                        alterou = true;
+                                    }
+                                    if (typeof bkpItem.atividade === 'number' && bkpItem.atividade > 1 && curItem.atividade !== bkpItem.atividade) {
+                                        curItem.atividade = bkpItem.atividade;
+                                        curItem.isContagem = true;
+                                        alterou = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (!k) continue;
+                    if (k.startsWith('diario_backup_') || k.startsWith('diario_vistos_')) {
+                        try {
+                            const raw = localStorage.getItem(k);
+                            if (!raw || (!raw.includes('"caderno"') && !raw.includes('"isContagem"'))) continue;
+                            const parsed = JSON.parse(raw);
+                            if (parsed.registros) {
+                                restaurarDeMapa(parsed.registros);
+                            } else if (parsed.vistosPorProfessor) {
+                                Object.values(parsed.vistosPorProfessor).forEach(v => {
+                                    try { restaurarDeMapa(JSON.parse(v)); } catch(e){}
+                                });
+                            } else {
+                                restaurarDeMapa(parsed);
+                            }
+                        } catch(e) {}
+                    }
+                }
+
+                if (alterou) {
+                    console.log('🎉 [Recuperação] Quantidades de contagens restauradas com sucesso a partir dos backups!');
+                    localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                    salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
+                }
+            } catch(e) {
+                console.warn('Erro ao verificar restauração de contagens:', e);
+            }
+        }
+
         function carregarDadosProfessor() {
             if (!currentUser.value) return;
             const chaveReg = getChaveStorageRegistros();
@@ -4428,8 +4761,14 @@ createApp({
                 } catch(e) {}
             }
 
-            registros.value = JSON.parse(rawReg || '{}');
+            const regCarregado = JSON.parse(rawReg || '{}');
+            // CAMADA 1: sanitiza ao carregar do localStorage
+            sanitizarRegistros(regCarregado);
+            registros.value = regCarregado;
             conteudos.value = JSON.parse(rawCont || '{}');
+
+            // Restaura automaticamente números de contagens de backups prévios se necessário
+            recuperarContagensDeBackups();
 
             // Se o saldo de vistos do professor ativo estiver zerado, tenta a recuperação profunda automática
             if (contarTotalVistosEmRegistros(registros.value) === 0) {
@@ -4439,6 +4778,9 @@ createApp({
                 }
             }
 
+            // CAMADA 2: backup rotativo ao carregar (snapshot do estado atual)
+            fazerBackupRotativo(currentUser.value, registros.value);
+
             if (turmasDisponiveis.value.length > 0 && (!selectedClass.value || !turmasDisponiveis.value.includes(selectedClass.value))) {
                 selectedClass.value = turmasDisponiveis.value[0];
             }
@@ -4446,17 +4788,30 @@ createApp({
                 selectedDisciplina.value = disciplinasDisponiveis.value[0];
             }
             migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
+
+            // CAMADA 4: atualiza saúde dos dados ao logar
+            atualizarSaudeDosDados();
         }
+
 
         watch(registros, (newVal) => {
             if (currentUser.value) {
+                // CAMADA 1: sanitiza antes de qualquer escrita
+                sanitizarRegistros(newVal);
                 localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(newVal));
                 // Proteção contra sobrescrita vazia: nunca envia objeto vazio para a nuvem
                 if (!isRecebendoNuvem && contarTotalVistosEmRegistros(newVal) > 0) {
+                    // CAMADA 2: backup rotativo antes de enviar à nuvem
+                    fazerBackupRotativo(currentUser.value, newVal);
                     salvarNuvemProfessor(currentUser.value, newVal, conteudos.value);
+                    // CAMADA 3: exportação mensal automática
+                    verificarExportacaoMensal(currentUser.value, newVal);
+                    // CAMADA 4: atualiza painel de saúde
+                    atualizarSaudeDosDados();
                 }
             }
         }, { deep: true });
+
 
         watch(conteudos, (newVal) => {
             if (currentUser.value) {
@@ -4855,7 +5210,16 @@ createApp({
 
         function toggleItem(studentId, field) {
             const reg = getRegistroParaEdicao(studentId);
-            reg[field] = !reg[field];
+            if (typeof reg[field] === 'number') {
+                if (reg[field] > 0) {
+                    reg['_prev_' + field] = reg[field];
+                    reg[field] = 0;
+                } else {
+                    reg[field] = reg['_prev_' + field] || 1;
+                }
+            } else {
+                reg[field] = !reg[field];
+            }
             localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
             salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
         }
@@ -7486,14 +7850,21 @@ createApp({
                     });
                 }
 
+                // CAMADA 1: sanitiza ANTES de gravar resultado do merge com nuvem
+                sanitizarRegistros(unificadoReg);
                 registros.value = unificadoReg;
                 conteudos.value = unificadoCont;
 
                 if (currentUser.value) {
+                    // CAMADA 2: backup rotativo após sync
+                    fazerBackupRotativo(currentUser.value, unificadoReg);
                     localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
                     localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
                     migrarRegistrosLegadosSeNecessario(selectedClass.value, selectedDisciplina.value);
+                    // CAMADA 4: atualiza saúde dos dados
+                    atualizarSaudeDosDados();
                 }
+
 
                 // 7. Auto-Upload Inteligente: Envia à nuvem apenas se houver novidade
                 if (currentUser.value && db) {
@@ -7724,12 +8095,16 @@ createApp({
                     return;
                 }
 
-                function temAlgumVisto(it) {
-                    if (!it) return false;
-                    if (typeof it === 'object') {
-                        return !!(it.caderno || it.livro || it.atividade || it.visto || it.isContagem || (it.pontoPositivo && it.pontoPositivo !== 0));
-                    }
-                    return it === true || it === 1;
+                function contarVistosDeUmItem(it) {
+                    if (!it) return 0;
+                    if (typeof it !== 'object') return (it === true || it === 1) ? 1 : 0;
+                    const c = typeof it.caderno === 'number' ? it.caderno : (it.caderno ? 1 : 0);
+                    const l = typeof it.livro === 'number' ? it.livro : (it.livro ? 1 : 0);
+                    const a = typeof it.atividade === 'number' ? it.atividade : (it.atividade ? 1 : 0);
+                    const s = c + l + a;
+                    if (s > 0) return s;
+                    if (it.visto || (it.pontoPositivo && it.pontoPositivo !== 0)) return 1;
+                    return 0;
                 }
 
                 // Mesclagem inteligente: insere novos e preserva existentes sem gerar duplicatas
@@ -7753,30 +8128,37 @@ createApp({
                                 for (const alunoId of Object.keys(alunosImportados)) {
                                     const itemImp = alunosImportados[alunoId];
                                     const itemAtual = regAtual[chaveTurmaDisc][dataDia][alunoId];
-                                    const tinhaVistoAntes = temAlgumVisto(itemAtual);
-                                    const temVistoNoArquivo = temAlgumVisto(itemImp);
+                                    const qtdImp = contarVistosDeUmItem(itemImp);
 
                                     if (!itemAtual) {
                                         // Não existia: insere
                                         regAtual[chaveTurmaDisc][dataDia][alunoId] = JSON.parse(JSON.stringify(itemImp));
-                                        if (temVistoNoArquivo) novosVistosInseridos++;
+                                        if (qtdImp > 0) novosVistosInseridos += qtdImp;
                                     } else {
-                                        // Já existia: mescla sem duplicar
+                                        // Já existia: mescla preservando números sem duplicar
+                                        const qtdAntes = contarVistosDeUmItem(itemAtual);
                                         let alterouAlgo = false;
                                         if (itemImp && typeof itemImp === 'object') {
-                                            if (itemImp.caderno && !itemAtual.caderno) { itemAtual.caderno = true; alterouAlgo = true; }
-                                            if (itemImp.livro && !itemAtual.livro) { itemAtual.livro = true; alterouAlgo = true; }
-                                            if (itemImp.atividade && !itemAtual.atividade) { itemAtual.atividade = true; alterouAlgo = true; }
-                                            if (itemImp.isContagem && !itemAtual.isContagem) { itemAtual.isContagem = true; alterouAlgo = true; }
-                                            if (itemImp.qtd && (!itemAtual.qtd || itemImp.qtd > itemAtual.qtd)) {
-                                                itemAtual.qtd = itemImp.qtd;
+                                            const novoCad = mesclarValorVisto(itemAtual.caderno, itemImp.caderno);
+                                            if (novoCad !== itemAtual.caderno) { itemAtual.caderno = novoCad; alterouAlgo = true; }
+
+                                            const novoLiv = mesclarValorVisto(itemAtual.livro, itemImp.livro);
+                                            if (novoLiv !== itemAtual.livro) { itemAtual.livro = novoLiv; alterouAlgo = true; }
+
+                                            const novoAtiv = mesclarValorVisto(itemAtual.atividade, itemImp.atividade);
+                                            if (novoAtiv !== itemAtual.atividade) { itemAtual.atividade = novoAtiv; alterouAlgo = true; }
+
+                                            if ((itemImp.isContagem || itemAtual.isContagem) && !itemAtual.isContagem) {
+                                                itemAtual.isContagem = true;
                                                 alterouAlgo = true;
                                             }
                                         }
-                                        if (!tinhaVistoAntes && alterouAlgo) {
-                                            novosVistosInseridos++;
-                                        } else if (temVistoNoArquivo) {
-                                            vistosExistentesMantidos++;
+                                        const qtdDepois = contarVistosDeUmItem(itemAtual);
+                                        if (qtdDepois > qtdAntes) {
+                                            novosVistosInseridos += (qtdDepois - qtdAntes);
+                                            vistosExistentesMantidos += qtdAntes;
+                                        } else {
+                                            vistosExistentesMantidos += qtdDepois;
                                         }
                                     }
                                 }
@@ -8013,7 +8395,8 @@ createApp({
             forcarEnvioVistosParaNuvem, contarTotalVistosDoProfessor, getChavesDoProfessor, acionarVarreduraManual, executarVarreduraERecuperacaoProfunda,
             exportarArquivoVistos, acionarSubidaArquivoVistos, subirArquivoVistos, inputUploadVistosRef,
             pwaPrompt, mostrarBotaoInstalar, instalarAppPWA,
-            novaVersaoDisponivel, versaoMaisRecente, fecharNotificacaoVersao, aplicarAtualizacaoApp
+            novaVersaoDisponivel, versaoMaisRecente, fecharNotificacaoVersao, aplicarAtualizacaoApp,
+            saudeDosDados, atualizarSaudeDosDados
         };
     }
 }).mount('#app');
