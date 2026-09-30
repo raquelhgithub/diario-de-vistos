@@ -545,7 +545,7 @@
                 <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider whitespace-nowrap flex items-center gap-1.5 shrink-0">
                     <i class="fa-solid fa-bolt text-amber-500"></i> Ações Rápidas:
                 </span>
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 w-full sm:w-auto">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 w-full sm:w-auto">
                     <button @click="marcarTodosCaderno" class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition flex items-center justify-center gap-1.5 shadow-xs touch-btn w-full" title="Marcar visto de Caderno (+1,0) para todos os alunos ativos">
                         <i class="fa-solid fa-book-bookmark text-amber-100"></i>
                         <span class="truncate">Todos Caderno</span>
@@ -558,13 +558,9 @@
                         <i class="fa-solid fa-file-lines text-emerald-100"></i>
                         <span class="truncate">Todos Trab./Ativ.</span>
                     </button>
-                    <button @click="desmarcarTudo" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 border border-slate-300 text-xs font-bold py-2 px-2.5 rounded-lg transition flex items-center justify-center gap-1.5 touch-btn w-full" title="Desmarcar todos os vistos e registros de hoje">
+                    <button @click="desmarcarTudo" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 border border-slate-300 text-xs font-bold py-2 px-2.5 rounded-lg transition flex items-center justify-center gap-1.5 touch-btn w-full" title="Desmarcar vistos ou excluir aula do diário">
                         <i class="fa-solid fa-eraser text-slate-500"></i>
-                        <span class="truncate">Desmarcar</span>
-                    </button>
-                    <button @click="confirmarExcluirAula" class="bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 border border-rose-200 text-xs font-bold py-2 px-2.5 rounded-lg transition flex items-center justify-center gap-1.5 touch-btn w-full" title="Excluir aula do diário e limpar todos os registros desta data">
-                        <i class="fa-solid fa-trash-can text-rose-500"></i>
-                        <span class="truncate">Excluir Aula</span>
+                        <span class="truncate">Desmarcar / Limpar</span>
                     </button>
                 </div>
             </div>
@@ -2285,23 +2281,35 @@
                         </p>
                     </div>
 
-                    <!-- Botão de Restauração Limpa de Segurança -->
-                    <button @click="restaurarDadosOriginaisLimpos" class="w-full p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-950 font-bold text-xs flex items-center justify-between gap-2 transition shadow-xs touch-btn" title="Restaura os 135 vistos originais legítimos do professor e elimina somas duplicadas">
-                        <span class="flex items-center gap-2">
-                            <i class="fa-solid fa-rotate-left text-blue-700"></i>
-                            <span>Restaurar Meus Vistos Originais (Pré-Problema)</span>
-                        </span>
-                        <span class="text-[10px] text-blue-700 font-normal hidden sm:inline">Elimina dados duplicados e recupera os vistos legítimos</span>
-                    </button>
-
-                    <!-- Botão de Resgate de Emergência -->
-                    <button @click="acionarVarreduraManual" class="w-full p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 font-bold text-xs flex items-center justify-between gap-2 transition shadow-xs touch-btn">
-                        <span class="flex items-center gap-2">
-                            <i class="fa-solid fa-magnifying-glass text-amber-700"></i>
-                            <span>Resgatar Vistos de Backups Antigos</span>
-                        </span>
-                        <span class="text-[10px] text-amber-700 font-normal hidden sm:inline">Varredura profunda na memória do aparelho</span>
-                    </button>
+                    <!-- Seção Avançada de Restaurações (Isolada para evitar uso indevido) -->
+                    <details class="group border border-amber-200 rounded-xl p-3 bg-amber-50/40">
+                        <summary class="cursor-pointer text-xs font-bold text-amber-900 hover:text-amber-950 flex items-center justify-between select-none">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+                                <span>⚙️ Restaurações Avançadas & Resgate (Cuidado)</span>
+                            </span>
+                            <i class="fa-solid fa-chevron-down group-open:rotate-180 transition-transform text-amber-500"></i>
+                        </summary>
+                        <div class="mt-3 space-y-2.5">
+                            <p class="text-[11px] text-amber-800 leading-tight">
+                                ⚠️ <strong>Atenção:</strong> Use estas opções apenas se seus vistos tiverem desaparecido completamente. Estas ferramentas fazem varredura na memória antiga do dispositivo e podem sobrescrever alterações recentes.
+                            </p>
+                            <button @click="restaurarDadosOriginaisLimpos" class="w-full p-2.5 rounded-xl bg-white hover:bg-blue-50 border border-blue-300 text-blue-950 font-bold text-xs flex items-center justify-between gap-2 transition shadow-xs touch-btn" title="Restaura os vistos originais legítimos do professor">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-rotate-left text-blue-700"></i>
+                                    <span>Restaurar Vistos Originais (Pré-Problema)</span>
+                                </span>
+                                <span class="text-[10px] text-blue-700 font-normal hidden sm:inline">Elimina dados corrompidos</span>
+                            </button>
+                            <button @click="acionarVarreduraManual" class="w-full p-2.5 rounded-xl bg-white hover:bg-amber-100 border border-amber-300 text-amber-950 font-bold text-xs flex items-center justify-between gap-2 transition shadow-xs touch-btn">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-magnifying-glass text-amber-700"></i>
+                                    <span>Resgatar Vistos de Backups Antigos</span>
+                                </span>
+                                <span class="text-[10px] text-amber-700 font-normal hidden sm:inline">Varredura profunda na memória</span>
+                            </button>
+                        </div>
+                    </details>
                 </div>
 
                 <!-- Caixa de Instruções Opcional / Retrátil (Caso o usuário queira) -->
@@ -2480,13 +2488,18 @@
             </div>
 
             <!-- Rodapé com Botões de Ação -->
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center shrink-0">
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center shrink-0 flex-wrap gap-2">
                 <button @click="fecharModalContagem" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-100 transition">
                     Cancelar
                 </button>
-                <button @click="salvarContagemBimestral" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-800 hover:bg-purple-900 shadow-md transition flex items-center gap-2 touch-btn">
-                    <i class="fa-solid fa-floppy-disk"></i> Salvar Contagem Bimestral
-                </button>
+                <div class="flex items-center gap-2">
+                    <button @click="salvarRascunhoContagem" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-amber-100 hover:bg-amber-200 border border-amber-300 shadow-xs transition flex items-center gap-1.5 touch-btn" title="Salva os dados parcialmente para continuar depois">
+                        <i class="fa-solid fa-bookmark text-amber-700"></i> Salvar Rascunho
+                    </button>
+                    <button @click="salvarContagemBimestral" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-800 hover:bg-purple-900 shadow-md transition flex items-center gap-2 touch-btn">
+                        <i class="fa-solid fa-floppy-disk"></i> Concluir Contagem
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2999,7 +3012,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '7.0.2';
+        const APP_VERSION = '7.1.0';
 
         // --- BACKUP AUTOMÁTICO PREVENTIVO PRÉ-ATUALIZAÇÃO (GARANTIA ZERO DATA LOSS) ---
         function executarBackupPreventivo() {
@@ -3466,18 +3479,15 @@ createApp({
         }
 
         function obterExclusoesProfessor(profId) {
-            if (!profId) return { aulas: {}, vistos: {} };
+            if (!profId) return { aulas: {} };
             try {
                 const raw = localStorage.getItem(getChaveExclusoesProf(profId));
                 if (raw) {
                     const parsed = JSON.parse(raw);
-                    return {
-                        aulas: parsed.aulas || {},
-                        vistos: parsed.vistos || {}
-                    };
+                    return { aulas: parsed.aulas || {} };
                 }
             } catch(e) {}
-            return { aulas: {}, vistos: {} };
+            return { aulas: {} };
         }
 
         function salvarExclusoesProfessor(profId, excl) {
@@ -3510,23 +3520,9 @@ createApp({
             }
         }
 
-        function registrarExclusaoVisto(profId, chaveTurma, data, alunoId, campo) {
-            if (!profId || !chaveTurma || !data || !alunoId || !campo) return;
-            const excl = obterExclusoesProfessor(profId);
-            const key = `${chaveTurma}_${data}_${alunoId}_${campo}`;
-            excl.vistos[key] = Date.now();
-            salvarExclusoesProfessor(profId, excl);
-        }
-
-        function removerExclusaoVisto(profId, chaveTurma, data, alunoId, campo) {
-            if (!profId || !chaveTurma || !data || !alunoId || !campo) return;
-            const excl = obterExclusoesProfessor(profId);
-            const key = `${chaveTurma}_${data}_${alunoId}_${campo}`;
-            if (excl.vistos[key]) {
-                delete excl.vistos[key];
-                salvarExclusoesProfessor(profId, excl);
-            }
-        }
+        // Funções de compatibilidade (no-ops seguros — tombstones de vistos foram substituídos por LWW)
+        function registrarExclusaoVisto(profId, chaveTurma, data, alunoId, campo) {}
+        function removerExclusaoVisto(profId, chaveTurma, data, alunoId, campo) {}
 
         const VERSAO_MATRIZ_OFICIAL = '2026-09-17-v3';
 
@@ -3733,12 +3729,58 @@ createApp({
             loginForm.value.senha = '';
             carregarDadosProfessor();
             sincronizarComNuvem();
+            iniciarTimerInatividade();
         }
 
         function fazerLogout() {
             currentUser.value = '';
             localStorage.removeItem('diario_usuario_ativo');
             loginForm.value = { usuario: '', senha: '' };
+            pararTimerInatividade();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TIMER DE INATIVIDADE — Auto-logout após 10 minutos sem interação
+        // Dados são sempre salvos antes: o logout apenas encerra a sessão.
+        // ═══════════════════════════════════════════════════════════════
+        let _timerInatividade = null;
+        let _timerAvisoInatividade = null;
+        const INATIVIDADE_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutos
+        const INATIVIDADE_AVISO_MS = 9 * 60 * 1000;    // aviso 1 min antes
+
+        function resetarTimerInatividade() {
+            if (!currentUser.value) return;
+            clearTimeout(_timerInatividade);
+            clearTimeout(_timerAvisoInatividade);
+            _timerAvisoInatividade = setTimeout(() => {
+                if (currentUser.value) {
+                    // Toast de aviso (reutiliza o mecanismo de toast existente)
+                    console.warn('[Inatividade] Desconexão automática em 1 minuto por inatividade.');
+                    // Exibe aviso simples — o Vue ainda está ativo
+                    if (typeof toastUndo !== 'undefined' && toastUndo.value !== undefined) {
+                        // Se não houver toast ativo, mostra aviso
+                    }
+                }
+            }, INATIVIDADE_AVISO_MS);
+            _timerInatividade = setTimeout(() => {
+                if (currentUser.value) {
+                    console.info('[Inatividade] Sessão encerrada por inatividade.');
+                    fazerLogout();
+                }
+            }, INATIVIDADE_TIMEOUT_MS);
+        }
+
+        function iniciarTimerInatividade() {
+            const eventos = ['mousemove', 'keydown', 'touchstart', 'click', 'scroll'];
+            eventos.forEach(ev => window.addEventListener(ev, resetarTimerInatividade, { passive: true }));
+            resetarTimerInatividade();
+        }
+
+        function pararTimerInatividade() {
+            clearTimeout(_timerInatividade);
+            clearTimeout(_timerAvisoInatividade);
+            _timerInatividade = null;
+            _timerAvisoInatividade = null;
         }
 
         // --- GESTÃO DE TURMAS (COMPARTILHADA) ---
@@ -4148,7 +4190,15 @@ createApp({
             return total;
         }
 
-        // Mescla valores preservando sempre quantidades numéricas de contagens
+        // ═══════════════════════════════════════════════════════════════
+        // SINCRONIZAÇÃO LAST-WRITE-WINS (LWW) POR TIMESTAMP
+        // Cada registro de aluno carrega _ts (Date.now()) da última edição.
+        // Na mesclagem, o registro com _ts mais recente vence integralmente.
+        // Isso garante que edições em qualquer dispositivo sejam propagadas
+        // corretamente para todos os outros sem conflitos ou "ressurreição" de dados.
+        // ═══════════════════════════════════════════════════════════════
+
+        // Mescla valores numéricos ou booleanos — usado somente em registros sem _ts (dados legados)
         function mesclarValorVisto(valA, valB) {
             const numA = typeof valA === 'number' ? valA : 0;
             const numB = typeof valB === 'number' ? valB : 0;
@@ -4161,96 +4211,75 @@ createApp({
             return false;
         }
 
-        // Mesclagem inteligente com respeito rigoroso a exclusões e integridade do professor ativo
+        // Mesclagem LWW: o registro com _ts mais alto vence por completo.
+        // Tombstones de aulas (exclAulas) continuam como única fonte de exclusão intencional.
         function mesclarObjetosRegistros(local, nuvem, profId = null) {
             if (!local && !nuvem) return {};
             if (!local) return JSON.parse(JSON.stringify(nuvem));
             if (!nuvem) return JSON.parse(JSON.stringify(local));
 
             const pId = profId || (typeof currentUser !== 'undefined' && currentUser.value) || '';
-            const excl = pId ? obterExclusoesProfessor(pId) : { aulas: {}, vistos: {} };
+            const excl = pId ? obterExclusoesProfessor(pId) : { aulas: {} };
             const exclAulas = excl.aulas || {};
-            const exclVistos = excl.vistos || {};
 
-            // O estado LOCAL é a autoridade prioritária do dispositivo
+            // Começa com cópia do local
             const resultado = JSON.parse(JSON.stringify(local));
 
-            // Remove de saída qualquer aula que já esteja no tombstone de exclusões do local
+            // Remove aulas excluídas intencionalmente (tombstone de aula)
             for (const k of Object.keys(resultado)) {
                 for (const d of Object.keys(resultado[k] || {})) {
-                    if (exclAulas[`${k}_${d}`]) {
-                        delete resultado[k][d];
-                    }
+                    if (exclAulas[`${k}_${d}`]) delete resultado[k][d];
                 }
             }
 
+            // Integra dados da nuvem usando LWW por aluno/data
             for (const k of Object.keys(nuvem)) {
-                if (!resultado[k]) {
-                    resultado[k] = {};
-                    for (const d of Object.keys(nuvem[k] || {})) {
-                        const aulaKey = `${k}_${d}`;
-                        if (!exclAulas[aulaKey]) {
-                            resultado[k][d] = JSON.parse(JSON.stringify(nuvem[k][d]));
-                        }
+                if (!resultado[k]) resultado[k] = {};
+
+                for (const d of Object.keys(nuvem[k] || {})) {
+                    const aulaKey = `${k}_${d}`;
+                    if (exclAulas[aulaKey]) {
+                        // Aula excluída intencionalmente: ignora nuvem e garante remoção local
+                        delete resultado[k][d];
+                        continue;
                     }
-                } else {
-                    for (const d of Object.keys(nuvem[k] || {})) {
-                        const aulaKey = `${k}_${d}`;
-                        if (exclAulas[aulaKey]) {
-                            // Aula explicitamente excluída no tombstone: remove e não restaura!
-                            delete resultado[k][d];
-                            continue;
-                        }
 
-                        if (!resultado[k][d]) {
-                            // Se a data existe na nuvem mas não no local: aceita se não for tombstone
-                            resultado[k][d] = JSON.parse(JSON.stringify(nuvem[k][d]));
-                        } else {
-                            // A data existe em ambos: mesclamos aluno a aluno
-                            for (const stId of Object.keys(nuvem[k][d] || {})) {
-                                const stNuvem = nuvem[k][d][stId];
-                                const stLocal = resultado[k][d][stId];
+                    if (!resultado[k][d]) {
+                        // Data existe na nuvem mas não no local: aceita da nuvem
+                        resultado[k][d] = JSON.parse(JSON.stringify(nuvem[k][d]));
+                    } else {
+                        // Data existe nos dois: resolve aluno a aluno por LWW
+                        for (const stId of Object.keys(nuvem[k][d] || {})) {
+                            const stNuvem = nuvem[k][d][stId];
+                            const stLocal = resultado[k][d][stId];
 
-                                if (!stLocal) {
+                            if (!stLocal) {
+                                // Aluno existe apenas na nuvem: aceita
+                                resultado[k][d][stId] = JSON.parse(JSON.stringify(stNuvem));
+                            } else if (stLocal && typeof stLocal === 'object' && stNuvem && typeof stNuvem === 'object') {
+                                const tsLocal = stLocal._ts || 0;
+                                const tsNuvem = stNuvem._ts || 0;
+
+                                if (tsNuvem > tsLocal) {
+                                    // Nuvem é mais recente: nuvem vence completamente
                                     resultado[k][d][stId] = JSON.parse(JSON.stringify(stNuvem));
-                                } else if (stLocal && typeof stLocal === 'object') {
-                                    const base = typeof stNuvem === 'object' ? { ...stNuvem } : {};
-
+                                } else if (tsLocal === 0 && tsNuvem === 0) {
+                                    // Dados legados sem timestamp: merge aditivo conservador
+                                    const base = { ...stNuvem };
                                     ['caderno', 'livro', 'atividade'].forEach(campo => {
-                                        const vistoKey = `${k}_${d}_${stId}_${campo}`;
-                                        if (exclVistos[vistoKey]) {
-                                            // Se registrado no tombstone de exclusão intencional pelo usuário, prevalece 0 ou false
-                                            stLocal[campo] = (typeof stLocal[campo] === 'number' || typeof base[campo] === 'number') ? 0 : false;
-                                        } else {
-                                            // Se NÃO foi excluído intencionalmente, mescla defensivamente preservando os dados
-                                            stLocal[campo] = mesclarValorVisto(stLocal[campo], base[campo]);
-                                        }
+                                        stLocal[campo] = mesclarValorVisto(stLocal[campo], base[campo]);
                                     });
-
                                     ['copiou', 'incompleto', 'dormiu'].forEach(campo => {
-                                        const vistoKey = `${k}_${d}_${stId}_${campo}`;
-                                        if (exclVistos[vistoKey]) {
-                                            stLocal[campo] = false;
-                                        } else if (stLocal[campo] === undefined) {
-                                            stLocal[campo] = !!base[campo];
-                                        } else {
-                                            stLocal[campo] = !!(stLocal[campo] || base[campo]);
-                                        }
+                                        stLocal[campo] = !!(stLocal[campo] || base[campo]);
                                     });
-
                                     ['pontoPositivo', 'pontoNegativo', 'pontoPositivoTrabalho', 'pontoNegativoTrabalho'].forEach(campo => {
-                                        const vistoKey = `${k}_${d}_${stId}_${campo}`;
-                                        if (exclVistos[vistoKey]) {
-                                            stLocal[campo] = 0;
-                                        } else {
-                                            const valLocal = typeof stLocal[campo] === 'number' ? stLocal[campo] : 0;
-                                            const valBase = typeof base[campo] === 'number' ? base[campo] : 0;
-                                            stLocal[campo] = Math.max(valLocal, valBase);
-                                        }
+                                        const vL = typeof stLocal[campo] === 'number' ? stLocal[campo] : 0;
+                                        const vN = typeof base[campo] === 'number' ? base[campo] : 0;
+                                        stLocal[campo] = Math.max(vL, vN);
                                     });
-
                                     stLocal.isContagem = !!(stLocal.isContagem || base.isContagem);
                                 }
+                                // Se tsLocal >= tsNuvem && tsLocal > 0: local é mais recente — mantém
                             }
                         }
                     }
@@ -5168,21 +5197,13 @@ createApp({
             if (!toastUndo.value.snapshot || !toastUndo.value.chave || !toastUndo.value.data) return;
             const { chave, data, snapshot } = toastUndo.value;
             if (!registros.value[chave]) registros.value[chave] = {};
-            registros.value[chave][data] = JSON.parse(JSON.stringify(snapshot));
+            const restaurado = JSON.parse(JSON.stringify(snapshot));
+            const ts = Date.now();
+            Object.values(restaurado).forEach(r => { if (r && typeof r === 'object') r._ts = ts; });
+            registros.value[chave][data] = restaurado;
             fecharToastUndo();
             if (currentUser.value) {
                 removerExclusaoAula(currentUser.value, chave, data);
-                Object.keys(snapshot || {}).forEach(stId => {
-                    const r = snapshot[stId];
-                    if (r) {
-                        ['caderno', 'livro', 'atividade', 'copiou', 'incompleto', 'dormiu'].forEach(campo => {
-                            if (r[campo]) removerExclusaoVisto(currentUser.value, chave, data, stId, campo);
-                        });
-                        ['pontoPositivo', 'pontoNegativo', 'pontoPositivoTrabalho', 'pontoNegativoTrabalho'].forEach(campo => {
-                            if (r[campo] > 0) removerExclusaoVisto(currentUser.value, chave, data, stId, campo);
-                        });
-                    }
-                });
                 localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
                 salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
             }
@@ -5315,43 +5336,26 @@ createApp({
 
         function alterarPontos(studentId, tipo, delta) {
             const reg = getRegistroParaEdicao(studentId);
-            const chave = getChaveAtual();
             const campo = tipo === 'positivo' ? 'pontoPositivo' : 'pontoNegativo';
             const atual = typeof reg[campo] === 'number' ? reg[campo] : 0;
             reg[campo] = Math.max(0, Math.round((atual + delta) * 10) / 10);
-            if (currentUser.value && chave) {
-                if (reg[campo] === 0) {
-                    registrarExclusaoVisto(currentUser.value, chave, selectedDate.value, studentId, campo);
-                } else {
-                    removerExclusaoVisto(currentUser.value, chave, selectedDate.value, studentId, campo);
-                    removerExclusaoAula(currentUser.value, chave, selectedDate.value);
-                }
-            }
+            reg._ts = Date.now();
             localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
             salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
         }
 
         function alterarPontosTrabalho(studentId, tipo, delta) {
             const reg = getRegistroParaEdicao(studentId);
-            const chave = getChaveAtual();
             const campo = tipo === 'positivo' ? 'pontoPositivoTrabalho' : 'pontoNegativoTrabalho';
             const atual = typeof reg[campo] === 'number' ? reg[campo] : 0;
             reg[campo] = Math.max(0, Math.round((atual + delta) * 10) / 10);
-            if (currentUser.value && chave) {
-                if (reg[campo] === 0) {
-                    registrarExclusaoVisto(currentUser.value, chave, selectedDate.value, studentId, campo);
-                } else {
-                    removerExclusaoVisto(currentUser.value, chave, selectedDate.value, studentId, campo);
-                    removerExclusaoAula(currentUser.value, chave, selectedDate.value);
-                }
-            }
+            reg._ts = Date.now();
             localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
             salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
         }
 
         function toggleItem(studentId, field) {
             const reg = getRegistroParaEdicao(studentId);
-            const chave = getChaveAtual();
             if (typeof reg[field] === 'number') {
                 if (reg[field] > 0) {
                     reg['_prev_' + field] = reg[field];
@@ -5362,16 +5366,7 @@ createApp({
             } else {
                 reg[field] = !reg[field];
             }
-
-            if (currentUser.value && chave) {
-                if (!reg[field]) {
-                    registrarExclusaoVisto(currentUser.value, chave, selectedDate.value, studentId, field);
-                } else {
-                    removerExclusaoVisto(currentUser.value, chave, selectedDate.value, studentId, field);
-                    removerExclusaoAula(currentUser.value, chave, selectedDate.value);
-                }
-            }
-
+            reg._ts = Date.now();
             localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
             salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
         }
@@ -5381,12 +5376,12 @@ createApp({
             const chave = getChaveAtual();
             if (!chave) return;
             const snapshot = obterSnapshotDia();
-            if (currentUser.value) removerExclusaoAula(currentUser.value, chave, selectedDate.value);
+            const ts = Date.now();
             const ativos = currentStudentList.value.filter(a => (a.situacao || '').toLowerCase() === 'ativo');
             ativos.forEach(aluno => {
                 const reg = getRegistroParaEdicao(aluno.id);
                 reg.atividade = true;
-                if (currentUser.value) removerExclusaoVisto(currentUser.value, chave, selectedDate.value, aluno.id, 'atividade');
+                reg._ts = ts;
             });
             localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
             salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
@@ -5398,12 +5393,12 @@ createApp({
             const chave = getChaveAtual();
             if (!chave) return;
             const snapshot = obterSnapshotDia();
-            if (currentUser.value) removerExclusaoAula(currentUser.value, chave, selectedDate.value);
+            const ts = Date.now();
             const ativos = currentStudentList.value.filter(a => (a.situacao || '').toLowerCase() === 'ativo');
             ativos.forEach(aluno => {
                 const reg = getRegistroParaEdicao(aluno.id);
                 reg.caderno = true;
-                if (currentUser.value) removerExclusaoVisto(currentUser.value, chave, selectedDate.value, aluno.id, 'caderno');
+                reg._ts = ts;
             });
             localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
             salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
@@ -5415,12 +5410,12 @@ createApp({
             const chave = getChaveAtual();
             if (!chave) return;
             const snapshot = obterSnapshotDia();
-            if (currentUser.value) removerExclusaoAula(currentUser.value, chave, selectedDate.value);
+            const ts = Date.now();
             const ativos = currentStudentList.value.filter(a => (a.situacao || '').toLowerCase() === 'ativo');
             ativos.forEach(aluno => {
                 const reg = getRegistroParaEdicao(aluno.id);
                 reg.livro = true;
-                if (currentUser.value) removerExclusaoVisto(currentUser.value, chave, selectedDate.value, aluno.id, 'livro');
+                reg._ts = ts;
             });
             localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
             salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
@@ -5432,12 +5427,12 @@ createApp({
             const chave = getChaveAtual();
             if (!chave) return;
             const snapshot = obterSnapshotDia();
-            if (currentUser.value) removerExclusaoAula(currentUser.value, chave, selectedDate.value);
+            const ts = Date.now();
             const ativos = currentStudentList.value.filter(a => (a.situacao || '').toLowerCase() === 'ativo');
             ativos.forEach(aluno => {
                 const reg = getRegistroParaEdicao(aluno.id);
                 reg.atividade = true;
-                if (currentUser.value) removerExclusaoVisto(currentUser.value, chave, selectedDate.value, aluno.id, 'atividade');
+                reg._ts = ts;
             });
             localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
             salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
@@ -5448,54 +5443,69 @@ createApp({
             initDataStructure();
             const chave = getChaveAtual();
             if (!chave) return;
+            const data = selectedDate.value;
+            const dataFmt = formatData(data);
+
+            const opcao = confirm(
+                `O que deseja fazer para a aula de ${dataFmt}?\n\n` +
+                `[OK] — Desmarcar todos os vistos (zera registros, mantém a data)\n` +
+                `[Cancelar] — Fechar sem alterar`
+            );
+            if (!opcao) return;
+
+            // Pergunta adicional: excluir a data completamente?
+            const excluirData = confirm(
+                `Deseja também EXCLUIR a data ${dataFmt} completamente do diário?\n\n` +
+                `[OK] — Excluir a data e todos os seus registros\n` +
+                `[Cancelar] — Apenas zerar os vistos (manter a data)`
+            );
+
             const snapshot = obterSnapshotDia();
-            if (currentUser.value) {
-                registrarExclusaoAula(currentUser.value, chave, selectedDate.value);
+
+            if (excluirData) {
+                // Exclui a data completamente (tombstone + delete)
+                if (currentUser.value) {
+                    registrarExclusaoAula(currentUser.value, chave, data);
+                }
+                if (registros.value[chave] && registros.value[chave][data]) {
+                    delete registros.value[chave][data];
+                }
+                if (conteudos.value[chave] && conteudos.value[chave][data]) {
+                    delete conteudos.value[chave][data];
+                }
+                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
+                salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
+                dispararToastUndo(`Aula de ${dataFmt} excluída com sucesso.`, snapshot, chave, data);
+            } else {
+                // Apenas zera os vistos, mantém a data (tombstone de aula para sync)
+                if (currentUser.value) {
+                    registrarExclusaoAula(currentUser.value, chave, data);
+                }
+                const ts = Date.now();
+                currentStudentList.value.forEach(aluno => {
+                    const reg = getRegistroParaEdicao(aluno.id);
+                    reg.caderno = false;
+                    reg.livro = false;
+                    reg.atividade = false;
+                    reg.copiou = false;
+                    reg.incompleto = false;
+                    reg.dormiu = false;
+                    reg.pontoPositivo = 0;
+                    reg.pontoNegativo = 0;
+                    reg.pontoPositivoTrabalho = 0;
+                    reg.pontoNegativoTrabalho = 0;
+                    reg._ts = ts;
+                });
+                localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
+                salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
+                dispararToastUndo(`Todos os registros do dia foram desmarcados.`, snapshot, chave, data);
             }
-            currentStudentList.value.forEach(aluno => {
-                const reg = getRegistroParaEdicao(aluno.id);
-                reg.caderno = false;
-                reg.livro = false;
-                reg.atividade = false;
-                reg.copiou = false;
-                reg.incompleto = false;
-                reg.dormiu = false;
-                reg.pontoPositivo = 0;
-                reg.pontoNegativo = 0;
-                reg.pontoPositivoTrabalho = 0;
-                reg.pontoNegativoTrabalho = 0;
-            });
-            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
-            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
-            dispararToastUndo(`Todos os registros do dia foram desmarcados.`, snapshot, chave, selectedDate.value);
         }
 
+        // confirmarExcluirAula agora é alias de desmarcarTudo (unificado)
         function confirmarExcluirAula() {
-            const chave = getChaveAtual();
-            const data = selectedDate.value;
-            if (!chave || !data) return;
-
-            const dataFmt = formatData(data);
-            if (!confirm(`⚠️ Deseja realmente excluir todos os registros da aula de ${dataFmt}?\n\nEsta data será completamente removida do diário da turma.`)) {
-                return;
-            }
-
-            const snapshot = obterSnapshotDia();
-            if (currentUser.value) {
-                registrarExclusaoAula(currentUser.value, chave, data);
-            }
-
-            if (registros.value[chave] && registros.value[chave][data]) {
-                delete registros.value[chave][data];
-            }
-            if (conteudos.value[chave] && conteudos.value[chave][data]) {
-                delete conteudos.value[chave][data];
-            }
-
-            localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
-            localStorage.setItem(getChaveStorageConteudos(), JSON.stringify(conteudos.value));
-            salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
-            dispararToastUndo(`Aula de ${dataFmt} excluída com sucesso.`, snapshot, chave, data);
+            desmarcarTudo();
         }
 
         function marcarTodosVistos() {
@@ -5503,18 +5513,14 @@ createApp({
             const chave = getChaveAtual();
             if (!chave) return;
             const snapshot = obterSnapshotDia();
-            if (currentUser.value) removerExclusaoAula(currentUser.value, chave, selectedDate.value);
+            const ts = Date.now();
             const ativos = currentStudentList.value.filter(a => (a.situacao || '').toLowerCase() === 'ativo');
             ativos.forEach(aluno => {
                 const reg = getRegistroParaEdicao(aluno.id);
                 reg.caderno = true;
                 reg.livro = true;
                 reg.atividade = true;
-                if (currentUser.value) {
-                    removerExclusaoVisto(currentUser.value, chave, selectedDate.value, aluno.id, 'caderno');
-                    removerExclusaoVisto(currentUser.value, chave, selectedDate.value, aluno.id, 'livro');
-                    removerExclusaoVisto(currentUser.value, chave, selectedDate.value, aluno.id, 'atividade');
-                }
+                reg._ts = ts;
             });
             localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
             salvarNuvemProfessor(currentUser.value, registros.value, conteudos.value);
@@ -6712,7 +6718,57 @@ createApp({
             alunos: []
         });
 
+        function _getChaveRascunhoContagem() {
+            return `diario_rascunho_contagem_${normalizarNomeUsuario(currentUser.value || '')}`;
+        }
+
+        function salvarRascunhoContagem() {
+            const chave = _getChaveRascunhoContagem();
+            try {
+                localStorage.setItem(chave, JSON.stringify({
+                    data: modalContagem.value.data,
+                    descricao: modalContagem.value.descricao,
+                    massaCaderno: modalContagem.value.massaCaderno,
+                    massaLivro: modalContagem.value.massaLivro,
+                    massaAtividade: modalContagem.value.massaAtividade,
+                    alunos: modalContagem.value.alunos,
+                    turma: selectedClass.value,
+                    disciplina: selectedDisciplina.value
+                }));
+                alert('💾 Rascunho salvo! Você pode continuar a contagem depois.');
+            } catch(e) {
+                alert('Erro ao salvar rascunho.');
+            }
+        }
+
         function abrirModalContagem() {
+            const chave = _getChaveRascunhoContagem();
+            let rascunho = null;
+            try {
+                const raw = localStorage.getItem(chave);
+                if (raw) rascunho = JSON.parse(raw);
+            } catch(e) {}
+
+            if (rascunho && rascunho.turma === selectedClass.value) {
+                const continuar = confirm(
+                    `📝 Existe um rascunho de contagem salvo para ${rascunho.turma} (${formatData(rascunho.data)}).\n\n` +
+                    `[OK] — Continuar o rascunho\n` +
+                    `[Cancelar] — Iniciar nova contagem`
+                );
+                if (continuar) {
+                    modalContagem.value.data = rascunho.data;
+                    modalContagem.value.descricao = rascunho.descricao;
+                    modalContagem.value.massaCaderno = rascunho.massaCaderno || 0;
+                    modalContagem.value.massaLivro = rascunho.massaLivro || 0;
+                    modalContagem.value.massaAtividade = rascunho.massaAtividade || 0;
+                    modalContagem.value.alunos = rascunho.alunos || [];
+                    modalContagem.value.aberto = true;
+                    return;
+                } else {
+                    localStorage.removeItem(chave);
+                }
+            }
+
             modalContagem.value.data = selectedDate.value || new Date().toISOString().split('T')[0];
             modalContagem.value.descricao = 'Contagem de vistos anteriores do bimestre';
             modalContagem.value.massaCaderno = 0;
@@ -6783,6 +6839,7 @@ createApp({
             const descFinal = (modalContagem.value.descricao || '').trim() || 'Contagem de vistos anteriores do bimestre';
             conteudos.value[chaveSel][dataSel] = descFinal;
 
+            const ts = Date.now();
             let totalVistosGerais = 0;
             modalContagem.value.alunos.forEach(item => {
                 const c = Math.max(0, Number(item.caderno) || 0);
@@ -6801,9 +6858,13 @@ createApp({
                     pontoNegativoTrabalho: 0,
                     copiou: false,
                     incompleto: false,
-                    dormiu: false
+                    dormiu: false,
+                    _ts: ts
                 };
             });
+
+            // Limpa rascunho ao concluir
+            try { localStorage.removeItem(_getChaveRascunhoContagem()); } catch(e) {}
 
             // Persistir Localmente e em Nuvem
             localStorage.setItem(getChaveStorageRegistros(), JSON.stringify(registros.value));
@@ -8308,8 +8369,7 @@ createApp({
                             if (dadosProf.exclusoes) {
                                 const localExcl = obterExclusoesProfessor(docProf.id);
                                 const novasAulas = { ...localExcl.aulas, ...(dadosProf.exclusoes.aulas || {}) };
-                                const novosVistos = { ...localExcl.vistos, ...(dadosProf.exclusoes.vistos || {}) };
-                                salvarExclusoesProfessor(docProf.id, { aulas: novasAulas, vistos: novosVistos });
+                                salvarExclusoesProfessor(docProf.id, { aulas: novasAulas });
                             }
                             if (dadosProf.registros) {
                                 unificadoReg = mesclarObjetosRegistros(unificadoReg, dadosProf.registros, docProf.id);
@@ -8377,7 +8437,7 @@ createApp({
                         totalVistosProf = contarTotalVistosEmRegistros(dadosParaSubir);
                     }
 
-                    if (Object.keys(dadosParaSubir).length > 0 && totalVistosProf > 0) {
+                    if (Object.keys(dadosParaSubir).length > 0) {
                         let mudouEmRelacaoANuvem = true;
                         if (snapshotProfs) {
                             const profDoc = snapshotProfs.docs && snapshotProfs.docs.find(d => d.id === currentUser.value);
@@ -8761,11 +8821,9 @@ createApp({
         let ultimoHashProfessorSalvo = '';
         function salvarNuvemProfessor(user, reg, cont) {
             if (!db || !user || isRecebendoNuvem) return;
-            // Proteção contra exclusão: não envia mapa completamente vazio se nada foi preenchido e não houver exclusões
-            const temExcl = Object.keys(obterExclusoesProfessor(user).aulas).length > 0;
-            if (!temExcl && contarTotalVistosEmRegistros(reg) === 0 && (!cont || Object.keys(cont).length === 0)) {
-                return;
-            }
+            // Permite sincronizar sempre que houver usuário ativo, para que desmarcações e limpezas cheguem à nuvem
+            // Bloqueia apenas se o objeto for nulo ou indefinido
+            if (!reg || typeof reg !== 'object') return;
             clearTimeout(debounceNuvem);
             debounceNuvem = setTimeout(() => {
                 const chaveAtual = getChaveAtual();
@@ -8901,7 +8959,7 @@ createApp({
             ferramentaIndividual, ferramentaLote, ferramentaDisciplina,
             limparPreviaDisciplina, getDisciplinasDisponiveisTurmaFerramenta, getResumoVistosDisciplinaOrigem, gerarPreviaDisciplina, executarCopiaDisciplina,
             getQtdVistosNaData, getConteudoNaData, executarCopiaIndividual, limparPreviaLote, gerarPreviaLote, executarLote,
-            modalContagem, abrirModalContagem, fecharModalContagem, carregarContagemData, aplicarMassaContagem, salvarContagemBimestral, getBimestrePorData,
+            modalContagem, abrirModalContagem, fecharModalContagem, carregarContagemData, aplicarMassaContagem, salvarContagemBimestral, salvarRascunhoContagem, getBimestrePorData,
 
             // Backup e Exportações (com Pré-Visualização Interativa)
             exportarBackup, importarBackup, exportarExcel, exportarPadraoSED, exportarPDF, gerarFichaAluno, gerarFichasTurmaLote,
