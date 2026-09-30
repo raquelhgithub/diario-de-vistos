@@ -1090,7 +1090,8 @@
                             </td>
                             <!-- NOTA VISTOS (0 A 10) -->
                             <td class="p-2 text-center bg-indigo-50/40 border-x border-indigo-100">
-                                <span :class="['px-2.5 py-1 rounded-full font-black text-xs shadow-2xs inline-block', fechamentoAlunosResumo[aluno.id]?.notaVistosClass]">
+                                <span :class="['px-2.5 py-1 rounded-full font-black text-xs shadow-2xs inline-block cursor-help', fechamentoAlunosResumo[aluno.id]?.notaVistosClass]"
+                                      :title="'Pontos Totais: ' + (fechamentoAlunosResumo[aluno.id]?.pontosLiquidosVistosStr ?? '0.0') + ' / ' + (fechamentoAlunosResumo[aluno.id]?.maxVistos ?? 0) + ' vistos (Nota: ' + (fechamentoAlunosResumo[aluno.id]?.notaVistosFormatada ?? '0.0') + ')'">
                                     {{ fechamentoAlunosResumo[aluno.id]?.notaVistosFormatada ?? '0.0' }}
                                 </span>
                             </td>
@@ -1104,14 +1105,17 @@
                             </td>
                             <!-- NOTA TRABALHOS (0 A 10) -->
                             <td class="p-2 text-center bg-emerald-50/40 border-x border-emerald-100">
-                                <span v-if="fechamentoAlunosResumo[aluno.id]?.notaTrabalho !== null" :class="['px-2.5 py-1 rounded-full font-black text-xs shadow-2xs inline-block', fechamentoAlunosResumo[aluno.id]?.notaTrabalhoClass]">
+                                <span v-if="fechamentoAlunosResumo[aluno.id]?.notaTrabalho !== null" 
+                                      :class="['px-2.5 py-1 rounded-full font-black text-xs shadow-2xs inline-block cursor-help', fechamentoAlunosResumo[aluno.id]?.notaTrabalhoClass]"
+                                      :title="'Pontos Totais de Trabalho: ' + (fechamentoAlunosResumo[aluno.id]?.pontosLiquidosTrabalhoStr ?? '0.0') + ' / ' + (fechamentoAlunosResumo[aluno.id]?.maxTrabalhos ?? 0) + ' trabalhos (Nota: ' + (fechamentoAlunosResumo[aluno.id]?.notaTrabalhoFormatada ?? '0.0') + ')'">
                                     {{ fechamentoAlunosResumo[aluno.id]?.notaTrabalhoFormatada }}
                                 </span>
                                 <span v-else class="text-xs font-semibold text-slate-400 italic">Sem Trab.</span>
                             </td>
                             <!-- MÉDIA FINAL (0 A 10) -->
                             <td class="p-2.5 text-center bg-slate-100/60">
-                                <span :class="['px-3 py-1 rounded-full font-black text-xs sm:text-sm shadow-sm inline-block', fechamentoAlunosResumo[aluno.id]?.notaFinalClass ?? getNotaClass(0)]">
+                                <span :class="['px-3 py-1 rounded-full font-black text-xs sm:text-sm shadow-sm inline-block cursor-help', fechamentoAlunosResumo[aluno.id]?.notaFinalClass ?? getNotaClass(0)]"
+                                      :title="fechamentoAlunosResumo[aluno.id]?.notaTrabalho !== null ? 'Média: (Vistos ' + (fechamentoAlunosResumo[aluno.id]?.notaVistosFormatada ?? '0.0') + ' + Trab. ' + (fechamentoAlunosResumo[aluno.id]?.notaTrabalhoFormatada ?? '0.0') + ') ÷ 2 = ' + (fechamentoAlunosResumo[aluno.id]?.notaFinalFormatada ?? '0.0') : 'Nota 100% sobre Vistos: ' + (fechamentoAlunosResumo[aluno.id]?.notaFinalFormatada ?? '0.0')">
                                     {{ fechamentoAlunosResumo[aluno.id]?.notaFinalFormatada ?? '0.0' }}
                                 </span>
                             </td>
@@ -2613,6 +2617,9 @@
                                 <div><span class="text-slate-500 font-medium">Livro:</span> <strong class="text-sky-800">{{ currentFichaPreview.totais.livro }}</strong></div>
                                 <div><span class="text-slate-500 font-medium">Extras Vistos (+):</span> <strong class="text-emerald-700">+{{ (currentFichaPreview.totais.pontoPositivoVistos || 0).toFixed(1) }} pt</strong></div>
                                 <div><span class="text-slate-500 font-medium">Desc. Vistos (-):</span> <strong class="text-rose-700">-{{ (currentFichaPreview.totais.descontosVistos || 0).toFixed(1) }} pt</strong></div>
+                                <div class="col-span-2 text-[10px] text-slate-500 mt-0.5">
+                                    <span>Pontos Totais de Vistos: <strong>{{ (currentFichaPreview.totais.pontosLiquidosVistos || 0).toFixed(1) }} pts</strong></span>
+                                </div>
                             </div>
                         </div>
 
@@ -2628,11 +2635,11 @@
                             </div>
                             <div class="grid grid-cols-2 gap-1.5 text-[11px] pt-2">
                                 <div><span class="text-slate-500 font-medium">Entregues:</span> <strong class="text-emerald-800">{{ currentFichaPreview.totais.atividade }}</strong></div>
-                                <div><span class="text-slate-500 font-medium">Avaliação:</span> <strong class="text-emerald-900">{{ currentFichaPreview.totais.notaTrabalho !== null ? (currentFichaPreview.totais.notaTrabalho || 0).toFixed(1) : '-' }}</strong></div>
+                                <div><span class="text-slate-500 font-medium">Pontos Totais:</span> <strong class="text-emerald-900">{{ currentFichaPreview.totais.pontosLiquidosTrabalho !== undefined ? currentFichaPreview.totais.pontosLiquidosTrabalho.toFixed(1) : '-' }} pts</strong></div>
                                 <div><span class="text-slate-500 font-medium">Extras Trab. (+):</span> <strong class="text-emerald-700">+{{ (currentFichaPreview.totais.acrescimoTrabalho || 0).toFixed(1) }} pt</strong></div>
                                 <div><span class="text-slate-500 font-medium">Desc. Trab. (-):</span> <strong class="text-rose-700">-{{ (currentFichaPreview.totais.descontosTrabalho || 0).toFixed(1) }} pt</strong></div>
                                 <div class="col-span-2 text-[10px] text-slate-500 mt-0.5">
-                                    <span>Base na entrega de trabalhos com acréscimos (+) e descontos (-).</span>
+                                    <span>Base na formação por pontos totais (entregas + extras - descontos).</span>
                                 </div>
                             </div>
                         </div>
@@ -2988,7 +2995,7 @@ const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 createApp({
     setup() {
         // --- VERSÃO DO SOFTWARE (DIRETRIZ DE VERSIONAMENTO INCREMENTAL) ---
-        const APP_VERSION = '7.1';
+        const APP_VERSION = '7.0.1';
 
         // --- BACKUP AUTOMÁTICO PREVENTIVO PRÉ-ATUALIZAÇÃO (GARANTIA ZERO DATA LOSS) ---
         function executarBackupPreventivo() {
@@ -5375,8 +5382,13 @@ createApp({
             const descontosVistos = Math.round((descRotinaVistos + pontoNegativoVistos) * 10) / 10;
             const descontos = Math.round((descontosVistos + descontosTrabalho) * 10) / 10;
 
+            // Formação de Pontos Totais de Vistos (Piso Zero)
             const pontosBrutosVistos = Math.round(((caderno * 1.0) + (livro * 1.0) + pontoPositivoVistos) * 10) / 10;
             const pontosLiquidosVistos = Math.max(0, Math.round((pontosBrutosVistos - descontosVistos) * 10) / 10);
+
+            // Formação de Pontos Totais de Trabalhos (Piso Zero)
+            const pontosBrutosTrabalho = Math.round(((atividade * 1.0) + acrescimoTrabalho) * 10) / 10;
+            const pontosLiquidosTrabalho = Math.max(0, Math.round((pontosBrutosTrabalho - descontosTrabalho) * 10) / 10);
 
             const pontosBrutos = Math.round(((caderno * 1.0) + (livro * 1.0) + (atividade * 1.0) + pontoPositivo) * 10) / 10;
             const pontosLiquidos = Math.max(0, Math.round((pontosBrutos - descontos) * 10) / 10);
@@ -5389,6 +5401,7 @@ createApp({
                 acrescimoTrabalho, descontosTrabalho,
                 descontosVistos, descontos,
                 pontosBrutosVistos, pontosLiquidosVistos,
+                pontosBrutosTrabalho, pontosLiquidosTrabalho,
                 pontosBrutos, pontosLiquidos
             };
         }
@@ -5405,12 +5418,19 @@ createApp({
             todosAlunos.forEach(aluno => {
                 const t = getTotaisAluno(aluno.id, bim);
                 totaisMap[aluno.id] = t;
-                if (t.pontosLiquidosVistos > maxPtsVistos) {
-                    maxPtsVistos = t.pontosLiquidosVistos;
-                }
-                if (t.atividade > maxTrabalhos) {
-                    maxTrabalhos = t.atividade;
-                }
+
+                // Referencial da turma: o maior total de pontos (seja por base de vistos ou por acréscimos) define a nota 10
+                const baseVistosAluno = (t.caderno || 0) + (t.livro || 0);
+                const ptsVistosAluno = t.pontosLiquidosVistos || 0;
+                if (baseVistosAluno > maxPtsVistos) maxPtsVistos = baseVistosAluno;
+                if (ptsVistosAluno > maxPtsVistos) maxPtsVistos = ptsVistosAluno;
+
+                // Referencial de trabalhos da turma
+                const baseTrabAluno = t.atividade || 0;
+                const ptsTrabAluno = t.pontosLiquidosTrabalho || 0;
+                if (baseTrabAluno > maxTrabalhos) maxTrabalhos = baseTrabAluno;
+                if (ptsTrabAluno > maxTrabalhos) maxTrabalhos = ptsTrabAluno;
+
                 if (t.pontosLiquidos > maxPtsTotal) {
                     maxPtsTotal = t.pontosLiquidos;
                 }
@@ -5421,25 +5441,27 @@ createApp({
                 const t = totaisMap[aluno.id] || {
                     caderno: 0, livro: 0, atividade: 0, copiou: 0, incompleto: 0, dormiu: 0,
                     pontoPositivo: 0, pontoNegativo: 0, descontosVistos: 0, descontosTrabalho: 0, descontos: 0,
-                    pontosBrutosVistos: 0, pontosLiquidosVistos: 0, pontosBrutos: 0, pontosLiquidos: 0
+                    pontosBrutosVistos: 0, pontosLiquidosVistos: 0, pontosBrutosTrabalho: 0, pontosLiquidosTrabalho: 0,
+                    pontosBrutos: 0, pontosLiquidos: 0
                 };
 
-                // 1. Nota de Vistos (0 a 10)
+                // 1. Formação da Nota de Vistos (0 a 10) baseada nos pontos totais com piso zero e teto dez
                 let notaVistos = 0;
-                if (maxPtsVistos > 0) {
-                    notaVistos = Math.min(10, Math.max(0, (t.pontosLiquidosVistos / maxPtsVistos) * 10));
+                if (maxPtsVistos > 0 && t.pontosLiquidosVistos > 0) {
+                    notaVistos = Math.min(10, Math.max(0, Math.round(((t.pontosLiquidosVistos / maxPtsVistos) * 10) * 10) / 10));
                 }
 
-                // 2. Nota de Trabalhos (0 a 10) com acréscimo e desconto específicos de trabalho
+                // 2. Formação da Nota de Trabalhos (0 a 10) baseada nos pontos totais com piso zero e teto dez
                 let notaTrabalho = null;
                 if (maxTrabalhos > 0) {
-                    const baseTrab = (t.atividade / maxTrabalhos) * 10;
-                    // Acréscimo (+) e Desconto (-) no trabalho aplicados diretamente na escala 0 a 10
-                    const pontuacaoAjustada = baseTrab + (t.acrescimoTrabalho || 0) - (t.descontosTrabalho || 0);
-                    notaTrabalho = Math.min(10, Math.max(0, Math.round(pontuacaoAjustada * 10) / 10));
+                    if (t.pontosLiquidosTrabalho > 0) {
+                        notaTrabalho = Math.min(10, Math.max(0, Math.round(((t.pontosLiquidosTrabalho / maxTrabalhos) * 10) * 10) / 10));
+                    } else {
+                        notaTrabalho = 0.0;
+                    }
                 }
 
-                // 3. Nota Final Sugerida (Opção C: média Vistos + Trabalhos se houver trabalhos)
+                // 3. Nota Final Sugerida (Média Vistos + Trabalhos se houver trabalhos)
                 let notaFinal = 0;
                 if (notaTrabalho !== null) {
                     notaFinal = Math.round(((notaVistos + notaTrabalho) / 2) * 10) / 10;
@@ -5462,8 +5484,9 @@ createApp({
                     acrescimoVistosStr: `+${(t.pontoPositivoVistos || 0).toFixed(1)} pt`,
                     pontosLiquidosStr: (t.pontosLiquidos || 0).toFixed(1),
                     pontosLiquidosVistosStr: (t.pontosLiquidosVistos || 0).toFixed(1),
+                    pontosLiquidosTrabalhoStr: (t.pontosLiquidosTrabalho || 0).toFixed(1),
 
-                    // Notas discriminadas (Opção C)
+                    // Notas discriminadas
                     notaVistos: notaVistos,
                     notaVistosFormatada: notaVistos.toFixed(1),
                     notaVistosClass: getNotaClass(notaVistos),
@@ -5475,6 +5498,10 @@ createApp({
                     notaFinal: notaFinal,
                     notaFinalFormatada: notaFinal.toFixed(1),
                     notaFinalClass: getNotaClass(notaFinal),
+
+                    // Denominadores de referência da turma
+                    maxVistos: maxPtsVistos,
+                    maxTrabalhos: maxTrabalhos,
 
                     // Retrocompatibilidade
                     nota: notaFinal,
@@ -7023,6 +7050,7 @@ createApp({
                     `• Entregues: *${totais.atividade || 0}*\n` +
                     `• Extras Trab.: *+${(totais.acrescimoTrabalho || 0).toFixed(1)} pts*\n` +
                     `• Desc. Trab.: *-${(totais.descontosTrabalho || 0).toFixed(1)} pts*\n` +
+                    `• Pontos Totais Trab.: *${(totais.pontosLiquidosTrabalho || 0).toFixed(1)} pts*\n` +
                     `• Nota Trabalhos: *${(totais.notaTrabalho || 0).toFixed(1)} / 10,0*\n`;
             }
 
@@ -7038,6 +7066,7 @@ createApp({
                    `• Livro: *${totais.livro || 0}*\n` +
                    `• Extras Vistos: *+${(totais.pontoPositivoVistos || 0).toFixed(1)} pts*\n` +
                    `• Descontos Vistos: *-${(totais.descontosVistos || 0).toFixed(1)} pts*\n` +
+                   `• Pontos Totais Vistos: *${(totais.pontosLiquidosVistos || 0).toFixed(1)} pts*\n` +
                    `• Nota Vistos: *${(totais.notaVistos || 0).toFixed(1)} / 10,0*\n` +
                    resumoTrabStr + `\n` +
                    `🎯 *MÉDIA FINAL:* *${nota} / 10,0*\n\n` +
